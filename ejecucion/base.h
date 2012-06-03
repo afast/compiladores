@@ -13,5 +13,6 @@ struct TRString {
 
 typedef TRString RString;
 
-void puts(RString *string);
+void puts(RString *string_arg);
+void gets(RString *string_arg);
 #endif

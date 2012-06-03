@@ -1,21 +1,21 @@
 %start program
-%token tSEMICOLON tNEWLINE DO tPIPE END UNDEF ALIAS IF WHILE UNLESS UNTIL BEGIN tLBRACE tRBRACE
-%token RETURN YIELD AND OR NOT tNOT SUPER tLPAREN tRPAREN tTWOPOINTS tTHREEPOINTS tPLUS tMINUS
-%token tMUL tTWOMUL tDIV tPERCENT tEXP tCARET tAMP tEQUIV tGREATER tGREATEREQ tLESS tLESSEQ
-%token tEQUALS tTHREEEQUALS tDIFF tEQTILDE tNOTTILDE tTILDE tPUSH tSHIFT tBAND tBOR tDEFINED
-%token ELSE ELSIF FOR IN RESCUE ENSURE CLASS MODULE DEF tCOMMA tPOINT tDOUBLECOLON tCOLON THEN
-%token tLBRACKET tRBRACKET NIL SELF tTHEN NUMERIC tPLUSASGN tMINUSASGN tMULASGN tDIVASGN
-%token CASE HERE_DOC REGEXP STRING STRING2 SYMBOL VARNAME WHEN fname IDENTIFIER
-%token OP_ASGN tBEGIN tEND
+%token T_PTO_COMA tNEWLINE T_DO T_PIPE T_END /*UNDEF ALIAS*/ T_IF T_WHILE /*UNLESS UNTIL BEGIN*/ T_LLAVE_IZQ T_LLAVE_DER
+%token T_RETURN /*YIELD*/ T_AND T_OR T_NOT /*SUPER*/ T_PAR_IZQ T_PAR_DER /*tTWOPOINTS tTHREEPOINTS*/ T_MAS T_MENOS
+%token T_ASTER T_EXPO T_BAR T_PORCENTAJE /*tEXP tCARET tAMP*/ T_MENOR_IGUAL_MAYOR T_MAYOR T_MAS_IGUAL T_MENOR T_MENOS_IGUAL
+%token T_DOBLE_IGUAL T_TRIPLE_IGUAL T_NOT_IGUAL T_IGUAL_NIOQUI T_NOT_NIOQUI T_NIOQUI /*tPUSH tSHIFT tBAND tBOR tDEFINED*/
+%token T_ELSE T_ELSIF /*FOR IN RESCUE ENSURE*/ T_CLASS /*MODULE*/ T_DEF T_COMA T_PTO /*tDOUBLECOLON*/ T_DOS_PTOS T_THEN
+%token T_CORCHETE_IZQ T_CORCHETE_DER T_NIL /*SELF tTHEN NUMERIC*/ /*tMULASGN tDIVASGN*/
+%token T_CASE /*HERE_DOC REGEXP*/ STRING STRING2 SYMBOL VARNAME T_WHEN fname T_IDENTIF
+%token T_IGUAL /*tBEGIN*/ T_FIN_INTERROGACION
 /*=========================================================================
                           OPERATOR PRECEDENCE
 =========================================================================*/
-%left '-' '+'
-%left '*' '/'
-%right '^'
+%left T_MENOS T_MAS
+%left T_ASTER T_BAR
+//%right '^'
 %%
 program : compstmt;
-t : ';' | '\n';
+t : T_PTO_COMA | '\n';
 opt_t : /* empty */
      | t;
 compstmt : stmt
@@ -24,211 +24,216 @@ compstmt : stmt
          | stmt texpr t;
 texpr : t expr
       | texpr t expr;
-def_blockvar :'|' block_var '|';
+def_blockvar :T_PIPE block_var T_PIPE;
 opt_blockvar : /* empty */
              | def_blockvar;
 opt_block : /* empty */
-         | DO opt_blockvar compstmt END;
-stmt : call DO opt_blockvar compstmt END
-| UNDEF fname
-| ALIAS fname fname
-| stmt IF expr
-| stmt WHILE expr
-| stmt UNLESS expr
-| stmt UNTIL expr
-| tBEGIN '{' compstmt '}' /*object initializer*/
-| tEND '{' compstmt '}' /*object finalizer*/
-| lhs '=' command opt_block
+         | T_DO opt_blockvar compstmt T_END;
+stmt : call T_DO opt_blockvar compstmt T_END
+//| UNDEF fname
+//| ALIAS fname fname
+| stmt T_IF expr
+| stmt T_WHILE expr
+//| stmt UNLESS expr
+//| stmt UNTIL expr
+//| tBEGIN T_LLAVE_IZQ compstmt T_LLAVE_DER /*object initializer*/
+//| T_END T_LLAVE_IZQ compstmt T_LLAVE_DER /*object finalizer*/
+| lhs T_IGUAL command opt_block
 | expr
 ;
-expr : mlhs '=' mrhs
-    | RETURN call_args
-    | YIELD call_args
-    | expr AND expr
-    | expr OR expr
-    | NOT expr
+expr : mlhs T_IGUAL mrhs
+    | T_RETURN call_args
+//    | YIELD call_args
+    | expr T_AND expr
+    | expr T_OR expr
+    | T_NOT expr
     | command
-    | '!' command
+    | T_NOT command
     | arg
 ;
 call : function
     | command
 ;
 command : operation call_args
- | primary'.'operation call_args
- | primary tDOUBLECOLON operation call_args
- | SUPER call_args
+ | primary T_PTO operation call_args
+// | primary tDOUBLECOLON operation call_args
+// | SUPER call_args
 ;
-paren_or_call_args : '(' ')'
-              | '(' call_args ')';
+paren_or_call_args : T_PAR_IZQ T_PAR_DER
+              | T_PAR_IZQ call_args T_PAR_DER;
 opt_call_args : /* empty */
               | paren_or_call_args;
 function : operation
          | operation paren_or_call_args
-         | primary '.' operation
-         | primary '.' operation paren_or_call_args
-         | primary tDOUBLECOLON operation
-         | primary tDOUBLECOLON operation paren_or_call_args
-         | SUPER
-         | SUPER paren_or_call_args;
-arg : lhs '=' arg
-| lhs OP_ASGN arg
-| arg tTWOPOINTS arg | arg tTHREEPOINTS arg
-| arg '+' arg | arg '-' arg | arg '*' arg | arg '/' arg
-| arg '%' arg | arg tTWOMUL arg
-| '+' arg | '-' arg
-| arg '|' arg
-| arg '^' arg | arg '&' arg
-| arg tEQUIV arg
-| arg '>' arg | arg tGREATEREQ arg | arg '<' arg | arg tLESSEQ arg
-| arg tEQUALS arg | arg tTHREEEQUALS arg | arg tDIFF arg
-| arg tEQTILDE arg | arg tNOTTILDE arg
-| '!' arg | '~' arg
-| arg tPUSH arg | arg tSHIFT arg
-| arg tBAND arg | arg tBOR arg
-| tDEFINED arg
+         | primary T_PTO operation
+         | primary T_PTO operation paren_or_call_args
+  //       | primary tDOUBLECOLON operation
+  //       | primary tDOUBLECOLON operation paren_or_call_args
+  //       | SUPER
+  //       | SUPER paren_or_call_args;
+arg : lhs T_IGUAL arg
+//| lhs OP_ASGN arg /*la cambie por la de abajo */
+| lhs T_IGUAL arg
+//| arg tTWOPOINTS arg | arg tTHREEPOINTS arg
+| arg T_MAS arg | arg T_MENOS arg | arg T_ASTER arg | arg T_BAR arg
+| arg T_PORCENTAJE arg | arg T_EXPO arg
+| T_MAS arg | T_MENOS arg
+/*| arg T_PIPE arg
+| arg '^' arg | arg '&' arg*/
+| arg T_MENOR_IGUAL_MAYOR arg
+| arg T_MAYOR arg | arg T_MAS_IGUAL arg | arg T_MENOR arg | arg T_MENOS_IGUAL arg
+| arg T_DOBLE_IGUAL arg | arg T_TRIPLE_IGUAL arg | arg T_NOT_IGUAL arg
+| arg T_IGUAL_NIOQUI arg | arg T_NOT_NIOQUI arg
+| T_NOT arg | T_NIOQUI arg
+//| arg tPUSH arg 
+//| arg tSHIFT arg
+//| arg tBAND arg 
+//| arg tBOR arg
+//| tDEFINED arg
 | primary;
 
 opt_args : /* empty */
          | args;
 opt_args_comma : opt_args
-               | args ',';
+               | args T_COMA;
 opt_args_or_assocs : args
                    | assocs
-                   | assocs ',';
+                   | assocs T_COMA;
 recursive_elsif : /* empty */
-                | ELSIF expr then compstmt recursive_elsif;
+                | T_ELSIF expr then compstmt recursive_elsif;
 opt_else : /* empty */
-         | ELSE compstmt;
-rec_when_then : WHEN when_args then compstmt
-              | rec_when_then WHEN when_args then compstmt;
-rec_rescue : /* empty */
-           | rec_rescue RESCUE opt_args do compstmt;
-opt_ensure : /* empty */
-           | ENSURE compstmt;
+         | T_ELSE compstmt;
+rec_when_then : T_WHEN when_args then compstmt
+              | rec_when_then T_WHEN when_args then compstmt;
+//rec_rescue : /* empty */
+//           | rec_rescue RESCUE opt_args T_DO compstmt;
+//opt_ensure : /* empty */
+//           | ENSURE compstmt;
 opt_subclass : /* empty */
-             | '<' IDENTIFIER;
-primary: '(' compstmt ')'
+             | T_MENOR T_IDENTIF;
+primary: T_PAR_IZQ compstmt T_PAR_DER
 | literal
 | variable
-| primary tDOUBLECOLON IDENTIFIER
-| tDOUBLECOLON IDENTIFIER
-| primary '[' ']'
-| primary '[' args ']'
-| '[' ']'
-| '[' args ']'
-| '{' '}'
-| '{' opt_args_or_assocs '}'
-| RETURN
-| RETURN paren_or_call_args
-| YIELD
-| YIELD paren_or_call_args
-| tDEFINED '(' arg ')'
+//| primary tDOUBLECOLON T_IDENTIF
+//| tDOUBLECOLON T_IDENTIF
+| primary T_CORCHETE_IZQ T_CORCHETE_DER
+| primary T_CORCHETE_IZQ args T_CORCHETE_DER
+| T_CORCHETE_IZQ T_CORCHETE_DER
+| T_CORCHETE_IZQ args T_CORCHETE_DER
+| T_LLAVE_IZQ T_LLAVE_DER
+| T_LLAVE_IZQ opt_args_or_assocs T_LLAVE_DER
+| T_RETURN
+| T_RETURN paren_or_call_args
+//| YIELD
+//| YIELD paren_or_call_args
+//| tDEFINED T_PAR_IZQ arg T_PAR_DER
 | function
-| function '{' opt_blockvar compstmt '}'
-| IF expr then compstmt
+| function T_LLAVE_IZQ opt_blockvar compstmt T_LLAVE_DER
+| T_IF expr then compstmt
   recursive_elsif
   opt_else
-  END
-| UNLESS expr then
+  T_END
+/*| UNLESS expr then
   compstmt
   opt_else
-  END
-| WHILE expr do compstmt END
-| UNTIL expr do compstmt END
-| CASE compstmt
+  T_END*/
+| T_WHILE expr T_DO compstmt T_END
+//| UNTIL expr T_DO compstmt T_END
+| T_CASE compstmt
   rec_when_then
   opt_else
-  END
-| FOR block_var IN expr do
+  T_END
+/*| FOR block_var IN expr T_DO
     compstmt
-  END
-| BEGIN
+  T_END*/
+/*| BEGIN
     compstmt
     rec_rescue
     opt_else
     opt_ensure
-  END
-| CLASS IDENTIFIER opt_subclass
+  T_END*/
+| T_CLASS T_IDENTIF opt_subclass
     compstmt
-  END
-| MODULE IDENTIFIER
+  T_END
+/*| MODULE T_IDENTIF
     compstmt
-  END
-| DEF fname argdecl
+  T_END */
+| T_DEF fname argdecl
     compstmt
-  END
-| DEF singleton point_or_doublecolon fname argdecl
+  T_END
+| T_DEF singleton point_or_doublecolon fname argdecl
     compstmt
-  END;
-point_or_doublecolon : '.'
-                     | tDOUBLECOLON;
+  T_END;
+point_or_doublecolon : T_PTO
+//                     | tDOUBLECOLON;
 opt_comma_mul_arg : /* empty */
-              | ',' '*' arg;
+              | T_COMA T_ASTER arg;
 when_args : args opt_comma_mul_arg
-          | '*' arg;
+          | T_ASTER arg;
 then : t    /*"then" and "do" can go on next line*/
-     | THEN
-     | t THEN;
+     | T_THEN
+     | t T_THEN;
 do   : t
-     | DO
-     | t DO;
+     | T_DO
+     | t T_DO;
 block_var : lhs | mlhs;
 mlhs_item_list : mlhs_item
-               | mlhs_item_list ',' mlhs_item;
+               | mlhs_item_list T_COMA mlhs_item;
 opt_mul_opt_lhs : /* empty */
-                | '*' lhs
-                | '*';
+                | T_ASTER lhs
+                | T_ASTER;
 mlhs : mlhs_item_list opt_mul_opt_lhs
-     | '*' lhs;
-mlhs_item : lhs | '(' mlhs ')';
+     | T_ASTER lhs;
+mlhs_item : lhs | T_PAR_IZQ mlhs T_PAR_DER;
 lhs : variable
-    | primary '[' ']'
-    | primary '[' args ']'
-    | primary '.' IDENTIFIER;
+    | primary T_CORCHETE_IZQ T_CORCHETE_DER
+    | primary T_CORCHETE_IZQ args T_CORCHETE_DER
+    | primary T_PTO T_IDENTIF;
 mrhs : args opt_comma_mul_arg
-     | '*' arg;
+     | T_ASTER arg;
 opt_comma_assocs : /* empty */
-                 | ',' assocs;
-opt_comma_amp_arg : /* empty */
-                  | ',' '&' arg;
-call_args : args opt_comma_assocs opt_comma_mul_arg opt_comma_amp_arg
-          | assocs opt_comma_mul_arg opt_comma_amp_arg
-          | '*' arg opt_comma_amp_arg | '&' arg
+                 | T_COMA assocs;
+//opt_comma_amp_arg : /* empty */
+//                  | T_COMA '&' arg;
+call_args : args opt_comma_assocs opt_comma_mul_arg //opt_comma_amp_arg
+//          | assocs opt_comma_mul_arg opt_comma_amp_arg
+//          | T_ASTER arg opt_comma_amp_arg 
+//	  | '&' arg
           | command;
 args : arg
-     | args ',' arg;
-argdecl : '(' arglist ')'
+     | args T_COMA arg;
+argdecl : T_PAR_IZQ arglist T_PAR_DER
         | arglist t;
-identifier_list : IDENTIFIER
-                | identifier_list ',' IDENTIFIER;
+identifier_list : T_IDENTIF
+                | identifier_list T_COMA T_IDENTIF;
 opt_comma_mul_ident : /* empty */
-                    | ',' '*'
-                    | ',' '*' IDENTIFIER;
-opt_comma_amp_ident : /* empty */
-                    | ',' '&'IDENTIFIER;
-opt_amp_ident : /* empty */
-              | '&'IDENTIFIER;
-arglist : identifier_list opt_comma_mul_ident opt_comma_amp_ident
-        | '*'IDENTIFIER opt_comma_amp_ident
-        | opt_amp_ident;
+                    | T_COMA T_ASTER
+                    | T_COMA T_ASTER T_IDENTIF;
+//opt_comma_amp_ident : /* empty */
+//                    | T_COMA '&' T_IDENTIF;
+//opt_amp_ident : /* empty */
+//              | '&' T_IDENTIF;
+arglist : identifier_list opt_comma_mul_ident //opt_comma_amp_ident
+//        | T_ASTER T_IDENTIF opt_comma_amp_ident
+//        | opt_amp_ident;
 singleton : variable
-        | '(' expr ')';
+        | T_PAR_IZQ expr T_PAR_DER;
 assocs : assoc
-       | assocs ',' assoc;
-assoc : arg tTHEN arg;
+       | assocs T_COMA assoc;
+assoc : arg T_THEN arg;
 variable : VARNAME
-         | NIL
-         | SELF;
-literal : NUMERIC
-        | SYMBOL
+         | T_NIL
+//         | SELF;
+literal : /*NUMERIC
+        |*/ SYMBOL
         | STRING
         | STRING2
-        | HERE_DOC
-        | REGEXP;
+    //  | HERE_DOC
+    //  | REGEXP;
 opt_terc : /* empty */
-          | '!' | '?';
-operation : IDENTIFIER opt_terc;
+          | T_NOT 
+	  | T_FIN_INTERROGACION;
+operation : T_IDENTIF opt_terc;
 %%
 /* estos son reconocidos por el lexer */
 /*
@@ -248,10 +253,10 @@ string : '"' {any_char} '"'
        | '´' {any_char} '´'
        | '' {any_char} '';
 STRING2 : %(Q|q|x)char {any_char} char
-HERE_DOC : <<(IDENTIFIER | STRING)
+HERE_DOC : <<(T_IDENTIF | STRING)
 {any_char}
-IDENTIFIER
+T_IDENTIF
 REGEXP : / {any_char} / [i|o|p]
 | %r char {any_char} char
-IDENTIFIER : sequence in /[a-zA-Z_]{a-zA-Z0-9_}/.
+T_IDENTIF : sequence in /[a-zA-Z_]{a-zA-Z0-9_}/.
 */

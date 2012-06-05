@@ -88,6 +88,6 @@ not|!  {return(T_NOT);};
 \"{STRING_DOBLE_CON_SALTO}#\{|\"{STRING_DOBLE_SIN_SALTO}#\{ {return(T_STRING_IZQ);};
 \}{STRING_DOBLE_CON_SALTO}\"|\}{STRING_DOBLE_SIN_SALTO}\" {return(T_STRING_DER);};
 `{COMMAND_CON_SALTO}`|`{COMMAND_SIN_SALTO}` {return(T_COMMAND);};
-\n|\t|\r|" " {return(T_ESPACIOS\n);};
+\n|\t|\r|" " {return(T_ESPACIOS);};
 . {return(T_ERROR);};
 

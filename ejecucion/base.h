@@ -6,24 +6,6 @@
 
 enum obj_type { RSTRING, TOBJECT, RINT, RCLASS, RARRAY, RNIL };
 
-struct RObject {
-  void *dir;
-  obj_type type;
-};
-
-typedef RObject RObject;
-
-struct RString {
-  std::string *cadena;
-};
-
-struct RInteger {
-  long int value;
-};
-
-typedef RString RString;
-typedef RInteger RInteger;
-
 void puts(RString *string_arg);
 void gets(RString *string_arg);
 void init();

@@ -3,15 +3,13 @@
 #include <stdio.h>
 %}
 %start program
-%token T_PTO_COMA tNEWLINE T_DO T_PIPE T_END T_IF T_WHILE T_LLAVE_IZQ T_LLAVE_DER
+%token T_FIN_INSTRUCCION T_DO T_PIPE T_END T_IF T_WHILE T_LLAVE_IZQ T_LLAVE_DER
 %token T_RETURN T_AND T_OR T_NOT T_PAR_IZQ T_PAR_DER T_MAS T_MENOS
 %token T_ASTER T_EXPO T_BAR T_PORCENTAJE T_MENOR_IGUAL_MAYOR T_MAYOR T_MAS_IGUAL T_MENOR T_MENOS_IGUAL
-%token T_DOBLE_IGUAL T_TRIPLE_IGUAL T_NOT_IGUAL T_IGUAL_NIOQUI T_NOT_NIOQUI T_NIOQUI
+%token T_DOBLE_IGUAL T_TRIPLE_IGUAL T_NOT_IGUAL T_IGUAL_NIOQUI T_NOT_NIOQUI T_NIOQUI /*tPUSH tSHIFT tBAND tBOR tDEFINED*/
 %token T_ELSE T_ELSIF T_CLASS T_DEF T_COMA T_PTO T_DOS_PTOS T_THEN
-%token T_CORCHETE_IZQ T_CORCHETE_DER T_NIL 
-%token T_CASE STRING STRING2 SYMBOL VARNAME T_WHEN fname T_IDENTIF
-%token T_IGUAL T_FIN_INTERROGACION
-%token T_PUTS T_LENGTH T_GETS T_NEW T_SIZE T_EACH T_OBJECT_ID T_RESPOND_TO
+%token T_CORCHETE_IZQ T_CORCHETE_DER T_NIL T_CASE STRING STRING2 SYMBOL VARNAME T_WHEN fname T_IDENTIF
+%token T_IGUAL T_FIN_INTERROGACION T_PUTS T_LENGTH T_GETS T_NEW T_SIZE T_EACH T_OBJECT_ID T_RESPOND_TO
 %token T_INSTANCE_OF T_ATTR_READER T_ATTR_WRITER T_ACCESSOR T_LOAD T_REQUIRE
 %token T_ARGV T_BOOL T_ANTI_BAR T_NUMERAL T_MAYOR_IGUAL T_MENOR_IGUAL T_IDENTIF_GLOBAL
 %token T_ATRIBUTO T_VAR_PESOS_CERO T_VAR_PESOS T_VAR_PESOS_PESOS T_INTEGER
@@ -23,28 +21,32 @@
 %left T_ASTER T_BAR
 %%
 program : compstmt;
-t : T_PTO_COMA | '\n';
-opt_t : 
-     | t;
 compstmt : stmt
-         | stmt t
+         | stmt T_FIN_INSTRUCCION
          | stmt texpr
-         | stmt texpr t;
-texpr : t expr
-      | texpr t expr;
+         | stmt texpr T_FIN_INSTRUCCION;
+texpr : T_FIN_INSTRUCCION expr
+      | texpr T_FIN_INSTRUCCION expr;
 def_blockvar :T_PIPE block_var T_PIPE;
-opt_blockvar :
+opt_blockvar : /* empty */
              | def_blockvar;
 opt_block : /* empty */
          | T_DO opt_blockvar compstmt T_END;
 stmt : call T_DO opt_blockvar compstmt T_END
+//| UNDEF fname
+//| ALIAS fname fname
 | stmt T_IF expr
 | stmt T_WHILE expr
+//| stmt UNLESS expr
+//| stmt UNTIL expr
+//| tBEGIN T_LLAVE_IZQ compstmt T_LLAVE_DER /*object initializer*/
+//| T_END T_LLAVE_IZQ compstmt T_LLAVE_DER /*object finalizer*/
 | lhs T_IGUAL command opt_block
 | expr
 ;
 expr : mlhs T_IGUAL mrhs
     | T_RETURN call_args
+//    | YIELD call_args
     | expr T_AND expr
     | expr T_OR expr
     | T_NOT expr
@@ -56,12 +58,9 @@ call : function
     | command
 ;
 command : operation call_args
- | primary T_PTO operation call_args
-;
+ | primary T_PTO operation call_args;
 paren_or_call_args : T_PAR_IZQ T_PAR_DER
               | T_PAR_IZQ call_args T_PAR_DER;
-opt_call_args : /* empty */
-              | paren_or_call_args;
 function : operation
          | operation paren_or_call_args
          | primary T_PTO operation
@@ -77,10 +76,7 @@ arg : lhs T_IGUAL arg
 | arg T_IGUAL_NIOQUI arg | arg T_NOT_NIOQUI arg
 | T_NOT arg | T_NIOQUI arg
 | primary;
-
-opt_args : /* empty */
-         | args;
-opt_args_comma : opt_args
+opt_args_comma : args
                | args T_COMA;
 opt_args_or_assocs : args
                    | assocs
@@ -125,17 +121,16 @@ primary: T_PAR_IZQ compstmt T_PAR_DER
     compstmt
   T_END;
 point_or_doublecolon : T_PTO
-//                     | tDOUBLECOLON;
 opt_comma_mul_arg : /* empty */
               | T_COMA T_ASTER arg;
 when_args : args opt_comma_mul_arg
           | T_ASTER arg;
-then : t    /*"then" and "do" can go on next line*/
+then : T_FIN_INSTRUCCION    /*"then" and "do" can go on next line*/
      | T_THEN
-     | t T_THEN;
-do   : t
+     | T_FIN_INSTRUCCION T_THEN;
+do   : T_FIN_INSTRUCCION
      | T_DO
-     | t T_DO;
+     | T_FIN_INSTRUCCION T_DO;
 block_var : lhs | mlhs;
 mlhs_item_list : mlhs_item
                | mlhs_item_list T_COMA mlhs_item;
@@ -158,7 +153,7 @@ call_args : args opt_comma_assocs opt_comma_mul_arg //opt_comma_amp_arg
 args : arg
      | args T_COMA arg;
 argdecl : T_PAR_IZQ arglist T_PAR_DER
-        | arglist t;
+        | arglist T_FIN_INSTRUCCION;
 identifier_list : T_IDENTIF
                 | identifier_list T_COMA T_IDENTIF;
 opt_comma_mul_ident : /* empty */
@@ -170,10 +165,10 @@ singleton : variable
 assocs : assoc
        | assocs T_COMA assoc;
 assoc : arg T_THEN arg;
-variable : VARNAME
+variable : T_IDENTIF
          | T_NIL
-//         | SELF;
-literal : SYMBOL
+literal : /*NUMERIC
+        |*/ SYMBOL
         | STRING
         | STRING2
 opt_terc : /* empty */
@@ -194,4 +189,27 @@ main()
 yyparse();
 /*Acciones a ejecutar después del análisis*/
 }
-
+/* estos son reconocidos por el lexer */
+/*
+op_asgn : '+=' | '-=' | '*=' | '/=' | '%=' | '**='
+        | '&=' | '|=' | '^=' | '<<=' | '>>='
+        | '&&=' | '||=';
+symbol : ':'fname | ':'varname;
+fname : identifier | '..' | '|' | '^' | '&' | '<=>' | '==' | '===' | '=~'
+      | '>' | '>=' | '<' | '<=' | '+' | '-' | '*' | '/' | '%' | '**'
+     | '<<' | '>>' | '~' | '+@' | '-@' | '[]' | '[]=';
+opt_terc : 
+          | '!' | '?';
+operation : identifier opt_terc;
+varname : global | '@'identifier | identifier;
+global : '$'identifier | '$'any_char | '$-'any_char;
+string : '"' {any_char} '"'
+       | '´' {any_char} '´'
+       | '' {any_char} '';
+STRING2 : %(Q|q|x)char {any_char} char
+HERE_DOC : <<(T_IDENTIF | STRING)
+{any_char}
+T_IDENTIF
+REGEXP : / {any_char} / [i|o|p]
+| %r char {any_char} char
+*/

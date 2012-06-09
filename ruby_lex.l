@@ -37,7 +37,6 @@ require {return(T_REQUIRE);};
 ARGV {return(T_ARGV);};
 true|false {return(T_BOOL);};
 = 	 {return(T_IGUAL);};
-;        {return(T_PTO_COMA);};
 ,        {return(T_COMA);};
 \\        {return(T_ANTI_BAR);};
 #      {return(T_NUMERAL);};
@@ -88,6 +87,7 @@ not|!  {return(T_NOT);};
 \"{STRING_DOBLE_CON_SALTO}#\{|\"{STRING_DOBLE_SIN_SALTO}#\{ {return(T_STRING_IZQ);};
 \}{STRING_DOBLE_CON_SALTO}\"|\}{STRING_DOBLE_SIN_SALTO}\" {return(T_STRING_DER);};
 `{COMMAND_CON_SALTO}`|`{COMMAND_SIN_SALTO}` {return(T_COMMAND);};
-\n|\t|\r|" " {};
+\n|; {return T_FIN_INSTRUCCION;};
+\t|\r|" " {};
 . {return(T_ERROR);};
 

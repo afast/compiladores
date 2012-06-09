@@ -82,12 +82,12 @@ not|!  {return(T_NOT);};
 ((\+|\-)?[1-9][0-9]*)|0 {return(T_INTEGER);};
 (((\+|\-)?[1-9][0-9]*)\.[0-9]+)|(((\+|\-)?0)\.[0-9]+) {return(T_FLOAT);};
 #.*\n {;};
-^=begin(.*\n)*=end {;};
+^=begin(.*\n)*=end {};
 \'{STRING_SIMPLE_CON_SALTO}\'|\'{STRING_SIMPLE_SIN_SALTO}\' {return(T_STRING_1);};
 \"{STRING_DOBLE_CON_SALTO}\"|\"{STRING_DOBLE_SIN_SALTO}\" {return(T_STRING_2);};
 \"{STRING_DOBLE_CON_SALTO}#\{|\"{STRING_DOBLE_SIN_SALTO}#\{ {return(T_STRING_IZQ);};
 \}{STRING_DOBLE_CON_SALTO}\"|\}{STRING_DOBLE_SIN_SALTO}\" {return(T_STRING_DER);};
 `{COMMAND_CON_SALTO}`|`{COMMAND_SIN_SALTO}` {return(T_COMMAND);};
-\n|\t|\r|" " {return(T_ESPACIOS);};
+\n|\t|\r|" " {};
 . {return(T_ERROR);};
 

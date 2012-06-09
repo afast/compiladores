@@ -1,8 +1,13 @@
-enum code_ops { FIN, PUTS, GETS }; 
+#include "base.h"
+#include <iostream>
+#include <list>
+enum code_ops { FIN, PUTS, GETS, OBJID };
 
-struct instruccion {
+struct RInstruccion {
   enum code_ops op;
-  void *arg1, *arg2, *arg3;
+  RObject *arg1, *arg2, *arg3;
 };
 
-void ejecutar(struct instruccion *codigo);
+typedef RInstruccion Instruccion;
+
+void ejecutar(std::list<Instruccion*> *codigo);

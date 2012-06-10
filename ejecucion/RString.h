@@ -1,11 +1,13 @@
 #ifndef _RSTRING_H
 #define _RSTRING_H
 
-#include "RObject.h"
 #include <iostream>
 #include <string>
 
+#include "RObject.h"
+
 class RBool;
+class RString;
 
 class RString: public RObject {
   protected:

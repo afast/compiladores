@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <unordered_map>
+#include "RObject.h"
 
 enum obj_type { RSTRING, TOBJECT, RINT, RCLASS, RARRAY, RNIL };
 

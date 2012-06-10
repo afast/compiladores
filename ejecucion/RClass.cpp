@@ -34,10 +34,10 @@ RBool* RClass::respond_to(RString *method){
 }
 
 void RClass::add_method(std::string* method, std::list<Instruccion*> *codigo){
-  add_method(new RString(method), codigo);
+  method_names.push_back(new RString(method));
+  methods[*method] = codigo;
 }
 
 void RClass::add_method(RString* method, std::list<Instruccion*> *codigo){
-  method_names.push_back(method);
-  methods[*(method->getValue())] = codigo;
+  add_method(method->getValue(), codigo);
 }

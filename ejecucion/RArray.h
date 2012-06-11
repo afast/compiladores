@@ -9,17 +9,20 @@ class RBool;
 
 class RArray: public RObject {
   private:
-    RObject *value[];
-    int arrayLenght;
+    RObject **value;
+    int arrayLength;
     int nextSize;
   public:
-    RObject *getValue();
+    RObject **getValue();
     RInteger *size();
     RInteger *length();
     RArray();
     RArray(RArray *arg);
     RString *get_class();
-    RBool *respond_to(RString *method);
-    RBool operator== (RArray param);
+    bool respond_to(RString *method);
+    bool operator== (RArray param);
+    RObject* operator[] (RInteger param);
+    RObject* operator[] (RInteger *param);
+    RObject* operator[] (int param);
 };
 #endif

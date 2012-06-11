@@ -1,4 +1,7 @@
 #include "RArray.h"
+#include "RInteger.h"
+#include "RString.h"
+#include "RBool.h"
 
 RArray::RArray(){
   nextSize = 20;
@@ -8,11 +11,11 @@ RArray::RArray(){
 
 RArray::RArray(RArray *arg){
   nextSize = (arg->size()->getValue() % 10)*10 + 10;
-  value = new RObject[nextSize];
-  nextSizea += 10;
-  arrayLength = arg->size();
+  value = new RObject*[nextSize];
+  nextSize += 10;
+  arrayLength = arg->size()->getValue();
   for (int i=0; i<arrayLength; i++)
-    value[i] = *arg[i];
+    value[i] = (*arg)[i];
 }
 
 RObject **RArray::getValue(){
@@ -20,31 +23,31 @@ RObject **RArray::getValue(){
 }
 
 RInteger *RArray::size(){
-  return new Integer(arrayLength);
+  return new RInteger((long int)arrayLength);
 }
 
 RInteger *RArray::length(){
-  return new Integer(arrayLength);
+  return new RInteger(arrayLength);
 }
 
 RString *RArray::get_class(){
   return new RString("Array");
 }
 
-RBool *RArray::respond_to(RString *method){
-  return RObject::respont_to(method);
+bool RArray::respond_to(RString *method){
+  return RObject::respond_to(method);
 }
 
-RBool *RArray::operator== (RArray param){
-  RBool *res;
+bool RArray::operator== (RArray param){
+  bool res;
   if (param.size() != this->size())
-    res = new RBool(false);
+    res = false;
   else if (param.size() == 0)
-    res = new RBool(true);
+    res = true;
   else {
     int i=0;
-    res = new RBool(false);
-    while (i < param.size() && !res->getValue()) {
+    res = false;
+    while (i < param.size()->getValue() && !res) {
       RObject object1, object2;
       object1 = *(param[i]);
       object2 = *(value[i]);
@@ -53,4 +56,16 @@ RBool *RArray::operator== (RArray param){
     }
   }
   return res;
+}
+
+RObject* RArray::operator[] (int n){
+  return value[n];
+}
+
+RObject* RArray::operator[] (RInteger param){
+  return value[param.getValue()];
+}
+
+RObject* RArray::operator[] (RInteger *param){
+  return (*this)[*param];
 }

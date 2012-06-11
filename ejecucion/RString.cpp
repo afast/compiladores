@@ -28,7 +28,7 @@ RString * RString::get_class(){
   return new RString("String");
 }
 
-RBool *RString::respond_to(RString *method){
+bool RString::respond_to(RString *method){
   return RObject::respond_to(method);
 }
 
@@ -36,14 +36,38 @@ std::string *RString::getValue(){
   return str;
 }
 
-RBool * RString::operator== (RString param) {
-  return new RBool(this->str->compare(*param.getValue()) == 0);
+bool RString::operator== (RString param) {
+  return this->str->compare(*param.getValue()) == 0;
 }
 
-RBool * RString::operator== (std::string *param) {
-  return new RBool(this->str->compare(*param) == 0);
+bool RString::operator== (std::string *param) {
+  return this->str->compare(*param) == 0;
 }
 
-RBool * RString::operator== (const char *param) {
-  return new RBool(this->str->compare(param) == 0);
+bool RString::operator== (const char *param) {
+  return this->str->compare(param) == 0;
+}
+
+void RString::setValue(const char * param){
+  if (this->str == NULL)
+    delete str;
+  str = new std::string(param);
+}
+
+void RString::setValue(std::string *param){
+  if (this->str == NULL)
+    delete str;
+  str = param;
+}
+
+void RString::setValue(std::string param){
+  if (this->str == NULL)
+    delete str;
+  str = new std::string(param);
+}
+
+void RString::setValue(RString * param){
+  if (this->str == NULL)
+    delete str;
+  str = new std::string(*(param->getValue()));
 }

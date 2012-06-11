@@ -22,7 +22,7 @@ class RClass : public RObject {
     RClass(std::string* param);
     RClass(RString* param);
     RString* get_class();
-    RBool* respond_to(RString *method);
+    bool respond_to(RString *method);
     void add_method(std::string* method, std::list<Instruccion*> *codigo);
     void add_method(RString* method, std::list<Instruccion*> *codigo);
 };

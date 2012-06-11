@@ -3,8 +3,9 @@
 
 #include <iostream>
 #include <list>
+#include <unordered_map>
 
-#include "base.h"
+class RObject;
 
 enum code_ops { FIN, PUTS, GETS, OBJID };
 
@@ -14,9 +15,6 @@ struct RInstruccion {
 };
 
 typedef RInstruccion Instruccion;
-
-std::unordered_map<std::string, RObject*> variables; // las variables deben agregarse a este hash variables["nombre"] = RObject*
-std::unordered_map<std::string, std::list<Instruccion*>*> methods; // los metodos globales se guardan aqui methods["nombre"] = std::list<Instruccion *>*
 
 void ejecutar(std::list<Instruccion*> *codigo);
 #endif

@@ -22,13 +22,13 @@ RString* RClass::get_class(){
   return name;
 }
 
-RBool* RClass::respond_to(RString *method){
-  RBool *res = RObject::respond_to(method);
-  if (!res->getValue()) {
+bool RClass::respond_to(RString *method){
+  bool res = RObject::respond_to(method);
+  if (!res) {
     std::list<RString*>::iterator it = method_names.begin();
     do {
       res = **it == *method;
-    } while(it++ != method_names.end() && !res->getValue());
+    } while(it++ != method_names.end() && !res);
   }
   return res;
 }

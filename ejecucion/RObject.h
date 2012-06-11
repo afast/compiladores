@@ -12,6 +12,7 @@ class RObject {
     RObject();
     RInteger *objectId();
     virtual RString *get_class();
-    virtual RBool *respond_to(RString *method);
+    virtual bool respond_to(RString *method);
+    virtual bool operator== (RObject param);
 };
 #endif

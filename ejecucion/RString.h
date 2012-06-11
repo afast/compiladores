@@ -19,14 +19,14 @@ class RString: public RObject {
     RString(char *arg);
     RString(std::string *arg);
     RString(RString *arg);
-    //RInteger *object_id(); use parent method
     RString *get_class();
-    RBool *respond_to(RString *method);
-    RBool * operator== (RString param);
-    RBool * operator== (std::string *param);
-    RBool * operator== (const char *param);
-    //bool operator== (RString param);
-    //bool operator== (std::string *param);
-    //bool operator== (const char *param);
+    void setValue(const char * param);
+    void setValue(std::string param);
+    void setValue(std::string *param);
+    void setValue(RString * param);
+    bool respond_to(RString *method);
+    bool operator== (RString param);
+    bool operator== (std::string *param);
+    bool operator== (const char *param);
 };
 #endif

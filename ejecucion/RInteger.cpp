@@ -16,14 +16,18 @@ RString* RInteger::get_class(){
   return new RString("Integer");
 }
 
-RBool* RInteger::respond_to(RString *method){
+bool  RInteger::respond_to(RString *method){
   return RObject::respond_to(method);
 }
 
-RBool * RInteger::operator== (RInteger param){
+bool  RInteger::operator== (RInteger param){
   return new RBool(this->value == param.getValue());
 }
 
-RBool * RInteger::operator== (long int param){
+bool  RInteger::operator== (long int param){
   return new RBool(this->value == param);
+}
+
+long int RInteger::operator= (RInteger param){
+  return param.value;
 }

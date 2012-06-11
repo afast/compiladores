@@ -1,8 +1,10 @@
-#include "base.h"
 #include <sstream>
 
+#include "base.h"
+#include "RString.h"
+
 void puts(RString *string_arg) {
-  std::string *str = new std::string(string_arg->cadena->data());
+  std::string *str = new std::string(string_arg->getValue()->data());
   while (str->at(str->size()-1) == '\n')
     str->erase(str->size()-1);
   std::cout << str->data() << std::endl;
@@ -11,11 +13,11 @@ void puts(RString *string_arg) {
 
 void gets(RString *string_arg) {
   std::string *str = new std::string();
-  if (string_arg->cadena != NULL)
-    delete string_arg->cadena;
+  if (string_arg->getValue() != NULL)
+    delete string_arg->getValue();
   getline(std::cin, *str);
   str->push_back('\n'); // Ruby lee el string incluido el fin de linea
-  string_arg->cadena = str;
+  string_arg->setValue(str);
 }
 
 long int getDir(void* p){

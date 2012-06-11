@@ -15,8 +15,9 @@ class RInteger : public RObject {
     RInteger(long int integer);
     //RInteger *object_id(); use parent method
     RString* get_class();
-    RBool* respond_to(RString *method);
-    RBool * operator== (RInteger param);
-    RBool * operator== (long int param);
+    bool respond_to(RString *method);
+    bool operator== (RInteger param);
+    bool operator== (long int param);
+    long int operator= (RInteger param);
 };
 #endif

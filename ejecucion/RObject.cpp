@@ -29,7 +29,11 @@ RString *RObject::get_class(){
   return new RString("Object");
 }
 
-RBool *RObject::respond_to(RString *method){
+bool RObject::respond_to(RString *method){
   bool res = *method == "object_id" || *method == "class" || *method == "respond_to?";
-  return new RBool(res);
+  return res;
+}
+
+bool RObject::operator== (RObject param) {
+  return this->objectId() == param.objectId();
 }

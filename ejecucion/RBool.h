@@ -14,10 +14,10 @@ class RBool: public RObject {
     RBool(bool arg);
     RBool(RBool *arg);
     RString *get_class();
-    RBool *respond_to(RString *method);
+    bool respond_to(RString *method);
     bool operator= (RBool param);
-    RBool operator== (RBool param);
-    RBool operator|| (RBool param);
-    RBool operator&& (RBool param);
+    bool operator== (RBool param);
+    bool operator|| (RBool param);
+    bool operator&& (RBool param);
 };
 #endif

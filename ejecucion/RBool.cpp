@@ -19,20 +19,20 @@ RString* RBool::get_class(){
   return new RString("Bool");
 }
 
-RBool* RBool::respond_to(RString *method){
+bool RBool::respond_to(RString *method){
   return RObject::respond_to(method);
 }
 
-RBool RBool::operator== (RBool param){
-  return RBool(*this == param);
+bool RBool::operator== (RBool param){
+  return *this == param;
 }
 
-RBool RBool::operator|| (RBool param){
-  return RBool(*this || param);
+bool RBool::operator|| (RBool param){
+  return *this || param;
 }
 
-RBool RBool::operator&& (RBool param){
-  return RBool(*this && param);
+bool RBool::operator&& (RBool param){
+  return *this && param;
 }
 
 bool RBool::operator= (RBool param){

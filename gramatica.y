@@ -6,14 +6,14 @@
 %token T_FIN_INSTRUCCION T_DO T_PIPE T_END T_IF T_WHILE T_LLAVE_IZQ T_LLAVE_DER
 %token T_RETURN T_AND T_OR T_NOT T_PAR_IZQ T_PAR_DER T_MAS T_MENOS
 %token T_ASTER T_EXPO T_BAR T_PORCENTAJE T_MENOR_IGUAL_MAYOR T_MAYOR T_MAS_IGUAL T_MENOR T_MENOS_IGUAL
-%token T_DOBLE_IGUAL T_TRIPLE_IGUAL T_NOT_IGUAL T_IGUAL_NIOQUI T_NOT_NIOQUI T_NIOQUI /*tPUSH tSHIFT tBAND tBOR tDEFINED*/
+%token T_DOBLE_IGUAL T_TRIPLE_IGUAL T_NOT_IGUAL T_IGUAL_NIOQUI T_NOT_NIOQUI T_NIOQUI
 %token T_ELSE T_ELSIF T_CLASS T_DEF T_COMA T_PTO T_DOS_PTOS T_THEN
 %token T_CORCHETE_IZQ T_CORCHETE_DER T_NIL T_CASE STRING STRING2 SYMBOL VARNAME T_WHEN fname T_IDENTIF
 %token T_IGUAL T_FIN_INTERROGACION T_PUTS T_LENGTH T_GETS T_NEW T_SIZE T_EACH T_OBJECT_ID T_RESPOND_TO
 %token T_INSTANCE_OF T_ATTR_READER T_ATTR_WRITER T_ACCESSOR T_LOAD T_REQUIRE
 %token T_ARGV T_BOOL T_ANTI_BAR T_NUMERAL T_MAYOR_IGUAL T_MENOR_IGUAL T_IDENTIF_GLOBAL
-%token T_ATRIBUTO T_VAR_PESOS_CERO T_VAR_PESOS T_VAR_PESOS_PESOS T_INTEGER
-%token T_FLOAT T_STRING_1 T_STRING_2 T_STRING_IZQ T_STRING_DER T_COMMAND T_ESPACIOS T_ERROR
+%token T_ATRIBUTO T_VAR_PESOS_CERO T_VAR_PESOS T_VAR_PESOS_PESOS T_INTEGER_ABS
+%token T_FLOAT_ABS T_STRING_1 T_STRING_2 T_STRING_IZQ T_STRING_DER T_COMMAND T_ESPACIOS T_ERROR
 /*=========================================================================
                           OPERATOR PRECEDENCE
 =========================================================================*/
@@ -27,33 +27,72 @@ compstmt : stmt
          | stmt texpr T_FIN_INSTRUCCION;
 texpr : T_FIN_INSTRUCCION expr
       | texpr T_FIN_INSTRUCCION expr;
+stmt : expr 
+	| output
+	| if;
+expr : T_FIN_INSTRUCCION
+	| variable T_IGUAL value;
+value : | T_GETS
+	| expr_numeric
+	| expr_string
+	| expr_bool;
+string : T_STRING_1
+	| T_STRING_2
+	| T_COMMAND;
+output : T_PUTS value;
+number : T_INTEGER_ABS
+	| T_MENOS T_INTEGER_ABS
+	| T_MAS T_INTEGER_ABS
+	| T_FLOAT_ABS
+	| T_MENOS T_FLOAT_ABS
+	| T_MAS T_FLOAT_ABS;
+expr_numeric : number
+	| variable
+	| expr_numeric T_MAS expr_numeric
+	| expr_numeric T_ASTER expr_numeric
+	| expr_numeric T_MENOS expr_numeric
+	| expr_numeric T_BAR expr_numeric
+	| expr_numeric T_EXPO expr_numeric
+	| T_PAR_IZQ expr_numeric T_PAR_DER;
+expr_string : string
+	| variable
+	| T_NIL
+	| expr_string T_ASTER T_INTEGER_ABS
+	| expr_string T_MAS expr_string
+	| T_PAR_IZQ expr_string T_PAR_DER;
+expr_bool : T_BOOL
+	| value T_AND value
+	| value T_OR value
+	| T_NOT value
+	| value  T_MAYOR value
+	| value  T_MAYOR_IGUAL value
+	| value  T_MENOR value
+	| value  T_MENOR_IGUAL value
+	| value  T_DOBLE_IGUAL value
+	| value  T_NOT_IGUAL value
+	| T_PAR_IZQ value T_PAR_DER;
+variable : T_IDENTIF
+	| T_IDENTIF T_CORCHETE_IZQ T_INTEGER_ABS T_CORCHETE_DER;
+
+/*
 def_blockvar :T_PIPE block_var T_PIPE;
-opt_blockvar : /* empty */
+opt_blockvar : 
              | def_blockvar;
-opt_block : /* empty */
+opt_block : 
          | T_DO opt_blockvar compstmt T_END;
 stmt : call T_DO opt_blockvar compstmt T_END
-//| UNDEF fname
-//| ALIAS fname fname
 | stmt T_IF expr
 | stmt T_WHILE expr
-//| stmt UNLESS expr
-//| stmt UNTIL expr
-//| tBEGIN T_LLAVE_IZQ compstmt T_LLAVE_DER /*object initializer*/
-//| T_END T_LLAVE_IZQ compstmt T_LLAVE_DER /*object finalizer*/
 | lhs T_IGUAL command opt_block
-| expr
-;
+| expr;
 expr : mlhs T_IGUAL mrhs
     | T_RETURN call_args
-//    | YIELD call_args
     | expr T_AND expr
     | expr T_OR expr
     | T_NOT expr
     | command
     | T_NOT command
-    | arg
-;
+    | arg;
 call : function
     | command
 ;
@@ -81,13 +120,13 @@ opt_args_comma : args
 opt_args_or_assocs : args
                    | assocs
                    | assocs T_COMA;
-recursive_elsif : /* empty */
+recursive_elsif : 
                 | T_ELSIF expr then compstmt recursive_elsif;
-opt_else : /* empty */
+opt_else : 
          | T_ELSE compstmt;
 rec_when_then : T_WHEN when_args then compstmt
               | rec_when_then T_WHEN when_args then compstmt;
-opt_subclass : /* empty */
+opt_subclass : 
              | T_MENOR T_IDENTIF;
 primary: T_PAR_IZQ compstmt T_PAR_DER
 | literal
@@ -117,15 +156,14 @@ primary: T_PAR_IZQ compstmt T_PAR_DER
 | T_DEF fname argdecl
     compstmt
   T_END
-| T_DEF singleton point_or_doublecolon fname argdecl
+| T_DEF singleton T_PTO fname argdecl
     compstmt
   T_END;
-point_or_doublecolon : T_PTO
-opt_comma_mul_arg : /* empty */
+opt_comma_mul_arg : 
               | T_COMA T_ASTER arg;
 when_args : args opt_comma_mul_arg
           | T_ASTER arg;
-then : T_FIN_INSTRUCCION    /*"then" and "do" can go on next line*/
+then : T_FIN_INSTRUCCION
      | T_THEN
      | T_FIN_INSTRUCCION T_THEN;
 do   : T_FIN_INSTRUCCION
@@ -134,7 +172,7 @@ do   : T_FIN_INSTRUCCION
 block_var : lhs | mlhs;
 mlhs_item_list : mlhs_item
                | mlhs_item_list T_COMA mlhs_item;
-opt_mul_opt_lhs : /* empty */
+opt_mul_opt_lhs : 
                 | T_ASTER lhs
                 | T_ASTER;
 mlhs : mlhs_item_list opt_mul_opt_lhs
@@ -146,7 +184,7 @@ lhs : variable
     | primary T_PTO T_IDENTIF;
 mrhs : args opt_comma_mul_arg
      | T_ASTER arg;
-opt_comma_assocs : /* empty */
+opt_comma_assocs : 
                  | T_COMA assocs;
 call_args : args opt_comma_assocs opt_comma_mul_arg //opt_comma_amp_arg
           | command;
@@ -156,7 +194,7 @@ argdecl : T_PAR_IZQ arglist T_PAR_DER
         | arglist T_FIN_INSTRUCCION;
 identifier_list : T_IDENTIF
                 | identifier_list T_COMA T_IDENTIF;
-opt_comma_mul_ident : /* empty */
+opt_comma_mul_ident : 
                     | T_COMA T_ASTER
                     | T_COMA T_ASTER T_IDENTIF;
 arglist : identifier_list opt_comma_mul_ident //opt_comma_amp_ident
@@ -167,21 +205,20 @@ assocs : assoc
 assoc : arg T_THEN arg;
 variable : T_IDENTIF
          | T_NIL
-literal : /*NUMERIC
-        |*/ SYMBOL
+literal : SYMBOL
         | STRING
         | STRING2
-opt_terc : /* empty */
+opt_terc : 
           | T_NOT 
 	  | T_FIN_INTERROGACION;
 operation : T_IDENTIF opt_terc;
+*/
 %%
-yyerror (s) /* Llamada por yyparse ante un error */
+/* Llamada por yyparse ante un error */
+yyerror (s) 
 char *s;
 {
-printf ("%s\n", s); /* Esta implementación por defecto nos valdrá */
-/* Si no creamos esta función, habrá que enlazar con –ly en el
-momento de compilar para usar una implementación por defecto */
+printf ("%s\n", s); 
 }
 main()
 {

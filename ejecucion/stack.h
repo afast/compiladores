@@ -1,6 +1,12 @@
-#include "base.h"
+#ifndef _STACK_H
+#define _STACK_H
+
 #include <iostream>
 #include <list>
+#include <unordered_map>
+
+class RObject;
+
 enum code_ops { FIN, PUTS, GETS, OBJID };
 
 struct RInstruccion {
@@ -11,3 +17,4 @@ struct RInstruccion {
 typedef RInstruccion Instruccion;
 
 void ejecutar(std::list<Instruccion*> *codigo);
+#endif

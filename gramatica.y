@@ -25,17 +25,19 @@ compstmt : stmt
          | stmt T_FIN_INSTRUCCION
          | stmt texpr
          | stmt texpr T_FIN_INSTRUCCION;
-texpr : T_FIN_INSTRUCCION expr
-      | texpr T_FIN_INSTRUCCION expr;
-stmt : expr 
+texpr : T_FIN_INSTRUCCION stmt
+      | texpr T_FIN_INSTRUCCION stmt;
+stmt : /* Vacio */ 
 	| output
-	| if;
-expr : T_FIN_INSTRUCCION
+	| if
+	| while
 	| variable T_IGUAL value;
-value : | T_GETS
+value : T_GETS
+	| T_BOOL
 	| expr_numeric
 	| expr_string
-	| expr_bool;
+	| expr_bool
+	| case;
 string : T_STRING_1
 	| T_STRING_2
 	| T_COMMAND;
@@ -60,8 +62,7 @@ expr_string : string
 	| expr_string T_ASTER T_INTEGER_ABS
 	| expr_string T_MAS expr_string
 	| T_PAR_IZQ expr_string T_PAR_DER;
-expr_bool : T_BOOL
-	| value T_AND value
+expr_bool : value T_AND value
 	| value T_OR value
 	| T_NOT value
 	| value  T_MAYOR value
@@ -73,6 +74,22 @@ expr_bool : T_BOOL
 	| T_PAR_IZQ value T_PAR_DER;
 variable : T_IDENTIF
 	| T_IDENTIF T_CORCHETE_IZQ T_INTEGER_ABS T_CORCHETE_DER;
+
+if : T_IF expr_bool compstmt recursive_elsif opt_else T_END;
+recursive_elsif : /* Vacio */
+                | T_ELSIF expr_bool compstmt recursive_elsif;
+opt_else : /* Vacio */
+         | T_ELSE compstmt;
+while : T_WHILE expr_bool compstmt T_END;
+case : T_CASE rec_when_then T_END
+	| T_CASE T_FIN_INSTRUCCION rec_when_then T_END;
+
+rec_when_then : T_WHEN expr_bool T_THEN value T_FIN_INSTRUCCION
+              | rec_when_then T_WHEN expr_bool T_THEN value T_FIN_INSTRUCCION
+	      | T_WHEN expr_bool T_THEN value
+              | rec_when_then T_WHEN expr_bool T_THEN value;
+
+
 
 /*
 def_blockvar :T_PIPE block_var T_PIPE;

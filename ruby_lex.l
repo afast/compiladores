@@ -8,6 +8,7 @@ STRING_SIMPLE_SIN_SALTO [^(\'\n)]*
 COMMAND_CON_SALTO ([^(`\n)]*(\\\n)*)*
 COMMAND_SIN_SALTO [^(`\n)]*
 %%
+then      {return(T_THEN);};
 nil      {return(T_NIL);};
 puts   {return(T_PUTS);};
 length {return(T_LENGTH);};
@@ -86,7 +87,7 @@ not|!  {return(T_NOT);};
 \"{STRING_DOBLE_CON_SALTO}#\{|\"{STRING_DOBLE_SIN_SALTO}#\{ {return(T_STRING_IZQ);};
 \}{STRING_DOBLE_CON_SALTO}\"|\}{STRING_DOBLE_SIN_SALTO}\" {return(T_STRING_DER);};
 `{COMMAND_CON_SALTO}`|`{COMMAND_SIN_SALTO}` {return(T_COMMAND);};
-\n|; {return T_FIN_INSTRUCCION;};
+(\n|;)* {return T_FIN_INSTRUCCION;};
 \\|\t|\r|" " {};
 . {return(T_ERROR);};
 

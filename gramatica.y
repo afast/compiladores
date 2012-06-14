@@ -40,7 +40,8 @@ stmt : /* Vacio */
 	| T_ACCESSOR args_accesores;
 value : T_GETS
 	| T_BOOL
-	| variable T_PTO T_CLASS
+	| T_CLASS
+	| T_NEW
 	| expr_numeric
 	| expr_string
 	| expr_bool
@@ -70,7 +71,7 @@ expr_string : string
 	| expr_string T_ASTER T_INTEGER_ABS
 	| expr_string T_MAS expr_string
 	| T_PAR_IZQ expr_string T_PAR_DER;
-expr_bool : variable T_PTO T_RESPOND_TO T_PAR_IZQ expr_string T_PAR_DER
+expr_bool : T_RESPOND_TO T_PAR_IZQ expr_string T_PAR_DER
 	| variable T_PTO T_INSTANCE_OF expr_string
 	| value T_AND value
 	| value T_OR value

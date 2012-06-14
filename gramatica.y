@@ -4,11 +4,11 @@
 %}
 %start program
 %token T_FIN_INSTRUCCION T_DO T_PIPE T_END T_IF T_WHILE T_LLAVE_IZQ T_LLAVE_DER
-%token T_RETURN T_AND T_OR T_NOT T_PAR_IZQ T_PAR_DER T_MAS T_MENOS
+%token T_RETURN T_AND T_OR T_NOT T_PAR_IZQ T_PAR_DER T_MAS T_MENOS T_CONSTANTE
 %token T_ASTER T_EXPO T_BAR T_PORCENTAJE T_MENOR_IGUAL_MAYOR T_MAYOR T_MAS_IGUAL T_MENOR T_MENOS_IGUAL
 %token T_DOBLE_IGUAL T_TRIPLE_IGUAL T_NOT_IGUAL T_IGUAL_NIOQUI T_NOT_NIOQUI T_NIOQUI
-%token T_ELSE T_ELSIF T_CLASS T_DEF T_COMA T_PTO T_DOS_PTOS T_THEN
-%token T_CORCHETE_IZQ T_CORCHETE_DER T_NIL T_CASE STRING STRING2 SYMBOL VARNAME T_WHEN fname T_IDENTIF
+%token T_ELSE T_ELSIF T_CLASS T_DEF T_COMA T_PTO T_DOS_PTOS T_THEN T_VAR_LOCAL
+%token T_CORCHETE_IZQ T_CORCHETE_DER T_NIL T_CASE STRING STRING2 SYMBOL VARNAME T_WHEN T_IDENTIF
 %token T_IGUAL T_FIN_INTERROGACION T_PUTS T_LENGTH T_GETS T_NEW T_SIZE T_EACH T_OBJECT_ID T_RESPOND_TO
 %token T_INSTANCE_OF T_ATTR_READER T_ATTR_WRITER T_ACCESSOR T_LOAD T_REQUIRE
 %token T_ARGV T_BOOL T_ANTI_BAR T_NUMERAL T_MAYOR_IGUAL T_MENOR_IGUAL T_IDENTIF_GLOBAL
@@ -37,6 +37,7 @@ stmt : /* Vacio */
 	| array;
 value : T_GETS
 	| T_BOOL
+	| variable T_PTO T_CLASS
 	| expr_numeric
 	| expr_string
 	| expr_bool
@@ -53,6 +54,7 @@ number : T_INTEGER_ABS
 	| T_MAS T_FLOAT_ABS;
 expr_numeric : number
 	| variable
+	| variable T_PTO T_OBJECT_ID
 	| expr_numeric T_MAS expr_numeric
 	| expr_numeric T_ASTER expr_numeric
 	| expr_numeric T_MENOS expr_numeric
@@ -65,7 +67,9 @@ expr_string : string
 	| expr_string T_ASTER T_INTEGER_ABS
 	| expr_string T_MAS expr_string
 	| T_PAR_IZQ expr_string T_PAR_DER;
-expr_bool : value T_AND value
+expr_bool : variable T_PTO T_RESPOND_TO T_PAR_IZQ expr_string T_PAR_DER
+	| variable T_PTO T_INSTANCE_OF expr_string
+	| value T_AND value
 	| value T_OR value
 	| T_NOT value
 	| value  T_MAYOR value
@@ -75,7 +79,8 @@ expr_bool : value T_AND value
 	| value  T_DOBLE_IGUAL value
 	| value  T_NOT_IGUAL value
 	| T_PAR_IZQ value T_PAR_DER;
-variable : T_IDENTIF
+variable : T_VAR_LOCAL
+	| T_ATRIBUTO
 	| T_IDENTIF T_CORCHETE_IZQ T_INTEGER_ABS T_CORCHETE_DER;
 
 if : T_IF expr_bool compstmt recursive_elsif opt_else T_END;
@@ -92,7 +97,6 @@ rec_when_then : T_WHEN expr_bool T_THEN value T_FIN_INSTRUCCION
 	      | T_WHEN expr_bool T_THEN value
               | rec_when_then T_WHEN expr_bool T_THEN value;
 def :	T_DEF T_IDENTIF	argdecl compstmt T_END;
-class :	T_CLASS T_IDENTIF compstmt T_END;
 argdecl : T_PAR_IZQ arglist T_PAR_DER T_FIN_INSTRUCCION
 	| T_PAR_IZQ T_PAR_DER T_FIN_INSTRUCCION; /*para representar pej: funcion()*/
 	| arglist T_FIN_INSTRUCCION;
@@ -100,6 +104,8 @@ arglist : T_IDENTIF arglist_recur;  /*ver lo de recursion por la izq y por la de
 arglist_recur :	/*vacio*/
 	| arglist_recur T_COMA	T_IDENTIF;
 array :	T_CORCHETE_IZQ /*aca no se que poner*/ T_CORCHETE_DER;
+class :	T_CLASS T_IDENTIF compstmt T_END;
+
 
 
 

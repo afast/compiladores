@@ -72,7 +72,7 @@ not|!  {return(T_NOT);};
 \}     {return(T_LLAVE_DER);};
 \{     {return(T_LLAVE_IZQ);};
 [A-Z][_a-zA-Z0-9]*	 {return(T_NOM_CONST);};
-[_a-zA-Z][_a-zA-Z0-9]*	 {return(T_IDENTIF);};
+[_a-z][_a-zA-Z0-9]*	 {return(T_IDENTIF);};
 \$[_a-z][_a-zA-Z0-9]* {return(T_IDENTIF_GLOBAL);};
 @[_a-z][_a-zA-Z0-9]* {return(T_ATRIBUTO);};
 :[_a-z][_a-zA-Z0-9]* {return(T_ATRIBUTO_ACCESOR);};

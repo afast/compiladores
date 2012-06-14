@@ -34,7 +34,6 @@ stmt : /* Vacio */
 	| variable T_IGUAL value
 	| def
 	| class
-	| array
 	| T_ATTR_READER args_accesores
 	| T_ATTR_WRITER args_accesores
 	| T_ACCESSOR args_accesores;
@@ -44,7 +43,8 @@ value : T_GETS
 	| expr_numeric
 	| expr_string
 	| expr_bool
-	| case;
+	| case
+	| array;
 string : T_STRING_1
 	| T_STRING_2
 	| T_COMMAND;
@@ -106,7 +106,9 @@ argdecl : T_PAR_IZQ arglist T_PAR_DER T_FIN_INSTRUCCION
 arglist : T_IDENTIF arglist_recur;  /*ver lo de recursion por la izq y por la der*/
 arglist_recur :	/*vacio*/
 	| arglist_recur T_COMA	T_IDENTIF;
-array :	T_CORCHETE_IZQ /*aca no se que poner*/ T_CORCHETE_DER;
+array :	T_CORCHETE_IZQ list_values T_CORCHETE_DER;
+list_values: value
+	| value T_COMA list_values;
 class :	T_CLASS T_NOM_CONST compstmt T_END;
 args_accesores : T_ATRIBUTO_ACCESOR args_accesores_recur;
 args_accesores_recur :	/*vacio*/

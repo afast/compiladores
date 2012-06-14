@@ -4,15 +4,15 @@
 %}
 %start program
 %token T_FIN_INSTRUCCION T_DO T_PIPE T_END T_IF T_WHILE T_LLAVE_IZQ T_LLAVE_DER
-%token T_RETURN T_AND T_OR T_NOT T_PAR_IZQ T_PAR_DER T_MAS T_MENOS T_CONSTANTE
+%token T_RETURN T_AND T_OR T_NOT T_PAR_IZQ T_PAR_DER T_MAS T_MENOS T_NOM_CONST
 %token T_ASTER T_EXPO T_BAR T_PORCENTAJE T_MENOR_IGUAL_MAYOR T_MAYOR T_MAS_IGUAL T_MENOR T_MENOS_IGUAL
 %token T_DOBLE_IGUAL T_TRIPLE_IGUAL T_NOT_IGUAL T_IGUAL_NIOQUI T_NOT_NIOQUI T_NIOQUI
-%token T_ELSE T_ELSIF T_CLASS T_DEF T_COMA T_PTO T_DOS_PTOS T_THEN T_VAR_LOCAL
+%token T_ELSE T_ELSIF T_CLASS T_DEF T_COMA T_PTO T_DOS_PTOS T_THEN
 %token T_CORCHETE_IZQ T_CORCHETE_DER T_NIL T_CASE STRING STRING2 SYMBOL VARNAME T_WHEN T_IDENTIF
 %token T_IGUAL T_FIN_INTERROGACION T_PUTS T_LENGTH T_GETS T_NEW T_SIZE T_EACH T_OBJECT_ID T_RESPOND_TO
 %token T_INSTANCE_OF T_ATTR_READER T_ATTR_WRITER T_ACCESSOR T_LOAD T_REQUIRE
 %token T_ARGV T_BOOL T_ANTI_BAR T_NUMERAL T_MAYOR_IGUAL T_MENOR_IGUAL T_IDENTIF_GLOBAL
-%token T_ATRIBUTO T_VAR_PESOS_CERO T_VAR_PESOS T_VAR_PESOS_PESOS T_INTEGER_ABS
+%token T_ATRIBUTO T_VAR_PESOS_CERO T_VAR_PESOS T_VAR_PESOS_PESOS T_INTEGER_ABS T_ATRIBUTO_ACCESOR
 %token T_FLOAT_ABS T_STRING_1 T_STRING_2 T_STRING_IZQ T_STRING_DER T_COMMAND T_ESPACIOS T_ERROR
 /*=========================================================================
                           OPERATOR PRECEDENCE
@@ -34,7 +34,10 @@ stmt : /* Vacio */
 	| variable T_IGUAL value
 	| def
 	| class
-	| array;
+	| array
+	| T_ATTR_READER args_accesores
+	| T_ATTR_WRITER args_accesores
+	| T_ACCESSOR args_accesores;
 value : T_GETS
 	| T_BOOL
 	| variable T_PTO T_CLASS
@@ -79,7 +82,7 @@ expr_bool : variable T_PTO T_RESPOND_TO T_PAR_IZQ expr_string T_PAR_DER
 	| value  T_DOBLE_IGUAL value
 	| value  T_NOT_IGUAL value
 	| T_PAR_IZQ value T_PAR_DER;
-variable : T_VAR_LOCAL
+variable : T_IDENTIF
 	| T_ATRIBUTO
 	| T_IDENTIF T_CORCHETE_IZQ T_INTEGER_ABS T_CORCHETE_DER;
 
@@ -104,8 +107,10 @@ arglist : T_IDENTIF arglist_recur;  /*ver lo de recursion por la izq y por la de
 arglist_recur :	/*vacio*/
 	| arglist_recur T_COMA	T_IDENTIF;
 array :	T_CORCHETE_IZQ /*aca no se que poner*/ T_CORCHETE_DER;
-class :	T_CLASS T_IDENTIF compstmt T_END;
-
+class :	T_CLASS T_NOM_CONST compstmt T_END;
+args_accesores : T_ATRIBUTO_ACCESOR args_accesores_recur;
+args_accesores_recur :	/*vacio*/
+	| arglist_recur T_COMA	T_ATRIBUTO_ACCESOR;
 
 
 

@@ -100,13 +100,14 @@ rec_when_then : T_WHEN expr_bool T_THEN value T_FIN_INSTRUCCION
               | rec_when_then T_WHEN expr_bool T_THEN value T_FIN_INSTRUCCION
 	      | T_WHEN expr_bool T_THEN value
               | rec_when_then T_WHEN expr_bool T_THEN value;
-def :	T_DEF T_IDENTIF	argdecl compstmt T_END;
+def :	T_DEF T_IDENTIF	argdecl compstmt T_END
+	| T_DEF T_IDENTIF compstmt T_END;
 argdecl : T_PAR_IZQ arglist T_PAR_DER T_FIN_INSTRUCCION
 	| T_PAR_IZQ T_PAR_DER T_FIN_INSTRUCCION; /*para representar pej: funcion()*/
 	| arglist T_FIN_INSTRUCCION;
 arglist : T_IDENTIF arglist_recur;  /*ver lo de recursion por la izq y por la der*/
 arglist_recur :	/*vacio*/
-	| arglist_recur T_COMA	T_IDENTIF;
+	| T_COMA T_IDENTIF arglist_recur;
 array :	T_CORCHETE_IZQ list_values T_CORCHETE_DER;
 list_values: value
 	| value T_COMA list_values;

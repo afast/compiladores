@@ -91,6 +91,6 @@ not|!  {return(T_NOT);};
 \}{STRING_DOBLE_CON_SALTO}\"|\}{STRING_DOBLE_SIN_SALTO}\" {return(T_STRING_DER);};
 `{COMMAND_CON_SALTO}`|`{COMMAND_SIN_SALTO}` {return(T_COMMAND);};
 (\n|;)* {return T_FIN_INSTRUCCION;};
-\\|\t|\r|" " {};
+\\(\t|\r|" ")*\n|\t|\r|" " {};
 . {return(T_ERROR);};
 

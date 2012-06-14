@@ -58,7 +58,7 @@ number : T_INTEGER_ABS
 	| T_MAS T_FLOAT_ABS;
 expr_numeric : number
 	| variable
-	| variable T_PTO T_OBJECT_ID
+	| T_OBJECT_ID
 	| expr_numeric T_MAS expr_numeric
 	| expr_numeric T_ASTER expr_numeric
 	| expr_numeric T_MENOS expr_numeric
@@ -72,7 +72,7 @@ expr_string : string
 	| expr_string T_MAS expr_string
 	| T_PAR_IZQ expr_string T_PAR_DER;
 expr_bool : T_RESPOND_TO T_PAR_IZQ expr_string T_PAR_DER
-	| variable T_PTO T_INSTANCE_OF expr_string
+	| T_INSTANCE_OF expr_string
 	| value T_AND value
 	| value T_OR value
 	| T_NOT value

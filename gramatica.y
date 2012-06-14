@@ -7,7 +7,7 @@
 %token T_RETURN T_AND T_OR T_NOT T_PAR_IZQ T_PAR_DER T_MAS T_MENOS T_NOM_CONST
 %token T_ASTER T_EXPO T_BAR T_PORCENTAJE T_MENOR_IGUAL_MAYOR T_MAYOR T_MAS_IGUAL T_MENOR T_MENOS_IGUAL
 %token T_DOBLE_IGUAL T_TRIPLE_IGUAL T_NOT_IGUAL T_IGUAL_NIOQUI T_NOT_NIOQUI T_NIOQUI
-%token T_ELSE T_ELSIF T_CLASS T_DEF T_COMA T_PTO T_DOS_PTOS T_THEN
+%token T_ELSE T_ELSIF T_CLASS T_DEF T_COMA T_PTO T_DOS_PTOS T_THEN T_INSTANCE_CLASS
 %token T_CORCHETE_IZQ T_CORCHETE_DER T_NIL T_CASE STRING STRING2 SYMBOL VARNAME T_WHEN T_IDENTIF
 %token T_IGUAL T_FIN_INTERROGACION T_PUTS T_LENGTH T_GETS T_NEW T_SIZE T_EACH T_OBJECT_ID T_RESPOND_TO
 %token T_INSTANCE_OF T_ATTR_READER T_ATTR_WRITER T_ACCESSOR T_LOAD T_REQUIRE
@@ -39,8 +39,8 @@ stmt : /* Vacio */
 	| T_ACCESSOR args_accesores;
 value : T_GETS
 	| T_BOOL
-	| T_CLASS
-	| T_NEW
+	| T_INSTANCE_CLASS
+	| T_NEW T_PAR_IZQ args_new T_PAR_DER
 	| expr_numeric
 	| expr_string
 	| expr_bool
@@ -113,7 +113,10 @@ list_values: value
 class :	T_CLASS T_NOM_CONST compstmt T_END;
 args_accesores : T_ATRIBUTO_ACCESOR args_accesores_recur;
 args_accesores_recur :	/*vacio*/
-	| arglist_recur T_COMA	T_ATRIBUTO_ACCESOR;
+	| args_accesores_recur T_COMA T_ATRIBUTO_ACCESOR;
+args_new : value args_new_recur;
+args_new_recur :	/*vacio*/
+	| args_new_recur T_COMA	value;
 
 
 

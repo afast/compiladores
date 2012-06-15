@@ -32,6 +32,8 @@ stmt : /* Vacio */
 	| if
 	| while
 	| variable T_IGUAL value
+	| variable T_MAS_IGUAL number
+	| variable T_MENOS_IGUAL number
 	| def
 	| class
 	| T_ATTR_READER args_accesores
@@ -64,6 +66,7 @@ expr_numeric : number
 	| expr_numeric T_MENOS expr_numeric
 	| expr_numeric T_BAR expr_numeric
 	| expr_numeric T_EXPO expr_numeric
+	| expr_numeric T_PORCENTAJE expr_numeric
 	| T_PAR_IZQ expr_numeric T_PAR_DER;
 expr_string : string
 	| variable
@@ -108,7 +111,8 @@ argdecl : T_PAR_IZQ arglist T_PAR_DER T_FIN_INSTRUCCION
 arglist : T_IDENTIF arglist_recur;  /*ver lo de recursion por la izq y por la der*/
 arglist_recur :	/*vacio*/
 	| T_COMA T_IDENTIF arglist_recur;
-array :	T_CORCHETE_IZQ list_values T_CORCHETE_DER;
+array :	T_CORCHETE_IZQ list_values T_CORCHETE_DER
+	| T_CORCHETE_IZQ T_CORCHETE_DER;
 list_values: value
 	| value T_COMA list_values;
 class :	T_CLASS T_NOM_CONST compstmt T_END;

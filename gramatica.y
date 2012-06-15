@@ -64,6 +64,8 @@ number : T_INTEGER_ABS
 expr_numeric : number
 	| variable
 	| T_OBJECT_ID
+	| T_SIZE
+	| T_LENGTH
 	| expr_numeric T_MAS expr_numeric
 	| expr_numeric T_ASTER expr_numeric
 	| expr_numeric T_MENOS expr_numeric

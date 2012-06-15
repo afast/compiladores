@@ -7,16 +7,16 @@ STRING_SIMPLE_CON_SALTO ([^(\'\n)]*(\\\n)*)*
 STRING_SIMPLE_SIN_SALTO [^(\'\n)]*
 COMMAND_CON_SALTO ([^(`\n)]*(\\\n)*)*
 COMMAND_SIN_SALTO [^(`\n)]*
+NUMERO_ENTERO ([1-9][0-9]*|0)
+VARIABLE [_a-z][_a-zA-Z0-9]*|[_a-z][_a-zA-Z0-9]*\[NUMERO_ENTEROe \]
 %%
 then      {return(T_THEN);};
 nil      {return(T_NIL);};
 puts   {return(T_PUTS);};
-length {return(T_LENGTH);};
 def     {return(T_DEF);};
 end	 {return(T_END);};
 return	 {return(T_RETURN);};
 gets   {return(T_GETS);};
-size   {return(T_SIZE);};
 each  {return(T_EACH);};
 do      {return(T_DO);};
 if  {return(T_IF);};
@@ -71,6 +71,8 @@ not|!  {return(T_NOT);};
 [_a-z][_a-zA-Z0-9]*\.respond_to\? {return(T_RESPOND_TO);};
 [_a-z][_a-zA-Z0-9]*\.class   {return(T_INSTANCE_CLASS);};
 [A-Z][_a-zA-Z0-9]*\.new   {return(T_NEW);};
+{VARIABLE}\.length {return(T_LENGTH);};
+{VARIABLE}\.size {return(T_SIZE);};
 [_a-z][_a-zA-Z0-9]*\.[_a-z][_a-zA-Z0-9]* {return(T_INVOCACION_METODO);};
 [A-Z][_a-zA-Z0-9]*	 {return(T_NOM_CONST);};
 [_a-z][_a-zA-Z0-9]*	 {return(T_IDENTIF);};

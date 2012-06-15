@@ -11,7 +11,7 @@
 %token T_CORCHETE_IZQ T_CORCHETE_DER T_NIL T_CASE STRING STRING2 SYMBOL VARNAME T_WHEN T_IDENTIF
 %token T_IGUAL T_FIN_INTERROGACION T_PUTS T_LENGTH T_GETS T_NEW T_SIZE T_EACH T_OBJECT_ID T_RESPOND_TO
 %token T_INSTANCE_OF T_ATTR_READER T_ATTR_WRITER T_ACCESSOR T_LOAD T_REQUIRE
-%token T_ARGV T_BOOL T_ANTI_BAR T_NUMERAL T_MAYOR_IGUAL T_MENOR_IGUAL T_IDENTIF_GLOBAL
+%token T_BOOL T_ANTI_BAR T_NUMERAL T_MAYOR_IGUAL T_MENOR_IGUAL T_IDENTIF_GLOBAL
 %token T_ATRIBUTO T_VAR_PESOS_CERO T_VAR_PESOS T_VAR_PESOS_PESOS T_INTEGER_ABS T_ATRIBUTO_ACCESOR
 %token T_FLOAT_ABS T_STRING_1 T_STRING_2 T_STRING_IZQ T_STRING_DER T_COMMAND T_ESPACIOS T_ERROR
 /*=========================================================================
@@ -36,7 +36,9 @@ stmt : /* Vacio */
 	| class
 	| T_ATTR_READER args_accesores
 	| T_ATTR_WRITER args_accesores
-	| T_ACCESSOR args_accesores;
+	| T_ACCESSOR args_accesores
+	| load
+	| require;
 value : T_GETS
 	| T_BOOL
 	| T_INSTANCE_CLASS
@@ -119,6 +121,13 @@ args_new : value args_new_recur;
 args_new_recur :	/*vacio*/
 	| args_new_recur T_COMA	value;
 
+load : T_LOAD expr_string_load_require;
+require : T_REQUIRE expr_string_load_require;
+expr_string_load_require : T_STRING_1
+	| variable
+	| T_NIL
+	| expr_string_load_require T_ASTER T_INTEGER_ABS
+	| expr_string_load_require T_MAS expr_string_load_require;
 
 
 /*

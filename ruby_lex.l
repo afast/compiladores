@@ -31,7 +31,6 @@ attr_writer {return(T_ATTR_WRITER);};
 attr_accessor {return(T_ACCESSOR);};
 load {return(T_LOAD);};
 require {return(T_REQUIRE);};
-ARGV {return(T_ARGV);};
 true|false {return(T_BOOL);};
 = 	 {return(T_IGUAL);};
 ,        {return(T_COMA);};

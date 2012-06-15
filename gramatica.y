@@ -31,6 +31,7 @@ stmt : /* Vacio */
 	| output
 	| if
 	| while
+	| each
 	| variable T_IGUAL value
 	| variable T_MAS_IGUAL number
 	| variable T_MENOS_IGUAL number
@@ -135,7 +136,7 @@ expr_string_load_require : T_STRING_1
 	| T_NIL
 	| expr_string_load_require T_ASTER T_INTEGER_ABS
 	| expr_string_load_require T_MAS expr_string_load_require;
-
+each : T_EACH T_DO T_PIPE T_IDENTIF T_PIPE compstmt T_END;
 
 /*
 def_blockvar :T_PIPE block_var T_PIPE;

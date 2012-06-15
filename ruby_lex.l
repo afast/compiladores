@@ -71,6 +71,7 @@ not|!  {return(T_NOT);};
 [_a-z][_a-zA-Z0-9]*\.respond_to\? {return(T_RESPOND_TO);};
 [_a-z][_a-zA-Z0-9]*\.class   {return(T_INSTANCE_CLASS);};
 [A-Z][_a-zA-Z0-9]*\.new   {return(T_NEW);};
+[_a-z][_a-zA-Z0-9]*\.[_a-z][_a-zA-Z0-9]* {return(T_INVOCACION_METODO);};
 [A-Z][_a-zA-Z0-9]*	 {return(T_NOM_CONST);};
 [_a-z][_a-zA-Z0-9]*	 {return(T_IDENTIF);};
 \$[_a-z][_a-zA-Z0-9]* {return(T_IDENTIF_GLOBAL);};

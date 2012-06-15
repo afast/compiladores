@@ -7,8 +7,7 @@ STRING_SIMPLE_CON_SALTO ([^(\'\n)]*(\\\n)*)*
 STRING_SIMPLE_SIN_SALTO [^(\'\n)]*
 COMMAND_CON_SALTO ([^(`\n)]*(\\\n)*)*
 COMMAND_SIN_SALTO [^(`\n)]*
-NUMERO_ENTERO ([1-9][0-9]*|0)
-VARIABLE [_a-z][_a-zA-Z0-9]*|[_a-z][_a-zA-Z0-9]*\[NUMERO_ENTEROe \]
+VARIABLE [_a-z][_a-zA-Z0-9]*|[_a-z][_a-zA-Z0-9]*\[([1-9][0-9]*|0)\]
 %%
 then      {return(T_THEN);};
 nil      {return(T_NIL);};

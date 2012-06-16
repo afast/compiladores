@@ -1,7 +1,39 @@
 %{
 /* fichero instrucciones.y */
 #include <stdio.h>
+#include "ejecucion/stack.h"
+#include "ejecucion/base.h"
+#include "ejecucion/RString.h"
+
+void yyerror(const char *s)
+{
+        fprintf(stderr, "error: %s\n", s);
+}
+
+extern "C"
+{
+        int yyparse(void);
+        int yylex(void);  
+        int yywrap()
+        {
+                return 1;
+        }
+
+}
+
+
+
+
+char *str;
+std::list<Instruccion*> *codigoGlobal;
+void generar_puts(char *str);
 %}
+
+%union{
+  char* text;
+  int entero;
+}
+
 %start program
 %token T_FIN_INSTRUCCION T_DO T_PIPE T_END T_IF T_WHILE T_LLAVE_IZQ T_LLAVE_DER
 %token T_RETURN T_AND T_OR T_NOT T_PAR_IZQ T_PAR_DER T_MAS T_MENOS T_NOM_CONST
@@ -55,8 +87,8 @@ value : T_GETS
 string : T_STRING_1
 	| T_STRING_2
 	| T_COMMAND;
-output : T_PUTS value;
-number : T_INTEGER_ABS
+output : T_PUTS value {generar_puts($<text>2);};
+number : T_INTEGER_ABS {printf("%d\n", $<entero>1);}
 	| T_MENOS T_INTEGER_ABS
 	| T_MAS T_INTEGER_ABS
 	| T_FLOAT_ABS
@@ -138,179 +170,24 @@ expr_string_load_require : T_STRING_1
 	| expr_string_load_require T_MAS expr_string_load_require;
 each : T_EACH T_DO T_PIPE T_IDENTIF T_PIPE compstmt T_END;
 
-/*
-def_blockvar :T_PIPE block_var T_PIPE;
-opt_blockvar : 
-             | def_blockvar;
-opt_block : 
-         | T_DO opt_blockvar compstmt T_END;
-stmt : call T_DO opt_blockvar compstmt T_END
-| stmt T_IF expr
-| stmt T_WHILE expr
-| lhs T_IGUAL command opt_block
-| expr;
-expr : mlhs T_IGUAL mrhs
-    | T_RETURN call_args
-    | expr T_AND expr
-    | expr T_OR expr
-    | T_NOT expr
-    | command
-    | T_NOT command
-    | arg;
-call : function
-    | command
-;
-command : operation call_args
- | primary T_PTO operation call_args;
-paren_or_call_args : T_PAR_IZQ T_PAR_DER
-              | T_PAR_IZQ call_args T_PAR_DER;
-function : operation
-         | operation paren_or_call_args
-         | primary T_PTO operation
-         | primary T_PTO operation paren_or_call_args
-arg : lhs T_IGUAL arg
-| lhs T_IGUAL arg
-| arg T_MAS arg | arg T_MENOS arg | arg T_ASTER arg | arg T_BAR arg
-| arg T_PORCENTAJE arg | arg T_EXPO arg
-| T_MAS arg | T_MENOS arg
-| arg T_MENOR_IGUAL_MAYOR arg
-| arg T_MAYOR arg | arg T_MAYOR_IGUAL arg | arg T_MENOR arg | arg T_MENOR_IGUAL arg
-| arg T_DOBLE_IGUAL arg | arg T_TRIPLE_IGUAL arg | arg T_NOT_IGUAL arg
-| arg T_IGUAL_NIOQUI arg | arg T_NOT_NIOQUI arg
-| T_NOT arg | T_NIOQUI arg
-| primary;
-opt_args_comma : args
-               | args T_COMA;
-opt_args_or_assocs : args
-                   | assocs
-                   | assocs T_COMA;
-recursive_elsif : 
-                | T_ELSIF expr then compstmt recursive_elsif;
-opt_else : 
-         | T_ELSE compstmt;
-rec_when_then : T_WHEN when_args then compstmt
-              | rec_when_then T_WHEN when_args then compstmt;
-opt_subclass : 
-             | T_MENOR T_IDENTIF;
-primary: T_PAR_IZQ compstmt T_PAR_DER
-| literal
-| variable
-| primary T_CORCHETE_IZQ T_CORCHETE_DER
-| primary T_CORCHETE_IZQ args T_CORCHETE_DER
-| T_CORCHETE_IZQ T_CORCHETE_DER
-| T_CORCHETE_IZQ args T_CORCHETE_DER
-| T_LLAVE_IZQ T_LLAVE_DER
-| T_LLAVE_IZQ opt_args_or_assocs T_LLAVE_DER
-| T_RETURN
-| T_RETURN paren_or_call_args
-| function
-| function T_LLAVE_IZQ opt_blockvar compstmt T_LLAVE_DER
-| T_IF expr then compstmt
-  recursive_elsif
-  opt_else
-  T_END
-| T_WHILE expr T_DO compstmt T_END
-| T_CASE compstmt
-  rec_when_then
-  opt_else
-  T_END
-| T_CLASS T_IDENTIF opt_subclass
-    compstmt
-  T_END
-| T_DEF fname argdecl
-    compstmt
-  T_END
-| T_DEF singleton T_PTO fname argdecl
-    compstmt
-  T_END;
-opt_comma_mul_arg : 
-              | T_COMA T_ASTER arg;
-when_args : args opt_comma_mul_arg
-          | T_ASTER arg;
-then : T_FIN_INSTRUCCION
-     | T_THEN
-     | T_FIN_INSTRUCCION T_THEN;
-do   : T_FIN_INSTRUCCION
-     | T_DO
-     | T_FIN_INSTRUCCION T_DO;
-block_var : lhs | mlhs;
-mlhs_item_list : mlhs_item
-               | mlhs_item_list T_COMA mlhs_item;
-opt_mul_opt_lhs : 
-                | T_ASTER lhs
-                | T_ASTER;
-mlhs : mlhs_item_list opt_mul_opt_lhs
-     | T_ASTER lhs;
-mlhs_item : lhs | T_PAR_IZQ mlhs T_PAR_DER;
-lhs : variable
-    | primary T_CORCHETE_IZQ T_CORCHETE_DER
-    | primary T_CORCHETE_IZQ args T_CORCHETE_DER
-    | primary T_PTO T_IDENTIF;
-mrhs : args opt_comma_mul_arg
-     | T_ASTER arg;
-opt_comma_assocs : 
-                 | T_COMA assocs;
-call_args : args opt_comma_assocs opt_comma_mul_arg //opt_comma_amp_arg
-          | command;
-args : arg
-     | args T_COMA arg;
-argdecl : T_PAR_IZQ arglist T_PAR_DER
-        | arglist T_FIN_INSTRUCCION;
-identifier_list : T_IDENTIF
-                | identifier_list T_COMA T_IDENTIF;
-opt_comma_mul_ident : 
-                    | T_COMA T_ASTER
-                    | T_COMA T_ASTER T_IDENTIF;
-arglist : identifier_list opt_comma_mul_ident //opt_comma_amp_ident
-singleton : variable
-        | T_PAR_IZQ expr T_PAR_DER;
-assocs : assoc
-       | assocs T_COMA assoc;
-assoc : arg T_THEN arg;
-variable : T_IDENTIF
-         | T_NIL
-literal : SYMBOL
-        | STRING
-        | STRING2
-opt_terc : 
-          | T_NOT 
-	  | T_FIN_INTERROGACION;
-operation : T_IDENTIF opt_terc;
-*/
 %%
-/* Llamada por yyparse ante un error */
-yyerror (s) 
-char *s;
-{
-printf ("%s\n", s); 
-}
+
 main()
 {
+
+codigoGlobal = new std::list<Instruccion*>();
 /*Acciones a ejecutar antes del análisis*/
 yyparse();
 /*Acciones a ejecutar después del análisis*/
+Instruccion *fin = new Instruccion;
+fin->op = FIN;
+codigoGlobal->push_back(fin);
+ejecutar(codigoGlobal);
 }
-/* estos son reconocidos por el lexer */
-/*
-op_asgn : '+=' | '-=' | '*=' | '/=' | '%=' | '**='
-        | '&=' | '|=' | '^=' | '<<=' | '>>='
-        | '&&=' | '||=';
-symbol : ':'fname | ':'varname;
-fname : identifier | '..' | '|' | '^' | '&' | '<=>' | '==' | '===' | '=~'
-      | '>' | '>=' | '<' | '<=' | '+' | '-' | '*' | '/' | '%' | '**'
-     | '<<' | '>>' | '~' | '+@' | '-@' | '[]' | '[]=';
-opt_terc : 
-          | '!' | '?';
-operation : identifier opt_terc;
-varname : global | '@'identifier | identifier;
-global : '$'identifier | '$'any_char | '$-'any_char;
-string : '"' {any_char} '"'
-       | '´' {any_char} '´'
-       | '' {any_char} '';
-STRING2 : %(Q|q|x)char {any_char} char
-HERE_DOC : <<(T_IDENTIF | STRING)
-{any_char}
-T_IDENTIF
-REGEXP : / {any_char} / [i|o|p]
-| %r char {any_char} char
-*/
+void generar_puts(char* str){
+	Instruccion* instruccion = new Instruccion;
+	instruccion->op = PUTS;
+	instruccion->arg1 = new RString(str);
+	codigoGlobal->push_back(instruccion);
+}
+

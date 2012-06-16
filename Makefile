@@ -1,15 +1,15 @@
-CC = gcc
+CC = g++
 
-CFLAGS= -lfl
+CFLAGS= -lfl -std=c++0x
 
 BFLAGS= -yd
 
-PROGRAM = ruby
+PROGRAM = myruby
 
 all: main
 
 main: y.tab.c lex.yy.c
-	$(CC) -o $(PROGRAM) y.tab.c lex.yy.c $(CFLAGS)
+	$(CC) -o $(PROGRAM) y.tab.c lex.yy.c $(CFLAGS) ejecucion/stack.o ejecucion/base.o ejecucion/RObject.o ejecucion/RString.o ejecucion/RInteger.o ejecucion/RBool.o
 
 y.tab.c: gramatica.y
 	bison $(BFLAGS) gramatica.y

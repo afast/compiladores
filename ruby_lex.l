@@ -1,4 +1,9 @@
 %{
+
+extern "C" {
+      int yylex(void);
+    }
+
 #include "y.tab.h"
 %}
 STRING_DOBLE_CON_SALTO ([^(\"(#{)\n)]*(\\\n)*)*|(([^(\"(#{)\n)]*(\\\")*)*(\\\n)*)*
@@ -82,11 +87,11 @@ not|!  {return(T_NOT);};
 \$        {return(T_VAR_PESOS);};
 \$\$       {return(T_VAR_PESOS_PESOS);};
 \|           {return(T_PIPE);};
-([1-9][0-9]*)|0 {return(T_INTEGER_ABS);};
+([1-9][0-9]*)|0 {yylval.entero = atoi(yytext); return(T_INTEGER_ABS);};
 (([1-9][0-9]*)\.[0-9]+)|(((\+|\-)?0)\.[0-9]+) {return(T_FLOAT_ABS);};
 #.*\n {;};
 ^=begin(.*\n)*=end {};
-\'{STRING_SIMPLE_CON_SALTO}\'|\'{STRING_SIMPLE_SIN_SALTO}\' {return(T_STRING_1);};
+\'{STRING_SIMPLE_CON_SALTO}\'|\'{STRING_SIMPLE_SIN_SALTO}\' {yylval.text = strdup(yytext); return(T_STRING_1);};
 \"{STRING_DOBLE_CON_SALTO}\"|\"{STRING_DOBLE_SIN_SALTO}\" {return(T_STRING_2);};
 \"{STRING_DOBLE_CON_SALTO}#\{|\"{STRING_DOBLE_SIN_SALTO}#\{ {return(T_STRING_IZQ);};
 \}{STRING_DOBLE_CON_SALTO}\"|\}{STRING_DOBLE_SIN_SALTO}\" {return(T_STRING_DER);};

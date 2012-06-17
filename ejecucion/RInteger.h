@@ -19,5 +19,6 @@ class RInteger : public RObject {
     bool operator== (RInteger param);
     bool operator== (long int param);
     long int operator= (RInteger param);
+    RString* to_s();
 };
 #endif

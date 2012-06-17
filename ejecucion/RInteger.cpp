@@ -2,7 +2,7 @@
 #include "RBool.h"
 #include "RString.h"
 
-RInteger::RInteger(){}
+RInteger::RInteger(){this->value=0;}
 
 RInteger::RInteger(long int integer){
   this->value = integer;
@@ -30,4 +30,8 @@ bool  RInteger::operator== (long int param){
 
 long int RInteger::operator= (RInteger param){
   return param.value;
+}
+
+RString* RInteger::to_s(){
+  return new RString(this);
 }

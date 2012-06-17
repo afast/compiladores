@@ -2,6 +2,7 @@
 
 #include "base.h"
 #include "RString.h"
+#include "RInteger.h"
 
 void puts(RString *string_arg) {
   std::string *str = new std::string(string_arg->getValue()->data());
@@ -21,11 +22,11 @@ void gets(RString *string_arg) {
 }
 
 RInteger *add(RInteger *arg1, RInteger *arg2) {
-  std::RInteger *result = new std::RInteger(arg1->getValue() + arg2->getValue());
-  if (arg1->getValue() != NULL)
+  RInteger *result = new RInteger(arg1->getValue() + arg2->getValue());
+  /*if (arg1->getValue() != NULL)
     delete arg1->getValue();
   if (arg2->getValue() != NULL)
-    delete arg2->getValue();
+    delete arg2->getValue();*/
   return result;
 }
 

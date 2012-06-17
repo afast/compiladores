@@ -1,8 +1,10 @@
 #include <iostream>
+#include <sstream>
 #include <string>
 
 #include "RBool.h"
 #include "RString.h"
+#include "RInteger.h"
 
 RString::RString(){
   str = new std::string();
@@ -22,6 +24,13 @@ RString::RString(std::string *arg){
 
 RString::RString(RString *arg){
   this->str = new std::string(*arg->getValue());
+}
+
+RString::RString(RInteger *arg){
+  this->str = new std::string();
+  std::stringstream s;
+  s << arg->getValue();
+  s >> *str;
 }
 
 RString * RString::get_class(){

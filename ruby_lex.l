@@ -88,7 +88,7 @@ not|!  {return(T_NOT);};
 \$\$       {return(T_VAR_PESOS_PESOS);};
 \|           {return(T_PIPE);};
 ([1-9][0-9]*)|0 {yylval.entero = atoi(yytext); return(T_INTEGER_ABS);};
-(([1-9][0-9]*)\.[0-9]+)|(((\+|\-)?0)\.[0-9]+) {return(T_FLOAT_ABS);};
+(([1-9][0-9]*)\.[0-9]+)|(((\+|\-)?0)\.[0-9]+) {yylval.real = atof(yytext); return(T_FLOAT_ABS);};
 #.*\n {;};
 ^=begin(.*\n)*=end {};
 \'{STRING_SIMPLE_CON_SALTO}\'|\'{STRING_SIMPLE_SIN_SALTO}\' {yylval.text = strdup(yytext); return(T_STRING_1);};

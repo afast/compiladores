@@ -7,7 +7,7 @@
 
 class RObject;
 
-enum code_ops { FIN, PUTS, GETS, OBJID };
+enum code_ops { FIN, PUTS, GETS, OBJID, ADD };
 
 struct RInstruccion {
   enum code_ops op;

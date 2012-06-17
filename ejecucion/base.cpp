@@ -20,6 +20,15 @@ void gets(RString *string_arg) {
   string_arg->setValue(str);
 }
 
+RInteger *add(RInteger *arg1, RInteger *arg2) {
+  std::RInteger *result = new std::RInteger(arg1->getValue() + arg2->getValue());
+  if (arg1->getValue() != NULL)
+    delete arg1->getValue();
+  if (arg2->getValue() != NULL)
+    delete arg2->getValue();
+  return result;
+}
+
 long int getDir(void* p){
   long int id;
   std::stringstream s, sp;

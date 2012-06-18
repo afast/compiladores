@@ -9,7 +9,7 @@ enum obj_type { RSTRING, TOBJECT, RINT, RCLASS, RARRAY, RNIL };
 
 void puts(RString *string_arg);
 void gets(RString *string_arg);
-void add(RInteger *arg1, RInteger *arg2);
+RInteger *add(RInteger *arg1, RInteger *arg2);
 void init();
 long int getDir(void* p);
 #endif

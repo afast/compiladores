@@ -6,15 +6,10 @@
 #include "ejecucion/RString.h"
 #include "ejecucion/RInteger.h"
 
-void yyerror(const char *s)
-{
-        fprintf(stderr, "error: %s\n", s);
-}
-
 extern "C"
 {
         int yyparse(void);
-        int yylex(void);  
+        int yylex(void);
         int yywrap()
         {
                 return 1;
@@ -22,7 +17,10 @@ extern "C"
 
 }
 
-
+void yyerror(const char *s)
+{
+        fprintf(stderr, "Error: %s\n", s);
+}
 
 
 char *str;
@@ -39,7 +37,7 @@ void generar_suma(int op1, int op2);
 
 %start program
 %token T_FIN_INSTRUCCION T_DO T_PIPE T_END T_IF T_WHILE T_LLAVE_IZQ T_LLAVE_DER
-%token T_RETURN T_AND T_OR T_NOT T_PAR_IZQ T_PAR_DER T_MAS T_MENOS T_NOM_CONST
+%token T_RETURN T_AND T_OR T_NOT T_PAR_IZQ T_PAR_DER T_MAS T_MENOS T_NOM_CONST T_STRING_CENTER
 %token T_ASTER T_EXPO T_BAR T_PORCENTAJE T_MENOR_IGUAL_MAYOR T_MAYOR T_MAS_IGUAL T_MENOR T_MENOS_IGUAL
 %token T_DOBLE_IGUAL T_TRIPLE_IGUAL T_NOT_IGUAL T_IGUAL_NIOQUI T_NOT_NIOQUI T_NIOQUI
 %token T_ELSE T_ELSIF T_CLASS T_DEF T_COMA T_PTO T_DOS_PTOS T_THEN T_INSTANCE_CLASS
@@ -86,6 +84,7 @@ value : T_GETS
 	| expr_string
 	| expr_bool
 	| case
+	| expr_string_interpolado
 	| array;
 string : T_STRING_1
 	| T_STRING_2
@@ -172,6 +171,11 @@ expr_string_load_require : T_STRING_1
 	| expr_string_load_require T_ASTER T_INTEGER_ABS
 	| expr_string_load_require T_MAS expr_string_load_require;
 each : T_EACH T_DO T_PIPE T_IDENTIF T_PIPE compstmt T_END;
+expr_string_interpolado : T_STRING_IZQ expr_string_interpolado_recur T_STRING_DER;
+expr_string_interpolado_recur : /*vacio*/
+	| value
+	| expr_string_interpolado_recur T_STRING_CENTER value;
+
 
 %%
 

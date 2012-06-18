@@ -23,7 +23,7 @@ void ejecutar(std::list<Instruccion*> *codigo) {
       case FIN   : std::cout << "Fin ejecución" << std::endl; break;
       case PUTS  : puts((RString *)ri->arg1); break;
       case GETS  : gets((RString *)ri->arg1); break;
-      case ADD   : add((RInteger *)ri->arg1, (RInteger *)ri->arg2); break;
+      case ADD   : ri->arg3 = add((RInteger *)ri->arg1, (RInteger *)ri->arg2); break;
       case OBJID : if (ri->arg1 != NULL) *((RInteger*)ri->arg1) = getDir(ri->arg2); break;
     }
   } while (ri->op != FIN);

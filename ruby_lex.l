@@ -1,9 +1,7 @@
 %{
-
 extern "C" {
       int yylex(void);
     }
-
 #include "y.tab.h"
 %}
 STRING_DOBLE_CON_SALTO ([^(\"(#{)\n)]*(\\\n)*)*|(([^(\"(#{)\n)]*(\\\")*)*(\\\n)*)*
@@ -94,9 +92,10 @@ not|!  {return(T_NOT);};
 \'{STRING_SIMPLE_CON_SALTO}\'|\'{STRING_SIMPLE_SIN_SALTO}\' {yylval.text = strdup(yytext); return(T_STRING_1);};
 \"{STRING_DOBLE_CON_SALTO}\"|\"{STRING_DOBLE_SIN_SALTO}\" {return(T_STRING_2);};
 \"{STRING_DOBLE_CON_SALTO}#\{|\"{STRING_DOBLE_SIN_SALTO}#\{ {return(T_STRING_IZQ);};
+\}{STRING_DOBLE_CON_SALTO}#\{|\}{STRING_DOBLE_SIN_SALTO}#\{ {return(T_STRING_CENTER);};
 \}{STRING_DOBLE_CON_SALTO}\"|\}{STRING_DOBLE_SIN_SALTO}\" {return(T_STRING_DER);};
 `{COMMAND_CON_SALTO}`|`{COMMAND_SIN_SALTO}` {return(T_COMMAND);};
 (\n|;)* {return T_FIN_INSTRUCCION;};
 \\(\t|\r|" ")*\n|\t|\r|" " {};
-. {return(T_ERROR);};
+. {};
 

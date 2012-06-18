@@ -21,12 +21,7 @@ void gets(RString *string_arg) {
 }
 
 RInteger *add(RInteger *arg1, RInteger *arg2) {
-  std::RInteger *result = new std::RInteger(arg1->getValue() + arg2->getValue());
-  if (arg1->getValue() != NULL)
-    delete arg1->getValue();
-  if (arg2->getValue() != NULL)
-    delete arg2->getValue();
-  return result;
+  return new std::RInteger(arg1->getValue() + arg2->getValue());
 }
 
 long int getDir(void* p){

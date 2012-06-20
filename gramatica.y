@@ -5,6 +5,7 @@
 #include "ejecucion/base.h"
 #include "ejecucion/RString.h"
 #include "ejecucion/RInteger.h"
+#include "ejecucion/Util.h"
 
 extern "C"
 {
@@ -26,13 +27,17 @@ void yyerror(const char *s)
 char *str;
 std::list<Instruccion*> *codigoGlobal;
 void generar_puts(char *str);
-void generar_suma(int op1, int op2);
+//void generar_suma(int op1, int op2);
+
+
+
 %}
 
 %union{
   char* text;
   double real;
   int entero;
+  node_tac node;
 }
 
 %start program
@@ -89,8 +94,8 @@ value : T_GETS
 string : T_STRING_1
 	| T_STRING_2
 	| T_COMMAND;
-output : T_PUTS value {generar_puts($<text>2);};
-number : T_INTEGER_ABS {printf("%i\n", $<entero>1);}
+output : T_PUTS value {generar_puts(Util::intToString($<entero>2));};
+number : T_INTEGER_ABS {$<entero>$ = $<entero>1;}
 	| T_MENOS T_INTEGER_ABS {printf("%i\n", (-1)*$<entero>2);}
 	| T_MAS T_INTEGER_ABS {printf("%i\n", $<entero>1);}
 	| T_FLOAT_ABS {printf("%f\n", $<real>1);}
@@ -101,7 +106,7 @@ expr_numeric : number
 	| T_OBJECT_ID
 	| T_SIZE
 	| T_LENGTH
-	| expr_numeric T_MAS expr_numeric {generar_suma($<entero>1, $<entero>3);}
+	| expr_numeric T_MAS expr_numeric {$<entero>$ = $<entero>1 + $<entero>3;}
 	| expr_numeric T_ASTER expr_numeric
 	| expr_numeric T_MENOS expr_numeric
 	| expr_numeric T_BAR expr_numeric
@@ -197,6 +202,7 @@ void generar_puts(char* str){
 	instruccion->arg1 = new RString(str);
 	codigoGlobal->push_back(instruccion);
 }
+/*
 void generar_suma(int op1, int op2){
 printf("entre aca111111111111111111");
 	Instruccion* instruccion = new Instruccion;
@@ -207,4 +213,5 @@ printf("entre aca222222222222222222");
 printf("entre aca333333333333333333");
 	codigoGlobal->push_back(instruccion);
 printf("entre aca444444444444444444");
-}
+}*/
+

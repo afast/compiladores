@@ -3,6 +3,15 @@ extern "C" {
       int yylex(void);
     }
 #include "y.tab.h"
+#include "ejecucion/stack.h"
+
+struct s_node_tac {
+  char var_tmp[10];
+  std::list<Instruccion*> *usos;
+};
+
+typedef s_node_tac node_tac;
+
 %}
 STRING_DOBLE_CON_SALTO ([^(\"(#{)\n)]*(\\\n)*)*|(([^(\"(#{)\n)]*(\\\")*)*(\\\n)*)*
 STRING_DOBLE_SIN_SALTO [^(\"(#{)\n)]*|([^(\"(#{)\n)]*(\\\")*)*

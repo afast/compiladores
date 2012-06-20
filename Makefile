@@ -9,7 +9,7 @@ PROGRAM = myruby
 all: main
 
 main: y.tab.c lex.yy.c
-	$(CC) -o $(PROGRAM) y.tab.c lex.yy.c $(CFLAGS) ejecucion/stack.o ejecucion/base.o ejecucion/RObject.o ejecucion/RString.o ejecucion/RInteger.o ejecucion/RBool.o
+	$(CC) -o $(PROGRAM) y.tab.c lex.yy.c $(CFLAGS) ejecucion/stack.o ejecucion/base.o ejecucion/RObject.o ejecucion/RString.o ejecucion/RInteger.o ejecucion/RBool.o ejecucion/Util.o ejecucion/tacStructures.h
 
 y.tab.c: gramatica.y
 	bison $(BFLAGS) gramatica.y

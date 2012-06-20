@@ -1,7 +1,5 @@
-all: test robject rstring rinteger rclass rbool rarray
-	make stack.o robject rstring rinteger rclass rbool rarray
-test: test.cpp stack.o base.o robject rstring rinteger rclass rbool rarray
-	g++ test.cpp stack.o base.o RObject.o RString.o RInteger.o RClass.o RBool.o RArray.o -o test -std=gnu++0x
+all: robject rstring rinteger rclass rbool rarray
+	make stack.o robject rstring rinteger rclass rbool rarray util
 stack.o: stack.cpp stack.h base.o
 	g++ stack.cpp base.h -c -std=gnu++0x
 base.o: base.cpp base.h
@@ -19,6 +17,7 @@ rbool: RBool.h RBool.cpp
 	g++ RBool.cpp -c
 rarray: RArray.h RArray.cpp
 	g++ RArray.cpp -c
-
+util: Util.h Util.cpp
+	g++ Util.cpp -c
 clean:
 	rm -f *.o

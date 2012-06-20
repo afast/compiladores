@@ -2,6 +2,8 @@
 
 #include "base.h"
 #include "RString.h"
+#include "RInteger.h"
+
 
 void puts(RString *string_arg) {
   std::string *str = new std::string(string_arg->getValue()->data());
@@ -21,7 +23,8 @@ void gets(RString *string_arg) {
 }
 
 RInteger *add(RInteger *arg1, RInteger *arg2) {
-  return new std::RInteger(arg1->getValue() + arg2->getValue());
+  RInteger *res = new RInteger(arg1->getValue() + arg2->getValue());
+  return res;
 }
 
 long int getDir(void* p){

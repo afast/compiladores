@@ -29,12 +29,6 @@ std::list<Instruccion*> *codigoGlobal;
 void generar_puts(char *str);
 //void generar_suma(int op1, int op2);
 
-struct s_node_tac {
-  char var_tmp[10];
-  std::list<Instruccion*> *usos;
-};
-
-typedef s_node_tac node_tac;
 
 
 %}

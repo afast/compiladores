@@ -16,5 +16,12 @@ struct RInstruccion {
 
 typedef RInstruccion Instruccion;
 
+struct s_node_tac {
+  char var_tmp[10];
+  std::list<Instruccion*> *usos;
+};
+
+typedef s_node_tac node_tac;
+
 void ejecutar(std::list<Instruccion*> *codigo);
 #endif

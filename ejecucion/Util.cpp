@@ -6,14 +6,19 @@
 #include <sstream>
 
 char* Util::intToString(int value){
+	int n;
+	char * aux = new char [20];
+	n=sprintf(aux, "%d", value);
+	return aux; 
+}
 
-char* result;
-if(value < 10){
-  result = strdup("menor a 10");
-}
-else{
-result = strdup("mayor o igual a 10");
-}
-  return result;
+char* Util::nueva_var()
+{
+  char* s = new char[10];
+  static int actual=0;
+  strcpy(s,"t_");
+  strcpy(&(s[1]), intToString(actual));
+  actual++;
+  return s;
 }
 

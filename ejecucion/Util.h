@@ -6,6 +6,6 @@
 class Util {
   public:
     static char *intToString(int value);
-
+    static char* nueva_var();
 };
 #endif

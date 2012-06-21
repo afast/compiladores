@@ -1,6 +1,7 @@
 %{
 /* fichero instrucciones.y */
 #include <stdio.h>
+#include <string.h>
 #include "ejecucion/stack.h"
 #include "ejecucion/base.h"
 #include "ejecucion/RString.h"
@@ -26,9 +27,9 @@ void yyerror(const char *s)
 
 char *str;
 std::list<Instruccion*> *codigoGlobal;
-void generar_puts(char *str);
-//void generar_suma(int op1, int op2);
-
+Instruccion* generar_puts(char *str);
+Instruccion* generar_suma(node_tac* op1, node_tac* op2);
+void printCodigo();
 
 
 %}
@@ -37,7 +38,7 @@ void generar_puts(char *str);
   char* text;
   double real;
   int entero;
-  node_tac node;
+  node_tac* node;
 }
 
 %start program
@@ -66,7 +67,7 @@ compstmt : stmt
 texpr : T_FIN_INSTRUCCION stmt
       | texpr T_FIN_INSTRUCCION stmt;
 stmt : /* Vacio */ 
-	| output
+	| output {codigoGlobal->merge(*$<node>1->codigo);}
 	| if
 	| while
 	| each
@@ -94,19 +95,31 @@ value : T_GETS
 string : T_STRING_1
 	| T_STRING_2
 	| T_COMMAND;
-output : T_PUTS value {generar_puts(Util::intToString($<entero>2));};
-number : T_INTEGER_ABS {$<entero>$ = $<entero>1;}
-	| T_MENOS T_INTEGER_ABS {printf("%i\n", (-1)*$<entero>2);}
-	| T_MAS T_INTEGER_ABS {printf("%i\n", $<entero>1);}
-	| T_FLOAT_ABS {printf("%f\n", $<real>1);}
-	| T_MENOS T_FLOAT_ABS {printf("%f\n", (-1)*$<real>2);}
-	| T_MAS T_FLOAT_ABS {printf("%f\n", $<real>1);};
+output : T_PUTS value {printf("PUTS\n");$<node>$ = new node_tac;
+			$<node>$->codigo = new std::list<Instruccion*>();
+			$<node>$->codigo->merge(*$<node>2->codigo);
+			$<node>$->codigo->push_back(generar_puts($<node>2->dir));};
+number : T_INTEGER_ABS {printf("NUMBER %d\n", $<entero>1); $<node>$ = new node_tac;
+			strcpy($<node>$->dir, Util::intToString($<entero>1));
+			$<node>$->tipo = CONSTANTE;
+			$<node>$->codigo = new std::list<Instruccion*>();}
+	| T_MENOS T_INTEGER_ABS 
+	| T_MAS T_INTEGER_ABS 
+	| T_FLOAT_ABS 
+	| T_MENOS T_FLOAT_ABS 
+	| T_MAS T_FLOAT_ABS;
 expr_numeric : number
 	| variable
 	| T_OBJECT_ID
 	| T_SIZE
 	| T_LENGTH
-	| expr_numeric T_MAS expr_numeric {$<entero>$ = $<entero>1 + $<entero>3;}
+	| expr_numeric T_MAS expr_numeric {printf("ADD\n");$<node>$ = new node_tac;
+						strcpy($<node>$->dir, Util::nueva_var());
+						$<node>$->tipo = TEMPORAL;
+						$<node>$->codigo = new std::list<Instruccion*>();
+						$<node>$->codigo->merge(*$<node>1->codigo);
+						$<node>$->codigo->merge(*$<node>3->codigo);
+						$<node>$->codigo->push_back(generar_suma($<node>1, $<node>3));}
 	| expr_numeric T_ASTER expr_numeric
 	| expr_numeric T_MENOS expr_numeric
 	| expr_numeric T_BAR expr_numeric
@@ -194,24 +207,43 @@ yyparse();
 Instruccion *fin = new Instruccion;
 fin->op = FIN;
 codigoGlobal->push_back(fin);
+printCodigo();
 ejecutar(codigoGlobal);
 }
-void generar_puts(char* str){
+Instruccion* generar_puts(char* str){
 	Instruccion* instruccion = new Instruccion;
 	instruccion->op = PUTS;
 	instruccion->arg1 = new RString(str);
-	codigoGlobal->push_back(instruccion);
+	return instruccion;
+//	codigoGlobal->push_back(instruccion);
 }
-/*
-void generar_suma(int op1, int op2){
-printf("entre aca111111111111111111");
+
+Instruccion* generar_suma(node_tac* op1, node_tac* op2){
 	Instruccion* instruccion = new Instruccion;
 	instruccion->op = ADD;
-printf("entre aca222222222222222222");
-	instruccion->arg1 = new RInteger(op1);
-	instruccion->arg2 = new RInteger(op2);
-printf("entre aca333333333333333333");
-	codigoGlobal->push_back(instruccion);
-printf("entre aca444444444444444444");
-}*/
+	if((op1->tipo == TEMPORAL) || (op1->tipo == VARIABLE)){
+		instruccion->arg1 = new RInteger(10); // ACA HAY QUE TRAER EL VALOR DE LA VARIABLE QUE ESTA EN ALGUN HASH
+	} else {
+		instruccion->arg1 = new RInteger(atoi(op1->dir));
+	}
+	if((op2->tipo == TEMPORAL) || (op2->tipo == VARIABLE)){
+		instruccion->arg2 = new RInteger(10);
+	} else {
+		instruccion->arg2 = new RInteger(atoi(op2->dir));
+	}
+	return instruccion;
+}
+
+void printCodigo() {
+  std::list<Instruccion *>::iterator it = codigoGlobal->begin();
+  Instruccion *ri;
+  do {
+    ri = *it++;
+    switch (ri->op) {
+      case FIN   : std::cout << "FIN" << std::endl; break;
+      case PUTS  : std::cout << "PUTS " << ri->arg1 << std::endl; break;
+      case ADD   : std::cout << "ADD " << ri->arg1 << " " << ri->arg2 << " " << ri->arg3 << std::endl; break;
+    }
+  } while (ri->op != FIN);
+}
 

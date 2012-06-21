@@ -24,6 +24,7 @@ void gets(RString *string_arg) {
 
 RInteger *add(RInteger *arg1, RInteger *arg2) {
   RInteger *res = new RInteger(arg1->getValue() + arg2->getValue());
+	std::cout << "------------------>   " << res->getValue() << std::endl;
   return res;
 }
 

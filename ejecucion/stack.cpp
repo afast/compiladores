@@ -31,7 +31,7 @@ void ejecutar(std::list<Instruccion*> *codigo) {
       case GETS  : gets((RString *)ri->arg1); break;
       case ADD   : 
 	//std::string *str = new std::string((RString *)ri->arg3->getValue()->data());
-	vTemporales[(RString *)ri->arg3->getValue()] = add((RInteger *)ri->arg1, (RInteger *)ri->arg2); break;
+	vTemporales[*(((RString *)ri->arg3)->getValue())] = add((RInteger *)ri->arg1, (RInteger *)ri->arg2); break;
       case OBJID : if (ri->arg1 != NULL) *((RInteger*)ri->arg1) = getDir(ri->arg2); break;
     }
   } while (ri->op != FIN);

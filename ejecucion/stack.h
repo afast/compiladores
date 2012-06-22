@@ -7,7 +7,7 @@
 
 class RObject;
 
-enum code_ops { FIN, PUTS, GETS, OBJID, ADD, ASSIGN_TMP, MULT, SUB };
+enum code_ops { FIN, PUTS, GETS, OBJID, ADD, ASSIGN_TMP, MULT, SUB, DIV, POW, MOD };
 enum tipo_dir { CONSTANTE, TEMPORAL, VARIABLE, ETIQUETA };
 
 struct RInstruccion {

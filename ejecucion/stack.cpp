@@ -42,6 +42,8 @@ void ejecutar(std::list<Instruccion*> *codigo) {
 			break;
       case OBJID : if (ri->arg1 != NULL) *((RInteger*)ri->arg1) = getDir(ri->arg2); break;
       case ASSIGN_TMP : assign_tmp((RString *)ri->arg1, ri->arg2); break;
+      case MULT : mult((RString *)ri->arg1, (RString *)ri->arg2, (RString *)ri->arg3); break;
+      case SUB : sub((RString *)ri->arg1, (RString *)ri->arg2, (RString *)ri->arg3); break;
     }
   } while (ri->op != FIN);
 }

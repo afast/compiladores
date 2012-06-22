@@ -40,8 +40,21 @@ std::cout << "------------1111111111111111------>   " << std::endl;
 	std::cout << "------------------>   " << std::endl;
 }
 
+void mult(RString *arg1, RString *arg2, RString *arg3) {
+  RInteger *op1 = (RInteger *)vTemporales[*(arg1->getValue())];
+  RInteger *op2 = (RInteger *)vTemporales[*(arg2->getValue())];
+  vTemporales[*(arg3->getValue())] = new RInteger(op1->getValue() * op2->getValue());
+}
+
+void sub(RString *arg1, RString *arg2, RString *arg3) {
+  RInteger *op1 = (RInteger *)vTemporales[*(arg1->getValue())];
+  RInteger *op2 = (RInteger *)vTemporales[*(arg2->getValue())];
+  vTemporales[*(arg3->getValue())] = new RInteger(op1->getValue() - op2->getValue());
+}
+
 void assign_tmp(RString *name, RObject * value){
 	vTemporales[*(((RString *)name)->getValue())] = value;
+std::cout << "-QQQQQQQQQ----------------->   " << ((RInteger *)vTemporales[*(((RString *)name)->getValue())])->getValue() << std::endl;
 }
 
 long int getDir(void* p){

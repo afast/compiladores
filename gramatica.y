@@ -28,7 +28,7 @@ void yyerror(const char *s)
 char *str;
 std::list<Instruccion*> *codigoGlobal;
 Instruccion* generar_puts(node_tac* op);
-node_tac* generar_suma(code_ops oper, node_tac* op1, node_tac* op2);
+node_tac* generar_oper_binario(code_ops oper, node_tac* op1, node_tac* op2);
 Instruccion* insert_tmp(node_tac* tmp, RObject *value);
 void printCodigo();
 
@@ -115,9 +115,9 @@ expr_numeric : number
 	| T_OBJECT_ID
 	| T_SIZE
 	| T_LENGTH
-	| expr_numeric T_MAS expr_numeric { $<node>$ = generar_suma(ADD, $<node>1, $<node>3);}
-	| expr_numeric T_ASTER expr_numeric
-	| expr_numeric T_MENOS expr_numeric
+	| expr_numeric T_MAS expr_numeric { $<node>$ = generar_oper_binario(ADD, $<node>1, $<node>3);}
+	| expr_numeric T_ASTER expr_numeric { $<node>$ = generar_oper_binario(MULT, $<node>1, $<node>3);}
+	| expr_numeric T_MENOS expr_numeric { $<node>$ = generar_oper_binario(SUB, $<node>1, $<node>3);}
 	| expr_numeric T_BAR expr_numeric
 	| expr_numeric T_EXPO expr_numeric
 	| expr_numeric T_PORCENTAJE expr_numeric
@@ -213,7 +213,7 @@ Instruccion* generar_puts(node_tac* op){
 	return instruccion;
 }
 
-node_tac* generar_suma(code_ops oper, node_tac* op1, node_tac* op2){
+node_tac* generar_oper_binario(code_ops oper, node_tac* op1, node_tac* op2){
 	node_tac* result = new node_tac;
 	strcpy(result->dir, Util::nueva_var());
 	result->tipo = TEMPORAL;
@@ -246,6 +246,7 @@ void printCodigo() {
       case FIN   : std::cout << "FIN" << std::endl; break;
       case PUTS  : std::cout << "PUTS " << ri->arg1 << std::endl; break;
       case ADD   : std::cout << "ADD " << ri->arg1 << " " << ri->arg2 << " " << ri->arg3 << std::endl; break;
+      case MULT   : std::cout << "MULT " << ri->arg1 << " " << ri->arg2 << " " << ri->arg3 << std::endl; break;
     }
   } while (ri->op != FIN);
 }

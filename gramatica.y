@@ -58,7 +58,8 @@ void printCodigo();
                           OPERATOR PRECEDENCE
 =========================================================================*/
 %left T_MENOS T_MAS
-%left T_ASTER T_BAR
+%left T_ASTER T_BAR T_PORCENTAJE
+%left T_EXPO
 %%
 program : compstmt;
 compstmt : stmt
@@ -118,9 +119,9 @@ expr_numeric : number
 	| expr_numeric T_MAS expr_numeric { $<node>$ = generar_oper_binario(ADD, $<node>1, $<node>3);}
 	| expr_numeric T_ASTER expr_numeric { $<node>$ = generar_oper_binario(MULT, $<node>1, $<node>3);}
 	| expr_numeric T_MENOS expr_numeric { $<node>$ = generar_oper_binario(SUB, $<node>1, $<node>3);}
-	| expr_numeric T_BAR expr_numeric
-	| expr_numeric T_EXPO expr_numeric
-	| expr_numeric T_PORCENTAJE expr_numeric
+	| expr_numeric T_BAR expr_numeric   { $<node>$ = generar_oper_binario(DIV, $<node>1, $<node>3);}	
+	| expr_numeric T_EXPO expr_numeric  { $<node>$ = generar_oper_binario(POW, $<node>1, $<node>3);}
+	| expr_numeric T_PORCENTAJE expr_numeric { $<node>$ = generar_oper_binario(MOD, $<node>1, $<node>3);}
 	| T_PAR_IZQ expr_numeric T_PAR_DER;
 expr_string : string
 	| variable

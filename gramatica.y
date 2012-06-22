@@ -96,15 +96,15 @@ value : T_GETS
 string : T_STRING_1
 	| T_STRING_2
 	| T_COMMAND;
-output : T_PUTS value {printf("PUTS\n");$<node>$ = new node_tac;
+output : T_PUTS value {$<node>$ = new node_tac;
 			$<node>$->codigo = new std::list<Instruccion*>();
 			$<node>$->codigo->merge(*$<node>2->codigo);
 			$<node>$->codigo->push_back(generar_puts($<node>2));};
-number : T_INTEGER_ABS {printf("NUMBER %d\n", $<entero>1); $<node>$ = new node_tac;
+number : T_INTEGER_ABS {$<node>$ = new node_tac;
 			strcpy($<node>$->dir, Util::nueva_var());
 			$<node>$->tipo = CONSTANTE;
-			$<node>$->codigo = new std::list<Instruccion*>();printf("NUMBER 3333333333333333333333\n");
-			$<node>$->codigo->push_back(insert_tmp($<node>$, new RInteger($<entero>1)));printf("NUMBER 4444444444444444444444\n");}
+			$<node>$->codigo = new std::list<Instruccion*>();
+			$<node>$->codigo->push_back(insert_tmp($<node>$, new RInteger($<entero>1)));}
 	| T_MENOS T_INTEGER_ABS 
 	| T_MAS T_INTEGER_ABS 
 	| T_FLOAT_ABS 

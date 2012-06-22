@@ -27,8 +27,9 @@ void yyerror(const char *s)
 
 char *str;
 std::list<Instruccion*> *codigoGlobal;
-Instruccion* generar_puts(char *str);
-Instruccion* generar_suma(node_tac* op1, node_tac* op2);
+Instruccion* generar_puts(node_tac* op);
+node_tac* generar_suma(code_ops oper, node_tac* op1, node_tac* op2);
+Instruccion* insert_tmp(node_tac* tmp, RObject *value);
 void printCodigo();
 
 
@@ -98,11 +99,12 @@ string : T_STRING_1
 output : T_PUTS value {printf("PUTS\n");$<node>$ = new node_tac;
 			$<node>$->codigo = new std::list<Instruccion*>();
 			$<node>$->codigo->merge(*$<node>2->codigo);
-			$<node>$->codigo->push_back(generar_puts($<node>2->dir));};
+			$<node>$->codigo->push_back(generar_puts($<node>2));};
 number : T_INTEGER_ABS {printf("NUMBER %d\n", $<entero>1); $<node>$ = new node_tac;
-			strcpy($<node>$->dir, Util::intToString($<entero>1));
+			strcpy($<node>$->dir, Util::nueva_var());
 			$<node>$->tipo = CONSTANTE;
-			$<node>$->codigo = new std::list<Instruccion*>();}
+			$<node>$->codigo = new std::list<Instruccion*>();printf("NUMBER 3333333333333333333333\n");
+			$<node>$->codigo->push_back(insert_tmp($<node>$, new RInteger($<entero>1)));printf("NUMBER 4444444444444444444444\n");}
 	| T_MENOS T_INTEGER_ABS 
 	| T_MAS T_INTEGER_ABS 
 	| T_FLOAT_ABS 
@@ -113,13 +115,7 @@ expr_numeric : number
 	| T_OBJECT_ID
 	| T_SIZE
 	| T_LENGTH
-	| expr_numeric T_MAS expr_numeric {printf("ADD\n");$<node>$ = new node_tac;
-						strcpy($<node>$->dir, Util::nueva_var());
-						$<node>$->tipo = TEMPORAL;
-						$<node>$->codigo = new std::list<Instruccion*>();
-						$<node>$->codigo->merge(*$<node>1->codigo);
-						$<node>$->codigo->merge(*$<node>3->codigo);
-						$<node>$->codigo->push_back(generar_suma($<node>1, $<node>3));}
+	| expr_numeric T_MAS expr_numeric { $<node>$ = generar_suma(ADD, $<node>1, $<node>3);}
 	| expr_numeric T_ASTER expr_numeric
 	| expr_numeric T_MENOS expr_numeric
 	| expr_numeric T_BAR expr_numeric
@@ -180,7 +176,6 @@ args_accesores_recur :	/*vacio*/
 args_new : value args_new_recur;
 args_new_recur :	/*vacio*/
 	| args_new_recur T_COMA	value;
-
 load : T_LOAD expr_string_load_require;
 require : T_REQUIRE expr_string_load_require;
 expr_string_load_require : T_STRING_1
@@ -201,6 +196,7 @@ main()
 {
 
 codigoGlobal = new std::list<Instruccion*>();
+inicializer();
 /*Acciones a ejecutar antes del análisis*/
 yyparse();
 /*Acciones a ejecutar después del análisis*/
@@ -210,27 +206,34 @@ codigoGlobal->push_back(fin);
 printCodigo();
 ejecutar(codigoGlobal);
 }
-Instruccion* generar_puts(char* str){
+Instruccion* generar_puts(node_tac* op){
 	Instruccion* instruccion = new Instruccion;
 	instruccion->op = PUTS;
-	instruccion->arg1 = new RString(str);
+	instruccion->arg1 = new RString(op->dir);
 	return instruccion;
-//	codigoGlobal->push_back(instruccion);
 }
 
-Instruccion* generar_suma(node_tac* op1, node_tac* op2){
+node_tac* generar_suma(code_ops oper, node_tac* op1, node_tac* op2){
+	node_tac* result = new node_tac;
+	strcpy(result->dir, Util::nueva_var());
+	result->tipo = TEMPORAL;
+	result->codigo = new std::list<Instruccion*>();
+	result->codigo->merge(*op1->codigo);
+	result->codigo->merge(*op2->codigo);
 	Instruccion* instruccion = new Instruccion;
-	instruccion->op = ADD;
-	if((op1->tipo == TEMPORAL) || (op1->tipo == VARIABLE)){
-		instruccion->arg1 = new RInteger(10); // ACA HAY QUE TRAER EL VALOR DE LA VARIABLE QUE ESTA EN ALGUN HASH
-	} else {
-		instruccion->arg1 = new RInteger(atoi(op1->dir));
-	}
-	if((op2->tipo == TEMPORAL) || (op2->tipo == VARIABLE)){
-		instruccion->arg2 = new RInteger(10);
-	} else {
-		instruccion->arg2 = new RInteger(atoi(op2->dir));
-	}
+	instruccion->op = oper;
+	instruccion->arg1 = new RString(op1->dir);
+	instruccion->arg2 = new RString(op2->dir);
+	instruccion->arg3 = new RString(result->dir);
+	result->codigo->push_back(instruccion);
+	return result;
+}
+
+Instruccion* insert_tmp(node_tac* tmp, RObject *value){
+	Instruccion* instruccion = new Instruccion;
+	instruccion->op = ASSIGN_TMP;
+	instruccion->arg1 = new RString(tmp->dir);
+	instruccion->arg2 = value;
 	return instruccion;
 }
 

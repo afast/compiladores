@@ -7,6 +7,7 @@
 #include "ejecucion/RString.h"
 #include "ejecucion/RInteger.h"
 #include "ejecucion/Util.h"
+#include "ejecucion/RBool.h"
 
 extern "C"
 {
@@ -29,7 +30,12 @@ char *str;
 std::list<Instruccion*> *codigoGlobal;
 Instruccion* generar_puts(node_tac* op);
 node_tac* generar_oper_binario(code_ops oper, node_tac* op1, node_tac* op2);
-Instruccion* insert_tmp(node_tac* tmp, RObject *value);
+node_tac* insert_tmp(RObject *value);
+node_tac* generar_elsif(node_tac* condition, node_tac* stmt, node_tac* op_elsif);
+//node_tac* generar_if(node_tac* condition, node_tac* stmt, node_tac* op_elsif, node_tac* op_else);
+node_tac* generar_if_sigue(node_tac* result, node_tac* stmt, node_tac* op_elsif, node_tac* op_else);
+node_tac* generar_if(node_tac* condition);
+node_tac* generar_else(node_tac* stmt);
 void printCodigo();
 
 
@@ -61,16 +67,16 @@ void printCodigo();
 %left T_ASTER T_BAR T_PORCENTAJE
 %left T_EXPO
 %%
-program : compstmt;
-compstmt : stmt
-         | stmt T_FIN_INSTRUCCION
+program : compstmt {$<node>$ = $<node>1;};
+compstmt : stmt {$<node>$ = $<node>1;}
+         | stmt T_FIN_INSTRUCCION {$<node>$ = $<node>1;}
          | stmt texpr
          | stmt texpr T_FIN_INSTRUCCION;
 texpr : T_FIN_INSTRUCCION stmt
       | texpr T_FIN_INSTRUCCION stmt;
 stmt : /* Vacio */ 
 	| output {codigoGlobal->merge(*$<node>1->codigo);}
-	| if
+	| if {codigoGlobal->merge(*$<node>1->codigo);}
 	| while
 	| each
 	| variable T_IGUAL value
@@ -85,7 +91,7 @@ stmt : /* Vacio */
 	| load
 	| require;
 value : T_GETS
-	| T_BOOL
+	| T_BOOL {std::cout << "BOOL" << std::endl;$<node>$ = insert_tmp(new RBool($<entero>1));}
 	| T_INSTANCE_CLASS
 	| T_NEW T_PAR_IZQ args_new T_PAR_DER
 	| expr_numeric
@@ -97,15 +103,11 @@ value : T_GETS
 string : T_STRING_1
 	| T_STRING_2
 	| T_COMMAND;
-output : T_PUTS value {$<node>$ = new node_tac;
+output : T_PUTS value {std::cout << "T_PUTS" << std::endl;$<node>$ = new node_tac;
 			$<node>$->codigo = new std::list<Instruccion*>();
 			$<node>$->codigo->merge(*$<node>2->codigo);
 			$<node>$->codigo->push_back(generar_puts($<node>2));};
-number : T_INTEGER_ABS {$<node>$ = new node_tac;
-			strcpy($<node>$->dir, Util::nueva_var());
-			$<node>$->tipo = CONSTANTE;
-			$<node>$->codigo = new std::list<Instruccion*>();
-			$<node>$->codigo->push_back(insert_tmp($<node>$, new RInteger($<entero>1)));}
+number : T_INTEGER_ABS {std::cout << "NUMBER" << std::endl;$<node>$ = insert_tmp(new RInteger($<entero>1));}
 	| T_MENOS T_INTEGER_ABS 
 	| T_MAS T_INTEGER_ABS 
 	| T_FLOAT_ABS 
@@ -131,7 +133,7 @@ expr_string : string
 	| T_PAR_IZQ expr_string T_PAR_DER;
 expr_bool : T_RESPOND_TO T_PAR_IZQ expr_string T_PAR_DER
 	| T_INSTANCE_OF expr_string
-	| value T_AND value
+	| value T_AND value { std::cout << "T_AND" << std::endl;$<node>$ = generar_oper_binario(AND, $<node>1, $<node>3);}
 	| value T_OR value
 	| T_NOT value
 	| value  T_MAYOR value
@@ -140,16 +142,17 @@ expr_bool : T_RESPOND_TO T_PAR_IZQ expr_string T_PAR_DER
 	| value  T_MENOR_IGUAL value
 	| value  T_DOBLE_IGUAL value
 	| value  T_NOT_IGUAL value
-	| T_PAR_IZQ value T_PAR_DER;
+	| T_PAR_IZQ value T_PAR_DER{ std::cout << "PAR BOOL" << std::endl;$<node>$ = $<node>2;};
 variable : T_IDENTIF
 	| T_ATRIBUTO
 	| T_IDENTIF T_CORCHETE_IZQ T_INTEGER_ABS T_CORCHETE_DER;
 
-if : T_IF expr_bool compstmt recursive_elsif opt_else T_END;
-recursive_elsif : /* Vacio */
-                | T_ELSIF expr_bool compstmt recursive_elsif;
-opt_else : /* Vacio */
-         | T_ELSE compstmt;
+if : T_IF expr_bool { $<node>$ = generar_if($<node>2);} compstmt recursive_elsif opt_else T_END { generar_if_sigue($<node>$, $<node>4, $<node>5, $<node>6);};
+//if_sigue : compstmt recursive_elsif opt_else T_END { $<node>$ = generar_if_sigue($<node>1, $<node>2, $<node>3);};
+recursive_elsif : /* Vacio */ { $<node>$ = NULL;}
+                | T_ELSIF expr_bool compstmt recursive_elsif { $<node>$ = generar_elsif($<node>2, $<node>3, $<node>4);};
+opt_else : /* Vacio */ { $<node>$ = NULL;}
+         | T_ELSE compstmt { $<node>$ = generar_else($<node>2);};
 while : T_WHILE expr_bool compstmt T_END;
 case : T_CASE rec_when_then T_END
 	| T_CASE T_FIN_INSTRUCCION rec_when_then T_END;
@@ -217,7 +220,6 @@ Instruccion* generar_puts(node_tac* op){
 node_tac* generar_oper_binario(code_ops oper, node_tac* op1, node_tac* op2){
 	node_tac* result = new node_tac;
 	strcpy(result->dir, Util::nueva_var());
-	result->tipo = TEMPORAL;
 	result->codigo = new std::list<Instruccion*>();
 	result->codigo->merge(*op1->codigo);
 	result->codigo->merge(*op2->codigo);
@@ -230,24 +232,125 @@ node_tac* generar_oper_binario(code_ops oper, node_tac* op1, node_tac* op2){
 	return result;
 }
 
-Instruccion* insert_tmp(node_tac* tmp, RObject *value){
+/*
+node_tac* generar_if(node_tac* condition, node_tac* stmt, node_tac* op_elsif, node_tac* op_else){
+
+	node_tac* result = new node_tac;
+	result->codigo = new std::list<Instruccion*>();
+	result->codigo->merge(*condition->codigo);
+
+	Instruccion* instruccion = new Instruccion;
+	instruccion->op = IF;
+	instruccion->arg1 = new RString(condition->dir);
+	result->codigo->push_back(instruccion);
+	result->codigo->merge(*stmt->codigo);
+
+	if(op_elsif != NULL){
+		result->codigo->merge(*op_elsif->codigo);
+	}
+	if(op_else != NULL){
+		result->codigo->merge(*op_else->codigo);
+	}
+
+	Instruccion* instruccion2 = new Instruccion;
+	instruccion2->op = END;
+	result->codigo->push_back(instruccion2);
+	return result;
+}
+*/
+
+
+node_tac* generar_if(node_tac* condition){
+
+	node_tac* result = new node_tac;
+	result->codigo = new std::list<Instruccion*>();
+	result->codigo->merge(*condition->codigo);
+
+	Instruccion* instruccion = new Instruccion;
+	instruccion->op = IF;
+	instruccion->arg1 = new RString(condition->dir);
+	result->codigo->push_back(instruccion);
+	return result;
+}
+
+node_tac* generar_if_sigue(node_tac* result, node_tac* stmt, node_tac* op_elsif, node_tac* op_else){
+  std::cout << "=========111111111111111111111===============" << stmt << std::endl;
+	result->codigo->merge(*stmt->codigo);
+std::cout << "============11111111111111111111111122222222222222222222222=============" << std::endl;
+	if(op_elsif != NULL){
+		result->codigo->merge(*op_elsif->codigo);
+	}
+	if(op_else != NULL){
+		result->codigo->merge(*op_else->codigo);
+	}
+  std::cout << "============22222222222222222222222=============" << std::endl;
+	Instruccion* instruccion2 = new Instruccion;
+	instruccion2->op = END;
+	result->codigo->push_back(instruccion2);
+	return result;
+}
+
+
+node_tac* generar_elsif(node_tac* condition, node_tac* stmt, node_tac* op_elsif){
+	node_tac* result = new node_tac;
+	result->codigo = new std::list<Instruccion*>();
+	Instruccion* instruccion = new Instruccion;
+	instruccion->op = ELSIFCOND;
+	result->codigo->push_back(instruccion);
+
+	result->codigo->merge(*condition->codigo);
+
+	Instruccion* instruccion2 = new Instruccion;
+	instruccion2->op = ELSIF;
+	instruccion2->arg1 = new RString(condition->dir);
+	result->codigo->push_back(instruccion2);
+
+	result->codigo->merge(*stmt->codigo);
+	result->codigo->merge(*op_elsif->codigo);
+	return result;
+}
+
+node_tac* generar_else(node_tac* stmt){
+	node_tac* result = new node_tac;
+	result->codigo = new std::list<Instruccion*>();
+	Instruccion* instruccion = new Instruccion;
+	instruccion->op = ELSE;
+	result->codigo->push_back(instruccion);
+	result->codigo->merge(*stmt->codigo);
+	return result;
+}
+
+
+node_tac* insert_tmp(RObject *value){
+	node_tac* result = new node_tac;
+	strcpy(result->dir, Util::nueva_var());
+	result->codigo = new std::list<Instruccion*>();
 	Instruccion* instruccion = new Instruccion;
 	instruccion->op = ASSIGN_TMP;
-	instruccion->arg1 = new RString(tmp->dir);
+	instruccion->arg1 = new RString(result->dir);
 	instruccion->arg2 = value;
-	return instruccion;
+	result->codigo->push_back(instruccion);
+	return result;
 }
 
 void printCodigo() {
+  std::cout << "=========================================" << std::endl; 
   std::list<Instruccion *>::iterator it = codigoGlobal->begin();
   Instruccion *ri;
   do {
     ri = *it++;
     switch (ri->op) {
       case FIN   : std::cout << "FIN" << std::endl; break;
-      case PUTS  : std::cout << "PUTS " << ri->arg1 << std::endl; break;
+      case PUTS  : std::cout << "PUTS " << *(((RString *)ri->arg1)->getValue()) << std::endl; break;
       case ADD   : std::cout << "ADD " << ri->arg1 << " " << ri->arg2 << " " << ri->arg3 << std::endl; break;
       case MULT   : std::cout << "MULT " << ri->arg1 << " " << ri->arg2 << " " << ri->arg3 << std::endl; break;
+      case IF   : std::cout << "IF "  << std::endl; break;
+      case ELSE   : std::cout << "ELSE "  << std::endl; break;
+      case ELSIF   : std::cout << "ELSIF "  << std::endl; break;
+      case ELSIFCOND   : std::cout << "ELSIFCOND "  << std::endl; break;
+      case END   : std::cout << "END "  << std::endl; break;
+      case ASSIGN_TMP   : std::cout << "ASSIGN_TMP "  << *(((RString *)ri->arg1)->getValue()) << std::endl; break;
+
     }
   } while (ri->op != FIN);
 }

@@ -1,6 +1,7 @@
 #include "RInteger.h"
 #include "RBool.h"
 #include "RString.h"
+#include "memory.h"
 
 RInteger::RInteger(){}
 
@@ -13,7 +14,9 @@ long int RInteger::getValue(){
 }
 //RInteger *object_id(); use parent method
 RString* RInteger::get_class(){
-  return new RString("Integer");
+  RString *s = new RString("Integer");
+  new_pointer(s);
+  return s;
 }
 
 bool  RInteger::respond_to(RString *method){
@@ -21,11 +24,11 @@ bool  RInteger::respond_to(RString *method){
 }
 
 bool  RInteger::operator== (RInteger param){
-  return new RBool(this->value == param.getValue());
+  return this->value == param.getValue();
 }
 
 bool  RInteger::operator== (long int param){
-  return new RBool(this->value == param);
+  return this->value == param;
 }
 
 long int RInteger::operator= (RInteger param){

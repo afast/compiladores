@@ -2,6 +2,7 @@
 #include "RInteger.h"
 #include "RString.h"
 #include "RBool.h"
+#include "memory.h"
 
 RArray::RArray(){
   nextSize = 20;
@@ -18,20 +19,30 @@ RArray::RArray(RArray *arg){
     value[i] = (*arg)[i];
 }
 
+RArray::~RArray(){
+  delete this->value;
+}
+
 RObject **RArray::getValue(){
   return value;
 }
 
 RInteger *RArray::size(){
-  return new RInteger((long int)arrayLength);
+  RInteger *res = new RInteger(arrayLength);
+  new_pointer(res);
+  return res;
 }
 
 RInteger *RArray::length(){
-  return new RInteger(arrayLength);
+  RInteger *res = new RInteger(arrayLength);
+  new_pointer(res);
+  return res;
 }
 
 RString *RArray::get_class(){
-  return new RString("Array");
+  RString *clase = new RString("Array");
+  new_pointer(clase);
+  return clase;
 }
 
 bool RArray::respond_to(RString *method){

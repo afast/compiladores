@@ -1,3 +1,5 @@
+pruebaif: pruebaif.cpp all
+	g++ pruebaif.cpp stack.o RObject.o RString.o RInteger.o RClass.o RBool.o Util.o base.o  -std=c++0x
 all: robject rstring rinteger rclass rbool rarray
 	make stack.o robject rstring rinteger rclass rbool rarray util
 stack.o: stack.cpp stack.h base.o
@@ -20,4 +22,4 @@ rarray: RArray.h RArray.cpp
 util: Util.h Util.cpp
 	g++ Util.cpp -c
 clean:
-	rm -f *.o
+	rm -f *.o *.gch *.orig

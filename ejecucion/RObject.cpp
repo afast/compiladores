@@ -37,3 +37,5 @@ bool RObject::respond_to(RString *method){
 bool RObject::operator== (RObject param) {
   return this->objectId() == param.objectId();
 }
+
+

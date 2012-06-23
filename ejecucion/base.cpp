@@ -75,6 +75,13 @@ void mod(RString *arg1, RString *arg2, RString *arg3) {
 void assign_tmp(RString *name, RObject * value){
 	vTemporales[*(((RString *)name)->getValue())] = value;
 std::cout << "-QQQQQQQQQ----------------->   " << ((RInteger *)vTemporales[*(((RString *)name)->getValue())])->getValue() << std::endl;
+RInteger *add(RInteger *arg1, RInteger *arg2) {
+  RInteger *result = new RInteger(arg1->getValue() + arg2->getValue());
+  /*if (arg1->getValue() != NULL)
+    delete arg1->getValue();
+  if (arg2->getValue() != NULL)
+    delete arg2->getValue();*/
+  return result;
 }
 
 long int getDir(void* p){

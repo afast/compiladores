@@ -19,6 +19,7 @@ class RString: public RObject {
     RString(char *arg);
     RString(std::string *arg);
     RString(RString *arg);
+    RString(RInteger *arg);
     RString *get_class();
     void setValue(const char * param);
     void setValue(std::string param);

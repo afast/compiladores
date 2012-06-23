@@ -38,6 +38,4 @@ bool RObject::operator== (RObject param) {
   return this->objectId() == param.objectId();
 }
 
-RObject  RObject::operator+ (RObject op){
-  return op;
-}
+

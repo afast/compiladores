@@ -122,7 +122,7 @@ expr_numeric : number
 	| expr_numeric T_BAR expr_numeric   { $<node>$ = generar_oper_binario(DIV, $<node>1, $<node>3);}	
 	| expr_numeric T_EXPO expr_numeric  { $<node>$ = generar_oper_binario(POW, $<node>1, $<node>3);}
 	| expr_numeric T_PORCENTAJE expr_numeric { $<node>$ = generar_oper_binario(MOD, $<node>1, $<node>3);}
-	| T_PAR_IZQ expr_numeric T_PAR_DER;
+	| T_PAR_IZQ expr_numeric T_PAR_DER{ $<node>$ = $<node>2;}; 
 expr_string : string
 	| variable
 	| T_NIL

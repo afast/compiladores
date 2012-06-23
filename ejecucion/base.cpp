@@ -37,7 +37,7 @@ std::cout << "------------1111111111111111------>   " << std::endl;
   RInteger *op1 = (RInteger *)vTemporales[*(arg1->getValue())];
   RInteger *op2 = (RInteger *)vTemporales[*(arg2->getValue())];
 
-  vTemporales[*(arg3->getValue())] = *op1 + *op2;
+  vTemporales[*(arg3->getValue())] = new RInteger(op1->getValue() + op2->getValue());
 	std::cout << "------------------>   " << std::endl;
 }
 

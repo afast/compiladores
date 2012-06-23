@@ -13,7 +13,11 @@ void puts(RString *string_arg) {
   //===============================================================
   // EL PUTS DEBE ESTAR SOBRECARGADO
   //===============================================================
-		RString* tmp = new RString(Util::intToString(value->getValue()));
+  RString* tmp;
+  if (value == NULL)
+    tmp = string_arg;
+  else
+	  tmp = new RString(Util::intToString(value->getValue()));
 
   std::string *str = new std::string(tmp->getValue()->data());
   while (str->at(str->size()-1) == '\n')

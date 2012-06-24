@@ -3,6 +3,7 @@
 
 #include "RBool.h"
 #include "RString.h"
+#include "memory.h"
 
 RString::RString(){
   str = new std::string();
@@ -24,8 +25,14 @@ RString::RString(RString *arg){
   this->str = new std::string(*arg->getValue());
 }
 
+RString::~RString(){
+  delete this->str;
+}
+
 RString * RString::get_class(){
-  return new RString("String");
+  RString* s = new RString("String");
+  new_pointer(s);
+  return s;
 }
 
 bool RString::respond_to(RString *method){
@@ -49,25 +56,25 @@ bool RString::operator== (const char *param) {
 }
 
 void RString::setValue(const char * param){
-  if (this->str == NULL)
+  if (this->str != NULL)
     delete str;
   str = new std::string(param);
 }
 
 void RString::setValue(std::string *param){
-  if (this->str == NULL)
+  if (this->str != NULL)
     delete str;
   str = param;
 }
 
 void RString::setValue(std::string param){
-  if (this->str == NULL)
+  if (this->str != NULL)
     delete str;
   str = new std::string(param);
 }
 
 void RString::setValue(RString * param){
-  if (this->str == NULL)
+  if (this->str != NULL)
     delete str;
   str = new std::string(*(param->getValue()));
 }

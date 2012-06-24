@@ -17,6 +17,7 @@ class RArray: public RObject {
     RInteger *size();
     RInteger *length();
     RArray();
+    ~RArray();
     RArray(RArray *arg);
     RString *get_class();
     bool respond_to(RString *method);

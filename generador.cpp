@@ -237,10 +237,10 @@ RNumeric* get_numeric_node(ast* hoja){
   return arg;
 }
 
-RNumeric* generar_div(ast* nodo, std::list<Instruccion*> *codigo){ return NULL; }
-RNumeric* generar_sub(ast* nodo, std::list<Instruccion*> *codigo){ return NULL; }
-RNumeric* generar_pow(ast* nodo, std::list<Instruccion*> *codigo){ return NULL; }
-RInteger* generar_mod(ast* nodo, std::list<Instruccion*> *codigo){ return NULL; }
+void generar_div(ast* nodo, std::list<Instruccion*> *codigo){}
+void generar_sub(ast* nodo, std::list<Instruccion*> *codigo){}
+void generar_pow(ast* nodo, std::list<Instruccion*> *codigo){}
+void generar_mod(ast* nodo, std::list<Instruccion*> *codigo){}
 void generar_elsif(ast* nodo, std::list<Instruccion*> *codigo){}
 void generar_while(ast* nodo, std::list<Instruccion*> *codigo){}
 void generar_string(ast* nodo, std::list<Instruccion*> *codigo){}

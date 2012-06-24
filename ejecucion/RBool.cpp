@@ -1,5 +1,6 @@
 #include "RBool.h"
 #include "RString.h"
+#include "memory.h"
 
 bool RBool::getValue(){
   return this->value;
@@ -16,7 +17,9 @@ RBool::RBool(RBool *arg){
 }
 
 RString* RBool::get_class(){
-  return new RString("Bool");
+  RString *clase = new RString("Bool");
+  new_pointer(clase);
+  return clase;
 }
 
 bool RBool::respond_to(RString *method){

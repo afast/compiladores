@@ -1,13 +1,18 @@
 #include "RClass.h"
 #include "RString.h"
 #include "RBool.h"
+#include "memory.h"
 
 RClass::RClass(const char* param){
-  init(new RString(param));
+  RString *s = new RString(param);
+  new_pointer(s);
+  init(s);
 }
 
 RClass::RClass(std::string* param){
-  init(new RString(param));
+  RString *s = new RString(param);
+  new_pointer(s);
+  init(s);
 }
 
 RClass::RClass(RString* param){
@@ -34,7 +39,9 @@ bool RClass::respond_to(RString *method){
 }
 
 void RClass::add_method(std::string* method, std::list<Instruccion*> *codigo){
-  method_names.push_back(new RString(method));
+  RString *nombre_metodo = new RString(method);
+  new_pointer(nombre_metodo);
+  method_names.push_back(nombre_metodo);
   methods[*method] = codigo;
 }
 

@@ -15,6 +15,7 @@ class RString: public RObject {
   public:
     std::string *getValue();
     RString();
+    ~RString();
     RString(const char *arg);
     RString(char *arg);
     RString(std::string *arg);

@@ -84,7 +84,7 @@ stmt : /* Vacio */
 	| variable T_MENOS_IGUAL number
 	| def
 	| class
-	| Toutput_ATTR_READER args_accesores
+	| T_ATTR_READER args_accesores
 	| T_ATTR_WRITER args_accesores
 	| T_ACCESSOR args_accesores
 	| T_INVOCACION_METODO

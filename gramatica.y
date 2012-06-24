@@ -200,7 +200,7 @@ main()
 {
 
 codigoGlobal = new std::list<Instruccion*>();
-inicializer();
+initializer();
 /*Acciones a ejecutar antes del análisis*/
 yyparse();
 /*Acciones a ejecutar después del análisis*/

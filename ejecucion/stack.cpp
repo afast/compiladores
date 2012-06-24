@@ -8,6 +8,8 @@
 #include "base.h"
 #include "memory.h"
 #include "RInteger.h"
+#include "RDecimal.h"
+#include "RNumeric.h"
 #include "RString.h"
 #include "RBool.h"
 class RString;
@@ -44,14 +46,21 @@ void clean_up(){
 void ejecutar(list<Instruccion*> *codigo) {
   list<Instruccion *>::iterator it = codigo->begin();
   Instruccion *ri;
+  cout << "Excecution started!" << endl;
   do {
     ri = *it++;
+    cout << "RI: " << ri->op << endl;
     switch (ri->op) {
       case FIN   : cout << "Fin ejecución" << endl; break;
-      case PUTS  : puts((RString *)ri->arg1); break;
+      case PUTS  : cout << "PUTS" << endl; puts(ri->arg1->to_s()); break;
       case GETS  : gets((RString *)ri->arg1); break;
-      case ADD   : cout << "adddddddddddd" << endl;
-        add((RString *)ri->arg1, (RString *)ri->arg2, (RString *)ri->arg3); 
+      case ADD   : cout << "ADD" << endl;
+        if (((RNumeric*)ri->arg1)->es_int()){
+          ((RInteger*)ri->arg1)->setValue(((RInteger*)ri->arg2)->getValue() + ((RInteger*)ri->arg3)->getValue());
+          cout << "suma dio: " << ((RInteger*)ri->arg2)->getValue() << "+" << ((RInteger*)ri->arg3)->getValue() << " = " << ((RInteger*)ri->arg1)->getValue() << endl;
+        }else
+          decimal_add((RDecimal*)ri->arg1, (RNumeric*)ri->arg2, (RNumeric*)ri->arg3);
+        //add((RString *)ri->arg1, (RString *)ri->arg2, (RString *)ri->arg3); 
         //cout << "Voy a ejecutar el ADD" << endl;
         //vTemporales[*(((RString *)ri->arg3)->getValue())] = add((RInteger *)ri->arg1, (RInteger *)ri->arg2); 
         //cout << "El valor es ----    " << vTemporales[*(((RString *)ri->arg3)->getValue())]  << endl;
@@ -148,3 +157,10 @@ Instruccion *nuevaInst(enum code_ops op, RObject* arg1, RObject* arg2, RObject* 
   return inst;
 }
 
+void decimal_add(RDecimal* arg1, RNumeric* arg2, RNumeric* arg3){
+  cout << "decimal add" << endl;
+  if (arg2->es_int())
+    arg1->setValue(((RInteger*)arg2)->getValue() + ((RDecimal*)arg3)->getValue());
+  else
+    arg1->setValue(((RDecimal*)arg2)->getValue() + ((RInteger*)arg3)->getValue());
+}

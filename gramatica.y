@@ -71,7 +71,7 @@ void printCodigo();
 %left T_ASTER T_BAR T_PORCENTAJE
 %left T_EXPO
 %%
-program : compstmt { printTree($1); freeTree($1);};
+program : compstmt { printTree($1); generar($1, codigoGlobal); freeTree($1);};
 compstmt : stmt { $$ = new_compstmt($1);}
          | stmt T_FIN_INSTRUCCION {$$ = new_compstmt($1);}
          | stmt texpr {$$ = add_front_stmt_compstmt($1, $2);}
@@ -204,10 +204,10 @@ main()
   /*Acciones a ejecutar antes del análisis*/
   yyparse();
   /*Acciones a ejecutar después del análisis*/
+  /* Indicar final del programa */
   Instruccion *fin = new Instruccion;
   fin->op = FIN;
   codigoGlobal->push_back(fin);
-  printCodigo();
   ejecutar(codigoGlobal);
 }
 Instruccion* generar_puts(node_tac* op){

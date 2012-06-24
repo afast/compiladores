@@ -6,10 +6,11 @@ bool RBool::getValue(){
   return this->value;
 }
 
-RBool::RBool(){}
+RBool::RBool(){new_pointer(this);}
 
 RBool::RBool(bool arg){
   value = arg;
+  new_pointer(this);
 }
 
 RBool::RBool(RBool *arg){
@@ -17,9 +18,11 @@ RBool::RBool(RBool *arg){
 }
 
 RString* RBool::get_class(){
-  RString *clase = new RString("Bool");
-  new_pointer(clase);
-  return clase;
+  return new RString("Bool");
+}
+
+RString* RBool::to_s(){
+  return new RString(this->value ? "true" : "false");
 }
 
 bool RBool::respond_to(RString *method){

@@ -14,6 +14,7 @@ class RBool: public RObject {
     RBool(bool arg);
     RBool(RBool *arg);
     RString *get_class();
+    RString *to_s();
     bool respond_to(RString *method);
     bool operator= (RBool param);
     bool operator== (RBool param);

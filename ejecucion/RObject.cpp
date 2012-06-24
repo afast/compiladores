@@ -29,6 +29,10 @@ RString *RObject::get_class(){
   return new RString("Object");
 }
 
+RString* RObject::to_s(){
+  return this->get_class();
+}
+
 bool RObject::respond_to(RString *method){
   bool res = *method == "object_id" || *method == "class" || *method == "respond_to?";
   return res;

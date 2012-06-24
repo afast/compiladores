@@ -7,7 +7,12 @@ class RBool;
 class RString;
 
 class RNumeric : public RObject {
+  protected:
+    bool integer, decimal;
   public:
     RString* get_class();
+    virtual RString* to_s();
+    bool es_int();
+    bool es_dec();
 };
 #endif

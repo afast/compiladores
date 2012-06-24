@@ -20,6 +20,7 @@ class RArray: public RObject {
     ~RArray();
     RArray(RArray *arg);
     RString *get_class();
+    RString *to_s();
     bool respond_to(RString *method);
     bool operator== (RArray param);
     RObject* operator[] (RInteger param);

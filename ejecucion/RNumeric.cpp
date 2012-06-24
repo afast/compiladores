@@ -1,3 +1,5 @@
+#include <cmath>
+
 #include "RNumeric.h"
 #include "RString.h"
 #include "RInteger.h"
@@ -32,4 +34,16 @@ double RNumeric::getDecimalValue(){
     return ((RInteger*)this)->getDecimalValue();
   if (decimal)
     return ((RDecimal*)this)->getValue();
+}
+
+double RNumeric::mod(RNumeric *param1){
+  if (this->es_int() && param1->es_int())
+    return ((RInteger*)this)->getValue() % ((RInteger*)param1)->getValue();
+  else {
+    double p1, p2;
+    p1 = this->getDecimalValue();
+    p2 = param1->getDecimalValue();
+    p1 -= floor(p1/p2)*p2;
+    return p1;
+  }
 }

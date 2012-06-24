@@ -3,6 +3,7 @@
 #include <list>
 #include <set>
 #include <stack>
+#include <cmath>
 
 #include "stack.h"
 #include "base.h"
@@ -79,8 +80,18 @@ void ejecutar(list<Instruccion*> *codigo) {
         else
           ((RDecimal*)ri->arg1)->setValue(((RNumeric*)ri->arg2)->getDecimalValue() - ((RNumeric*)ri->arg3)->getDecimalValue());
         break;
-      case POW : pow((RString *)ri->arg1, (RString *)ri->arg2, (RString *)ri->arg3); break;
-      case MOD : mod((RString *)ri->arg1, (RString *)ri->arg2, (RString *)ri->arg3); break;
+      case POW :
+        if (((RNumeric*)ri->arg1)->es_int())
+          ((RInteger*)ri->arg1)->setValue(pow(((RInteger*)ri->arg2)->getValue(), ((RInteger*)ri->arg3)->getValue()));
+        else
+          ((RDecimal*)ri->arg1)->setValue(pow(((RNumeric*)ri->arg2)->getDecimalValue(), ((RNumeric*)ri->arg3)->getDecimalValue()));
+        break;
+      case MOD :
+        if (((RNumeric*)ri->arg1)->es_int())
+          ((RInteger*)ri->arg1)->setValue(((RInteger*)ri->arg2)->getValue() % ((RInteger*)ri->arg3)->getValue());
+        else
+          ((RDecimal*)ri->arg1)->setValue(((RNumeric*)ri->arg2)->mod((RNumeric*)ri->arg3));
+        break;
       case IF : if (!((RBool*)ri->arg1)->getValue()) it = descartar_if(it); cond_stack.push(((RBool*)ri->arg1)->getValue()); break;
       case ELSIF : if (!((RBool*)ri->arg1)->getValue()) it = descartar_if(it); else { cond_stack.pop(); cond_stack.push(((RBool*)ri->arg1)->getValue());} break;
       case ELSIFCOND : if (cond_stack.top()) it = descartar_hasta_end(it); break;

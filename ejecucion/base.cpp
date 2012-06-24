@@ -24,39 +24,6 @@ void gets(RString *string_arg) {
   string_arg->setValue(str);
 }
 
-void add(RString *arg1, RString *arg2, RString *arg3) {
-std::cout << "------------1111111111111111------>   " << std::endl;
-  RInteger *op1 = (RInteger *)vTemporales[*(arg1->getValue())];
-  RInteger *op2 = (RInteger *)vTemporales[*(arg2->getValue())];
-
-  vTemporales[*(arg3->getValue())] = new RInteger(op1->getValue() + op2->getValue());
-	std::cout << "------------------>   " << std::endl;
-}
-
-void mult(RString *arg1, RString *arg2, RString *arg3) {
-  RInteger *op1 = (RInteger *)vTemporales[*(arg1->getValue())];
-  RInteger *op2 = (RInteger *)vTemporales[*(arg2->getValue())];
-  vTemporales[*(arg3->getValue())] = new RInteger(op1->getValue() * op2->getValue());
-}
-
-void sub(RString *arg1, RString *arg2, RString *arg3) {
-  RInteger *op1 = (RInteger *)vTemporales[*(arg1->getValue())];
-  RInteger *op2 = (RInteger *)vTemporales[*(arg2->getValue())];
-  vTemporales[*(arg3->getValue())] = new RInteger(op1->getValue() - op2->getValue());
-}
-
-void div(RString *arg1, RString *arg2, RString *arg3) {
-  RInteger *op1 = (RInteger *)vTemporales[*(arg1->getValue())];
-  RInteger *op2 = (RInteger *)vTemporales[*(arg2->getValue())];
-  vTemporales[*(arg3->getValue())] = new RInteger(op1->getValue() / op2->getValue()); /*FALTA CONTROLAR DIVISION ENTRE 0, no se si es aca*/
-}
-
-void pow(RString *arg1, RString *arg2, RString *arg3) {
-  RInteger *op1 = (RInteger *)vTemporales[*(arg1->getValue())];
-  RInteger *op2 = (RInteger *)vTemporales[*(arg2->getValue())];
-  vTemporales[*(arg3->getValue())] = new RInteger(pow(op1->getValue(), op2->getValue())); 
-}
-
 void mod(RString *arg1, RString *arg2, RString *arg3) {
   RInteger *op1 = (RInteger *)vTemporales[*(arg1->getValue())];
   RInteger *op2 = (RInteger *)vTemporales[*(arg2->getValue())];

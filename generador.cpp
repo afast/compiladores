@@ -33,6 +33,7 @@ RObject* generar_objeto(ast* nodo){
       objeto = s;
       break;}
     case f_decimal :{
+      cout << "detectado decimal: " << nodo->decimal << endl;
       RDecimal* s = new RDecimal(nodo->decimal);
       objeto = s;
       break;}
@@ -65,10 +66,10 @@ void decidir_nodo(ast* nodo, list<Instruccion*> *codigo){
       generar_op_numerica(SUB, nodo, codigo);
       break;
     case op_pow :
-      generar_pow(nodo, codigo);
+      generar_op_numerica(POW, nodo, codigo);
       break;
     case op_mod :
-      generar_mod(nodo, codigo);
+      generar_op_numerica(MOD, nodo, codigo);
       break;
     case c_elsif :
       generar_elsif(nodo, codigo);
@@ -198,7 +199,9 @@ RNumeric* get_numeric_node(ast* hoja){
       arg = new RInteger(hoja->entero);
       break;}
     case f_decimal:{
+      cout << "detectado decimal: " << hoja->decimal << endl;
       arg = new RDecimal(hoja->decimal);
+      cout << "detectado decimal: " << arg->getDecimalValue() << endl;
       break;}
     default:
       cout << "Error de tipo, el operando no es numerico!" << endl;
@@ -207,8 +210,6 @@ RNumeric* get_numeric_node(ast* hoja){
   return arg;
 }
 
-void generar_pow(ast* nodo, std::list<Instruccion*> *codigo){}
-void generar_mod(ast* nodo, std::list<Instruccion*> *codigo){}
 void generar_elsif(ast* nodo, std::list<Instruccion*> *codigo){}
 void generar_while(ast* nodo, std::list<Instruccion*> *codigo){}
 void generar_string(ast* nodo, std::list<Instruccion*> *codigo){}

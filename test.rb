@@ -3,6 +3,10 @@ puts 2+3+4*5
 puts 'hola'
 puts 3*3+3.3*3.0
 puts 2.1*2.4+2+3.2
+puts 2**2
+puts 4%3
+puts 4%3.1
+puts 4.3%3.1
 =begin
 puts gets
 puts `hello`

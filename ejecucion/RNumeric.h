@@ -15,5 +15,6 @@ class RNumeric : public RObject {
     virtual double getDecimalValue();
     bool es_int();
     bool es_dec();
+    double mod(RNumeric *param1);
 };
 #endif

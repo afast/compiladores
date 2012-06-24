@@ -1,7 +1,9 @@
 CFLAGS= -g -O0
 
+pruebawhile: pruebawhile.cpp all
+	g++ pruebawhile.cpp stack.o RObject.o RString.o RInteger.o RClass.o RBool.o Util.o base.o memory.o RArray.o  -std=c++0x $(CFLAGS) -o while
 pruebaif: pruebaif.cpp all
-	g++ pruebaif.cpp stack.o RObject.o RString.o RInteger.o RClass.o RBool.o Util.o base.o memory.o RArray.o  -std=c++0x $(CFLAGS)
+	g++ pruebaif.cpp stack.o RObject.o RString.o RInteger.o RClass.o RBool.o Util.o base.o memory.o RArray.o  -std=c++0x $(CFLAGS) -o if
 all: robject rstring rinteger rclass rbool rarray memory
 	make stack.o robject rstring rinteger rclass rbool rarray util memory
 stack.o: stack.cpp stack.h base.o

@@ -22,6 +22,7 @@ unordered_map<string, list<Instruccion*>*> global_methods; // los metodos global
 unordered_map<string, RObject*>* current_stack;
 list<unordered_map<string, RObject*>*> scope_stack;
 stack<bool> cond_stack;
+stack<list<Instruccion *>::iterator> while_stack;
 
 //RObject *getValue(string* key){
 //	return vTemporales[*key];
@@ -67,6 +68,8 @@ void ejecutar(list<Instruccion*> *codigo) {
       case ELSIFCOND : if (cond_stack.top()) it = descartar_hasta_end(it); break;
       case ELSE : if (cond_stack.top()) it = descartar_hasta_end(it); break;
       case END : cond_stack.pop(); break;
+      case WHILE : if (((RBool*)ri->arg1)->getValue()) while_stack.push(it); else it=descartar_whileend(it); break;
+      case WHILEEND : if (((RBool*)ri->arg1)->getValue()) it = while_stack.top(); else while_stack.pop(); break;
     }
   } while (ri->op != FIN);
 
@@ -111,7 +114,7 @@ void pop_stack(){
 list<Instruccion*>::iterator descartar_if(list<Instruccion*>::iterator it) { // caso if false
   Instruccion *ri = *it;
   while (ri->op != ELSIF && ri->op != ELSIFCOND && ri->op != ELSE && ri->op != END) {
-    if (ri->op == IF || ri->op == WHILE || ri->op == DO || ri->op == IF)
+    if (ri->op == IF || ri->op == DO || ri->op == IF)
       it = descartar_hasta_end(++it);
     ri = *(++it);
   }
@@ -121,11 +124,19 @@ list<Instruccion*>::iterator descartar_if(list<Instruccion*>::iterator it) { // 
 list<Instruccion*>::iterator descartar_hasta_end(list<Instruccion*>::iterator it){
   Instruccion *ri = *it;
   while (ri->op != END) {
-    if (ri->op == IF || ri->op == WHILE || ri->op == DO || ri->op == IF)
+    if (ri->op == IF || ri->op == DO || ri->op == IF)
       it = descartar_hasta_end(++it);
     ri = *(++it);
   }
   return it;
+}
+
+std::list<Instruccion*>::iterator descartar_whileend(std::list<Instruccion*>::iterator it){
+  Instruccion *ri = *it;
+  while (ri->op != WHILEEND) {
+    ri = *(++it);
+  }
+  return ++it;
 }
 
 Instruccion *nuevaInst(enum code_ops op, RObject* arg1, RObject* arg2, RObject* arg3){

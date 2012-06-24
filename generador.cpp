@@ -56,7 +56,6 @@ void decidir_nodo(ast* nodo, list<Instruccion*> *codigo){
       generar_mul(nodo, codigo);
       break;
     case op_plus :
-      cout << "generar plus" << endl;
       generar_plus(nodo, codigo);
       break;
     case op_div :
@@ -78,11 +77,9 @@ void decidir_nodo(ast* nodo, list<Instruccion*> *codigo){
       generar_while(nodo, codigo);
       break;
     case f_string :
-      cout << "generar string" << endl;
       generar_string(nodo, codigo);
       break;
     case f_entero :
-      cout << "generar entero" << endl;
       generar_entero(nodo, codigo);
       break;
     case f_decimal :
@@ -92,9 +89,7 @@ void decidir_nodo(ast* nodo, list<Instruccion*> *codigo){
       generar_bool(nodo, codigo);
       break;
     case t_puts :
-      cout << "generar puts" << endl;
       generar_puts(nodo, codigo);
-      cout << "puts generado" << endl;
       break;
     case t_gets : //Leer de la entrada estandar
       generar_gets(codigo);

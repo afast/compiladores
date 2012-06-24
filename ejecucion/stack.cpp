@@ -49,25 +49,24 @@ void ejecutar(list<Instruccion*> *codigo) {
   cout << "Excecution started!" << endl;
   do {
     ri = *it++;
-    cout << "RI: " << ri->op << endl;
     switch (ri->op) {
       case FIN   : cout << "Fin ejecución" << endl; break;
-      case PUTS  : cout << "PUTS" << endl; puts(ri->arg1->to_s()); break;
+      case PUTS  : puts(ri->arg1->to_s()); break;
       case GETS  : gets((RString *)ri->arg1); break;
-      case ADD   : cout << "ADD" << endl;
+      case ADD   : 
         if (((RNumeric*)ri->arg1)->es_int()){
           ((RInteger*)ri->arg1)->setValue(((RInteger*)ri->arg2)->getValue() + ((RInteger*)ri->arg3)->getValue());
-          cout << "suma dio: " << ((RInteger*)ri->arg2)->getValue() << "+" << ((RInteger*)ri->arg3)->getValue() << " = " << ((RInteger*)ri->arg1)->getValue() << endl;
         }else
           decimal_add((RDecimal*)ri->arg1, (RNumeric*)ri->arg2, (RNumeric*)ri->arg3);
-        //add((RString *)ri->arg1, (RString *)ri->arg2, (RString *)ri->arg3); 
-        //cout << "Voy a ejecutar el ADD" << endl;
-        //vTemporales[*(((RString *)ri->arg3)->getValue())] = add((RInteger *)ri->arg1, (RInteger *)ri->arg2); 
-        //cout << "El valor es ----    " << vTemporales[*(((RString *)ri->arg3)->getValue())]  << endl;
         break;
       case OBJID : if (ri->arg1 != NULL) *((RInteger*)ri->arg1) = getDir(ri->arg2); break;
       case ASSIGN_TMP : assign_tmp((RString *)ri->arg1, ri->arg2); break;
-      case MULT : mult((RString *)ri->arg1, (RString *)ri->arg2, (RString *)ri->arg3); break;
+      case MULT : 
+        if (((RNumeric*)ri->arg1)->es_int())
+          ((RInteger*)ri->arg1)->setValue(((RInteger*)ri->arg2)->getValue() * ((RInteger*)ri->arg3)->getValue());
+        else
+          ((RDecimal*)ri->arg1)->setValue(((RNumeric*)ri->arg2)->getDecimalValue() * ((RNumeric*)ri->arg3)->getDecimalValue());
+        break;
       case SUB : sub((RString *)ri->arg1, (RString *)ri->arg2, (RString *)ri->arg3); break;
       case DIV : div((RString *)ri->arg1, (RString *)ri->arg2, (RString *)ri->arg3); break;
       case POW : pow((RString *)ri->arg1, (RString *)ri->arg2, (RString *)ri->arg3); break;

@@ -15,6 +15,7 @@ class RInteger : public RNumeric {
     RInteger(long int integer);
     void setValue(long int val);
     //RInteger *object_id(); use parent method
+    double getDecimalValue();
     bool respond_to(RString *method);
     bool operator== (RInteger param);
     bool operator== (long int param);

@@ -21,6 +21,10 @@ long int RInteger::getValue(){
   return this->value;
 }
 
+double RInteger::getDecimalValue(){
+  return (double)this->value;
+}
+
 void RInteger::setValue(long int val){
   this->value = val;
 }

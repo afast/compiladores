@@ -26,3 +26,10 @@ RString* RNumeric::to_s(){
   }
   return s;
 }
+
+double RNumeric::getDecimalValue(){
+  if (integer)
+    return ((RInteger*)this)->getDecimalValue();
+  if (decimal)
+    return ((RDecimal*)this)->getValue();
+}

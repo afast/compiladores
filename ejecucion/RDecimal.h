@@ -15,6 +15,7 @@ class RDecimal : public RNumeric {
     RDecimal();
     RDecimal(double integer);
     //RDecimal *object_id(); use parent method
+    double getDecimalValue();
     bool respond_to(RString *method);
     bool operator== (RDecimal param);
     bool operator== (double param);

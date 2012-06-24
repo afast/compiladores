@@ -1,5 +1,5 @@
-puts 1+2+3
-puts 2+3+4
+puts 1+(2+3)
+puts 2+3+4*5
 puts 'hola'
 =begin
 puts gets

@@ -21,6 +21,10 @@ double RDecimal::getValue(){
   return this->value;
 }
 
+double RDecimal::getDecimalValue(){
+  return this->value;
+}
+
 void RDecimal::setValue(double dec){
   this->value = dec;
 }

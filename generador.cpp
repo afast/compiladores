@@ -53,16 +53,16 @@ void decidir_nodo(ast* nodo, list<Instruccion*> *codigo){
       generar_if(nodo, codigo);
       break;
     case op_mul :
-      generar_mul(nodo, codigo);
+      generar_op_numerica(MULT, nodo, codigo);
       break;
     case op_plus :
-      generar_plus(nodo, codigo);
+      generar_op_numerica(ADD, nodo, codigo);
       break;
     case op_div :
-      generar_div(nodo, codigo);
+      generar_op_numerica(DIV, nodo, codigo);
       break;
     case op_sub :
-      generar_sub(nodo, codigo);
+      generar_op_numerica(SUB, nodo, codigo);
       break;
     case op_pow :
       generar_pow(nodo, codigo);
@@ -166,7 +166,7 @@ void generar_compstmt(list<ast*> *stmt_list, list<Instruccion*> *codigo){
 
 
 void generar_if(ast* nodo, std::list<Instruccion*> *codigo){}
-void generar_mul(ast* nodo, std::list<Instruccion*> *codigo){
+void generar_op_numerica(enum code_ops op, ast* nodo, std::list<Instruccion*>* codigo){
   RNumeric* arg2, *arg3, *arg1;
   if (nodo_hoja(nodo->h1)){ // no preciso variable temporal
     arg2 = get_numeric_node(nodo->h1);
@@ -188,32 +188,7 @@ void generar_mul(ast* nodo, std::list<Instruccion*> *codigo){
     RInteger *i = new RInteger();
     arg1 = i;
   }
-  codigo->push_back(instr(MULT, arg1, arg2, arg3));
-}
-
-void generar_plus(ast* nodo, std::list<Instruccion*> *codigo){ //suma de numericos
-  RNumeric* arg2, *arg3, *arg1;
-  if (nodo_hoja(nodo->h1)){ // no preciso variable temporal
-    arg2 = get_numeric_node(nodo->h1);
-  } else {
-    decidir_nodo(nodo->h1, codigo); //ultima operacion debe ser numerica y guardar el resultado en arg1
-    arg2 = (RNumeric*)codigo->back()->arg1;
-  }
-  if (nodo_hoja(nodo->h2)){ // no preciso variable temporal
-    arg3 = get_numeric_node(nodo->h2);
-  } else {
-    decidir_nodo(nodo->h2, codigo); //ultima operacion debe ser numerica y guardar el resultado en arg1
-    arg3 = (RNumeric*)codigo->back()->arg1;
-  }
-
-  if (arg2->es_dec() || arg3->es_dec()){
-    RDecimal *d = new RDecimal();
-    arg1 = d;
-  }else{
-    RInteger *i = new RInteger();
-    arg1 = i;
-  }
-  codigo->push_back(instr(ADD, arg1, arg2, arg3));
+  codigo->push_back(instr(op, arg1, arg2, arg3));
 }
 
 RNumeric* get_numeric_node(ast* hoja){
@@ -232,8 +207,6 @@ RNumeric* get_numeric_node(ast* hoja){
   return arg;
 }
 
-void generar_div(ast* nodo, std::list<Instruccion*> *codigo){}
-void generar_sub(ast* nodo, std::list<Instruccion*> *codigo){}
 void generar_pow(ast* nodo, std::list<Instruccion*> *codigo){}
 void generar_mod(ast* nodo, std::list<Instruccion*> *codigo){}
 void generar_elsif(ast* nodo, std::list<Instruccion*> *codigo){}

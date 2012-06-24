@@ -57,7 +57,7 @@ void ejecutar(list<Instruccion*> *codigo) {
         if (((RNumeric*)ri->arg1)->es_int()){
           ((RInteger*)ri->arg1)->setValue(((RInteger*)ri->arg2)->getValue() + ((RInteger*)ri->arg3)->getValue());
         }else
-          decimal_add((RDecimal*)ri->arg1, (RNumeric*)ri->arg2, (RNumeric*)ri->arg3);
+          ((RDecimal*)ri->arg1)->setValue(((RNumeric*)ri->arg2)->getDecimalValue() + ((RNumeric*)ri->arg3)->getDecimalValue());
         break;
       case OBJID : if (ri->arg1 != NULL) *((RInteger*)ri->arg1) = getDir(ri->arg2); break;
       case ASSIGN_TMP : assign_tmp((RString *)ri->arg1, ri->arg2); break;
@@ -67,8 +67,18 @@ void ejecutar(list<Instruccion*> *codigo) {
         else
           ((RDecimal*)ri->arg1)->setValue(((RNumeric*)ri->arg2)->getDecimalValue() * ((RNumeric*)ri->arg3)->getDecimalValue());
         break;
-      case SUB : sub((RString *)ri->arg1, (RString *)ri->arg2, (RString *)ri->arg3); break;
-      case DIV : div((RString *)ri->arg1, (RString *)ri->arg2, (RString *)ri->arg3); break;
+      case SUB :
+        if (((RNumeric*)ri->arg1)->es_int())
+          ((RInteger*)ri->arg1)->setValue(((RInteger*)ri->arg2)->getValue() - ((RInteger*)ri->arg3)->getValue());
+        else
+          ((RDecimal*)ri->arg1)->setValue(((RNumeric*)ri->arg2)->getDecimalValue() - ((RNumeric*)ri->arg3)->getDecimalValue());
+        break;
+      case DIV :
+        if (((RNumeric*)ri->arg1)->es_int())
+          ((RInteger*)ri->arg1)->setValue(((RInteger*)ri->arg2)->getValue() - ((RInteger*)ri->arg3)->getValue());
+        else
+          ((RDecimal*)ri->arg1)->setValue(((RNumeric*)ri->arg2)->getDecimalValue() - ((RNumeric*)ri->arg3)->getDecimalValue());
+        break;
       case POW : pow((RString *)ri->arg1, (RString *)ri->arg2, (RString *)ri->arg3); break;
       case MOD : mod((RString *)ri->arg1, (RString *)ri->arg2, (RString *)ri->arg3); break;
       case IF : if (!((RBool*)ri->arg1)->getValue()) it = descartar_if(it); cond_stack.push(((RBool*)ri->arg1)->getValue()); break;

@@ -32,9 +32,9 @@ Instruccion* generar_puts(node_tac* op);
 node_tac* generar_oper_binario(code_ops oper, node_tac* op1, node_tac* op2);
 node_tac* insert_tmp(RObject *value);
 node_tac* generar_elsif(node_tac* condition, node_tac* stmt, node_tac* op_elsif);
-//node_tac* generar_if(node_tac* condition, node_tac* stmt, node_tac* op_elsif, node_tac* op_else);
-node_tac* generar_if_sigue(node_tac* result, node_tac* stmt, node_tac* op_elsif, node_tac* op_else);
-node_tac* generar_if(node_tac* condition);
+node_tac* generar_if(node_tac* condition, node_tac* stmt, node_tac* op_elsif, node_tac* op_else);
+//node_tac* generar_if_sigue(node_tac* result, node_tac* stmt, node_tac* op_elsif, node_tac* op_else);
+//node_tac* generar_if(node_tac* condition);
 node_tac* generar_else(node_tac* stmt);
 void printCodigo();
 
@@ -84,7 +84,7 @@ stmt : /* Vacio */
 	| variable T_MENOS_IGUAL number
 	| def
 	| class
-	| T_ATTR_READER args_accesores
+	| Toutput_ATTR_READER args_accesores
 	| T_ATTR_WRITER args_accesores
 	| T_ACCESSOR args_accesores
 	| T_INVOCACION_METODO
@@ -147,7 +147,7 @@ variable : T_IDENTIF
 	| T_ATRIBUTO
 	| T_IDENTIF T_CORCHETE_IZQ T_INTEGER_ABS T_CORCHETE_DER;
 
-if : T_IF expr_bool { $<node>$ = generar_if($<node>2);} compstmt recursive_elsif opt_else T_END { generar_if_sigue($<node>$, $<node>4, $<node>5, $<node>6);};
+if : T_IF expr_bool compstmt recursive_elsif opt_else T_END { $<node>$ = generar_if($<node>2, $<node>3, $<node>4, $<node>5);};
 //if_sigue : compstmt recursive_elsif opt_else T_END { $<node>$ = generar_if_sigue($<node>1, $<node>2, $<node>3);};
 recursive_elsif : /* Vacio */ { $<node>$ = NULL;}
                 | T_ELSIF expr_bool compstmt recursive_elsif { $<node>$ = generar_elsif($<node>2, $<node>3, $<node>4);};
@@ -200,7 +200,7 @@ main()
 {
 
 codigoGlobal = new std::list<Instruccion*>();
-inicializer();
+initializer();
 /*Acciones a ejecutar antes del análisis*/
 yyparse();
 /*Acciones a ejecutar después del análisis*/
@@ -208,7 +208,7 @@ Instruccion *fin = new Instruccion;
 fin->op = FIN;
 codigoGlobal->push_back(fin);
 printCodigo();
-ejecutar(codigoGlobal);
+//ejecutar(codigoGlobal);
 }
 Instruccion* generar_puts(node_tac* op){
 	Instruccion* instruccion = new Instruccion;
@@ -232,18 +232,18 @@ node_tac* generar_oper_binario(code_ops oper, node_tac* op1, node_tac* op2){
 	return result;
 }
 
-/*
+
 node_tac* generar_if(node_tac* condition, node_tac* stmt, node_tac* op_elsif, node_tac* op_else){
 
 	node_tac* result = new node_tac;
 	result->codigo = new std::list<Instruccion*>();
-	result->codigo->merge(*condition->codigo);
+	result->codigo->splice(result->codigo->end(), *condition->codigo);
 
 	Instruccion* instruccion = new Instruccion;
 	instruccion->op = IF;
 	instruccion->arg1 = new RString(condition->dir);
 	result->codigo->push_back(instruccion);
-	result->codigo->merge(*stmt->codigo);
+	result->codigo->splice(result->codigo->end(), *stmt->codigo);
 
 	if(op_elsif != NULL){
 		result->codigo->merge(*op_elsif->codigo);
@@ -257,9 +257,9 @@ node_tac* generar_if(node_tac* condition, node_tac* stmt, node_tac* op_elsif, no
 	result->codigo->push_back(instruccion2);
 	return result;
 }
-*/
 
 
+/*
 node_tac* generar_if(node_tac* condition){
 
 	node_tac* result = new node_tac;
@@ -290,7 +290,7 @@ std::cout << "============11111111111111111111111122222222222222222222222=======
 	return result;
 }
 
-
+*/
 node_tac* generar_elsif(node_tac* condition, node_tac* stmt, node_tac* op_elsif){
 	node_tac* result = new node_tac;
 	result->codigo = new std::list<Instruccion*>();
@@ -353,5 +353,6 @@ void printCodigo() {
 
     }
   } while (ri->op != FIN);
+  std::cout << "=========================================" << std::endl; 
 }
 

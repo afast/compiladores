@@ -5,6 +5,7 @@
 #include "RBool.h"
 #include "RString.h"
 #include "RInteger.h"
+#include "RDecimal.h"
 #include "memory.h"
 
 RString::RString(){
@@ -28,6 +29,13 @@ RString::RString(RString *arg){
 }
 
 RString::RString(RInteger *arg){
+  this->str = new std::string();
+  std::stringstream s;
+  s << arg->getValue();
+  s >> *str;
+}
+
+RString::RString(RDecimal *arg){
   this->str = new std::string();
   std::stringstream s;
   s << arg->getValue();

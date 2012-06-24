@@ -1,12 +1,12 @@
 #ifndef _RINTEGER_H
 #define _RINTEGER_H
 
-#include "RObject.h"
+#include "RNumeric.h"
 
 class RBool;
 class RString;
 
-class RInteger : public RObject {
+class RInteger : public RNumeric {
   protected:
     long int value;
   public:

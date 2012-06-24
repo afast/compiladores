@@ -8,6 +8,8 @@
 #include "ejecucion/RInteger.h"
 #include "ejecucion/Util.h"
 #include "ejecucion/RBool.h"
+#include "ast.h"
+#include "generador.h"
 
 extern "C"
 {
@@ -44,8 +46,8 @@ void printCodigo();
 %union{
   char* text;
   double real;
-  int entero;
-  node_tac* node;
+  long int entero;
+  ast* a;
 }
 
 %start program
@@ -60,6 +62,8 @@ void printCodigo();
 %token T_BOOL T_ANTI_BAR T_NUMERAL T_MAYOR_IGUAL T_MENOR_IGUAL T_IDENTIF_GLOBAL
 %token T_ATRIBUTO T_VAR_PESOS_CERO T_VAR_PESOS T_VAR_PESOS_PESOS T_INTEGER_ABS T_ATRIBUTO_ACCESOR
 %token T_FLOAT_ABS T_STRING_1 T_STRING_2 T_STRING_IZQ T_STRING_DER T_COMMAND T_ESPACIOS T_ERROR
+
+%type <a> expr_numeric compstmt stmt texpr value output number variable string expr_string expr_bool if recursive_elsif opt_else
 /*=========================================================================
                           OPERATOR PRECEDENCE
 =========================================================================*/
@@ -67,16 +71,16 @@ void printCodigo();
 %left T_ASTER T_BAR T_PORCENTAJE
 %left T_EXPO
 %%
-program : compstmt {$<node>$ = $<node>1;};
-compstmt : stmt {$<node>$ = $<node>1;}
-         | stmt T_FIN_INSTRUCCION {$<node>$ = $<node>1;}
-         | stmt texpr
-         | stmt texpr T_FIN_INSTRUCCION;
-texpr : T_FIN_INSTRUCCION stmt
-      | texpr T_FIN_INSTRUCCION stmt;
-stmt : /* Vacio */ 
-	| output {codigoGlobal->merge(*$<node>1->codigo);}
-	| if {codigoGlobal->merge(*$<node>1->codigo);}
+program : compstmt { printTree($1); freeTree($1);};
+compstmt : stmt { $$ = new_compstmt($1);}
+         | stmt T_FIN_INSTRUCCION {$$ = new_compstmt($1);}
+         | stmt texpr {$$ = add_front_stmt_compstmt($1, $2);}
+         | stmt texpr T_FIN_INSTRUCCION {$$ = add_front_stmt_compstmt($1, $2);};
+texpr : T_FIN_INSTRUCCION stmt { $$ = new_compstmt($2);}
+      | texpr T_FIN_INSTRUCCION stmt { $$ = add_stmt_compstmt($3, $1);};
+stmt : /* Vacio */ { $$ = NULL; }
+	| output
+	| if
 	| while
 	| each
 	| variable T_IGUAL value
@@ -90,69 +94,65 @@ stmt : /* Vacio */
 	| T_INVOCACION_METODO
 	| load
 	| require;
-value : T_GETS
-	| T_BOOL {std::cout << "BOOL" << std::endl;$<node>$ = insert_tmp(new RBool($<entero>1));}
+value : T_GETS { $$ = new_gets(); }
+	| T_BOOL {$$ = new_bool($<entero>1);}
 	| T_INSTANCE_CLASS
 	| T_NEW T_PAR_IZQ args_new T_PAR_DER
-	| expr_numeric
-	| expr_string
-	| expr_bool
+	| expr_numeric { $$ = $1; }
+	| expr_string { $$ = $1; }
+	| expr_bool { $$ = $1; }
 	| case
 	| expr_string_interpolado
 	| array;
-string : T_STRING_1
-	| T_STRING_2
-	| T_COMMAND;
-output : T_PUTS value {std::cout << "T_PUTS" << std::endl;$<node>$ = new node_tac;
-			$<node>$->codigo = new std::list<Instruccion*>();
-			$<node>$->codigo->merge(*$<node>2->codigo);
-			$<node>$->codigo->push_back(generar_puts($<node>2));};
-number : T_INTEGER_ABS {std::cout << "NUMBER" << std::endl;$<node>$ = insert_tmp(new RInteger($<entero>1));}
-	| T_MENOS T_INTEGER_ABS 
-	| T_MAS T_INTEGER_ABS 
-	| T_FLOAT_ABS 
-	| T_MENOS T_FLOAT_ABS 
-	| T_MAS T_FLOAT_ABS;
-expr_numeric : number
-	| variable
-	| T_OBJECT_ID
-	| T_SIZE
-	| T_LENGTH
-	| expr_numeric T_MAS expr_numeric { $<node>$ = generar_oper_binario(ADD, $<node>1, $<node>3);}
-	| expr_numeric T_ASTER expr_numeric { $<node>$ = generar_oper_binario(MULT, $<node>1, $<node>3);}
-	| expr_numeric T_MENOS expr_numeric { $<node>$ = generar_oper_binario(SUB, $<node>1, $<node>3);}
-	| expr_numeric T_BAR expr_numeric   { $<node>$ = generar_oper_binario(DIV, $<node>1, $<node>3);}	
-	| expr_numeric T_EXPO expr_numeric  { $<node>$ = generar_oper_binario(POW, $<node>1, $<node>3);}
-	| expr_numeric T_PORCENTAJE expr_numeric { $<node>$ = generar_oper_binario(MOD, $<node>1, $<node>3);}
-	| T_PAR_IZQ expr_numeric T_PAR_DER{ $<node>$ = $<node>2;}; 
-expr_string : string
-	| variable
-	| T_NIL
-	| expr_string T_ASTER T_INTEGER_ABS
-	| expr_string T_MAS expr_string
-	| T_PAR_IZQ expr_string T_PAR_DER;
-expr_bool : T_RESPOND_TO T_PAR_IZQ expr_string T_PAR_DER
-	| T_INSTANCE_OF expr_string
-	| value T_AND value { std::cout << "T_AND" << std::endl;$<node>$ = generar_oper_binario(AND, $<node>1, $<node>3);}
-	| value T_OR value
-	| T_NOT value
-	| value  T_MAYOR value
-	| value  T_MAYOR_IGUAL value
-	| value  T_MENOR value
-	| value  T_MENOR_IGUAL value
-	| value  T_DOBLE_IGUAL value
-	| value  T_NOT_IGUAL value
-	| T_PAR_IZQ value T_PAR_DER{ std::cout << "PAR BOOL" << std::endl;$<node>$ = $<node>2;};
-variable : T_IDENTIF
-	| T_ATRIBUTO
-	| T_IDENTIF T_CORCHETE_IZQ T_INTEGER_ABS T_CORCHETE_DER;
+string : T_STRING_1 { $$ = new_string($<text>1); }
+	| T_STRING_2 { $$ = new_string($<text>1); }
+	| T_COMMAND { $$ = new_command($<text>1); }
+output : T_PUTS value { $$ = new_puts($2); }
+number : T_INTEGER_ABS {$$ = new_number($<entero>1);}
+	| T_MENOS T_INTEGER_ABS { $$ = new_number((-1)*$<entero>2); }
+	| T_MAS T_INTEGER_ABS { $$ = new_number($<entero>2); }
+	| T_FLOAT_ABS { $$ = new_number($<real>1); }
+	| T_MENOS T_FLOAT_ABS { $$ = new_number((-1)*$<real>2); }
+	| T_MAS T_FLOAT_ABS { $$ = new_number($<real>2); };
+expr_numeric : number { $$ = $1; }
+	| variable { $$ = $1; }
+	| T_OBJECT_ID { $$ = new_object_call($<text>1); }
+	| T_SIZE { $$ = new_object_call($<text>1); }
+	| T_LENGTH { $$ = new_object_call($<text>1); }
+	| expr_numeric T_MAS expr_numeric { $$ = new_numeric_op(op_plus, $1, $3);}
+	| expr_numeric T_ASTER expr_numeric { $$ = new_numeric_op(op_mul, $1, $3);}
+	| expr_numeric T_MENOS expr_numeric { $$ = new_numeric_op(op_sub, $1, $3);}
+	| expr_numeric T_BAR expr_numeric   { $$ = new_numeric_op(op_div, $1, $3);}	
+	| expr_numeric T_EXPO expr_numeric  { $$ = new_numeric_op(op_pow, $1, $3);}
+	| expr_numeric T_PORCENTAJE expr_numeric { $$ = new_numeric_op(op_mod, $1, $3);}
+	| T_PAR_IZQ expr_numeric T_PAR_DER{ $$ = $2; }; 
+expr_string : string { $$ = $1; }
+	| variable { $$ = $1; }
+	| T_NIL { $$ = new_nil(); }
+	| expr_string T_ASTER T_INTEGER_ABS { $$ = new_mul_string($1, $<entero>3);}
+	| expr_string T_MAS expr_string { $$ = new_add_string($1, $3); }
+	| T_PAR_IZQ expr_string T_PAR_DER { $$ = $2; };
+expr_bool : T_RESPOND_TO T_PAR_IZQ expr_string T_PAR_DER { $$ = new_object_call($<text>1, new_arguments($3)); }
+	| T_INSTANCE_OF expr_string { $$ = new_object_call($<text>1, new_arguments($2)); }
+	| value T_AND value { std::cout << "T_AND" << std::endl; $$ = new_boolean_op(b_and, $1, $3);}
+	| value T_OR value { $$ = new_boolean_op(b_or, $1, $3);}
+	| T_NOT value { $$ = new_boolean_op(b_not, $2, NULL);}
+	| value  T_MAYOR value { $$ = new_boolean_op(b_mayor, $1, $3);}
+	| value  T_MAYOR_IGUAL value { $$ = new_boolean_op(b_mayor_igual, $1, $3);}
+	| value  T_MENOR value { $$ = new_boolean_op(b_menor, $1, $3);}
+	| value  T_MENOR_IGUAL value { $$ = new_boolean_op(b_menor_igual, $1, $3);}
+	| value  T_DOBLE_IGUAL value { $$ = new_boolean_op(b_doble_igual, $1, $3);}
+	| value  T_NOT_IGUAL value { $$ = new_boolean_op(b_not_igual, $1, $3);}
+	| T_PAR_IZQ value T_PAR_DER{ std::cout << "PAR BOOL" << std::endl; $$ = new_boolean_op(b_is_bool, $2, NULL);};
+variable : T_IDENTIF { $$ = new_identificador($<text>1);}
+	| T_ATRIBUTO { $$ = new_atributo($<text>1);}
+	| T_IDENTIF T_CORCHETE_IZQ T_INTEGER_ABS T_CORCHETE_DER { $$ = new_array_pos($<text>1, $<entero>3);};
 
-if : T_IF expr_bool { $<node>$ = generar_if($<node>2);} compstmt recursive_elsif opt_else T_END { generar_if_sigue($<node>$, $<node>4, $<node>5, $<node>6);};
-//if_sigue : compstmt recursive_elsif opt_else T_END { $<node>$ = generar_if_sigue($<node>1, $<node>2, $<node>3);};
-recursive_elsif : /* Vacio */ { $<node>$ = NULL;}
-                | T_ELSIF expr_bool compstmt recursive_elsif { $<node>$ = generar_elsif($<node>2, $<node>3, $<node>4);};
-opt_else : /* Vacio */ { $<node>$ = NULL;}
-         | T_ELSE compstmt { $<node>$ = generar_else($<node>2);};
+if : T_IF expr_bool compstmt recursive_elsif opt_else T_END { $$ = new_if($2, $3, $4, $5); }
+recursive_elsif : /* Vacio */ { $$ = NULL; }
+                | T_ELSIF expr_bool compstmt recursive_elsif { $$ = new_elsif($2, $3, $4); };
+opt_else : /* Vacio */ { $$ = NULL; }
+         | T_ELSE compstmt { $$ = $2; };
 while : T_WHILE expr_bool compstmt T_END;
 case : T_CASE rec_when_then T_END
 	| T_CASE T_FIN_INSTRUCCION rec_when_then T_END;
@@ -199,16 +199,16 @@ expr_string_interpolado_recur : /*vacio*/
 main()
 {
 
-codigoGlobal = new std::list<Instruccion*>();
-inicializer();
-/*Acciones a ejecutar antes del análisis*/
-yyparse();
-/*Acciones a ejecutar después del análisis*/
-Instruccion *fin = new Instruccion;
-fin->op = FIN;
-codigoGlobal->push_back(fin);
-printCodigo();
-ejecutar(codigoGlobal);
+  codigoGlobal = new std::list<Instruccion*>();
+  initializer();
+  /*Acciones a ejecutar antes del análisis*/
+  yyparse();
+  /*Acciones a ejecutar después del análisis*/
+  Instruccion *fin = new Instruccion;
+  fin->op = FIN;
+  codigoGlobal->push_back(fin);
+  printCodigo();
+  ejecutar(codigoGlobal);
 }
 Instruccion* generar_puts(node_tac* op){
 	Instruccion* instruccion = new Instruccion;

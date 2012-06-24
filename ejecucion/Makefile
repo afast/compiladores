@@ -4,8 +4,8 @@ pruebawhile: pruebawhile.cpp all
 	g++ pruebawhile.cpp stack.o RObject.o RString.o RInteger.o RClass.o RBool.o Util.o base.o memory.o RArray.o  -std=c++0x $(CFLAGS) -o while
 pruebaif: pruebaif.cpp all
 	g++ pruebaif.cpp stack.o RObject.o RString.o RInteger.o RClass.o RBool.o Util.o base.o memory.o RArray.o  -std=c++0x $(CFLAGS) -o if
-all: robject rstring rnumeric rinteger rclass rbool rarray memory rdecimal
-	make stack.o robject rstring rinteger rclass rbool rarray util memory
+all: robject rstring rnumeric rinteger rclass rbool rarray memory rdecimal stack.o
+
 stack.o: stack.cpp stack.h base.o
 	g++ stack.cpp base.h -c -std=gnu++0x $(CFLAGS)
 base.o: base.cpp base.h

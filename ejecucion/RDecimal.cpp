@@ -3,21 +3,36 @@
 #include "RString.h"
 #include "memory.h"
 
-RDecimal::RDecimal(){this->value=0;}
+RDecimal::RDecimal(){
+  this->value=0;
+  this->decimal = true;
+  this->integer = false;
+  new_pointer(this);
+}
 
 RDecimal::RDecimal(double decimal){
   this->value = decimal;
+  this->decimal = true;
+  this->integer = false;
+  new_pointer(this);
 }
 
 double RDecimal::getValue(){
   return this->value;
 }
+
+double RDecimal::getDecimalValue(){
+  return this->value;
+}
+
+void RDecimal::setValue(double dec){
+  this->value = dec;
+}
 //RDecimal *object_id(); use parent method
 RString* RDecimal::get_class(){
-  RString *s = new RString("Decimal");
-  new_pointer(s);
-  return s;
+  return new RString("Decimal");
 }
+
 
 bool  RDecimal::respond_to(RString *method){
   return RObject::respond_to(method);
@@ -36,7 +51,5 @@ double RDecimal::operator= (RDecimal param){
 }
 
 RString* RDecimal::to_s(){
-  RString *s = new RString(this);
-  new_pointer(s);
-  return s;
+  return new RString(this);
 }

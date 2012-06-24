@@ -8,9 +8,11 @@ RArray::RArray(){
   nextSize = 20;
   value = new RObject*[10];
   arrayLength = 0;
+  new_pointer(this);
 }
 
 RArray::RArray(RArray *arg){
+  new_pointer(this);
   nextSize = (arg->size()->getValue() % 10)*10 + 10;
   value = new RObject*[nextSize];
   nextSize += 10;
@@ -28,21 +30,19 @@ RObject **RArray::getValue(){
 }
 
 RInteger *RArray::size(){
-  RInteger *res = new RInteger(arrayLength);
-  new_pointer(res);
-  return res;
+  return new RInteger(arrayLength);
+}
+
+RString *RArray::to_s(){
+  return this->get_class();
 }
 
 RInteger *RArray::length(){
-  RInteger *res = new RInteger(arrayLength);
-  new_pointer(res);
-  return res;
+  return new RInteger(arrayLength);
 }
 
 RString *RArray::get_class(){
-  RString *clase = new RString("Array");
-  new_pointer(clase);
-  return clase;
+  return new RString("Array");
 }
 
 bool RArray::respond_to(RString *method){

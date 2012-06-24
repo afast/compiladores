@@ -13,12 +13,14 @@ class RInteger : public RNumeric {
     long int getValue();
     RInteger();
     RInteger(long int integer);
+    void setValue(long int val);
     //RInteger *object_id(); use parent method
-    RString* get_class();
+    double getDecimalValue();
     bool respond_to(RString *method);
     bool operator== (RInteger param);
     bool operator== (long int param);
     long int operator= (RInteger param);
     RString* to_s();
+    RString* get_class();
 };
 #endif

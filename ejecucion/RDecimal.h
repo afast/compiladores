@@ -11,14 +11,16 @@ class RDecimal : public RNumeric {
     double value;
   public:
     double getValue();
+    void setValue(double dec);
     RDecimal();
     RDecimal(double integer);
     //RDecimal *object_id(); use parent method
-    RString* get_class();
+    double getDecimalValue();
     bool respond_to(RString *method);
     bool operator== (RDecimal param);
     bool operator== (double param);
     double operator= (RDecimal param);
+    RString* get_class();
     RString* to_s();
 };
 #endif

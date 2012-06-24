@@ -4,15 +4,11 @@
 #include "memory.h"
 
 RClass::RClass(const char* param){
-  RString *s = new RString(param);
-  new_pointer(s);
-  init(s);
+  init(new RString(param));
 }
 
 RClass::RClass(std::string* param){
-  RString *s = new RString(param);
-  new_pointer(s);
-  init(s);
+  init(new RString(param));
 }
 
 RClass::RClass(RString* param){
@@ -24,6 +20,10 @@ void RClass::init(RString* param){
 }
 
 RString* RClass::get_class(){
+  return name;
+}
+
+RString* RClass::to_s(){
   return name;
 }
 
@@ -39,9 +39,7 @@ bool RClass::respond_to(RString *method){
 }
 
 void RClass::add_method(std::string* method, std::list<Instruccion*> *codigo){
-  RString *nombre_metodo = new RString(method);
-  new_pointer(nombre_metodo);
-  method_names.push_back(nombre_metodo);
+  method_names.push_back(new RString(method));
   methods[*method] = codigo;
 }
 

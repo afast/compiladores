@@ -3,11 +3,14 @@
 #include <list>
 #include <set>
 #include <stack>
+#include <cmath>
 
 #include "stack.h"
 #include "base.h"
 #include "memory.h"
 #include "RInteger.h"
+#include "RDecimal.h"
+#include "RNumeric.h"
 #include "RString.h"
 #include "RBool.h"
 class RString;
@@ -44,25 +47,51 @@ void clean_up(){
 void ejecutar(list<Instruccion*> *codigo) {
   list<Instruccion *>::iterator it = codigo->begin();
   Instruccion *ri;
+  cout << "Excecution started!" << endl;
   do {
     ri = *it++;
     switch (ri->op) {
       case FIN   : cout << "Fin ejecución" << endl; break;
-      case PUTS  : puts((RString *)ri->arg1); break;
+      case PUTS  : puts(ri->arg1->to_s()); break;
       case GETS  : gets((RString *)ri->arg1); break;
-      case ADD   : cout << "adddddddddddd" << endl;
-        add((RString *)ri->arg1, (RString *)ri->arg2, (RString *)ri->arg3); 
-        //cout << "Voy a ejecutar el ADD" << endl;
-        //vTemporales[*(((RString *)ri->arg3)->getValue())] = add((RInteger *)ri->arg1, (RInteger *)ri->arg2); 
-        //cout << "El valor es ----    " << vTemporales[*(((RString *)ri->arg3)->getValue())]  << endl;
+      case ADD   : 
+        if (((RNumeric*)ri->arg1)->es_int()){
+          ((RInteger*)ri->arg1)->setValue(((RInteger*)ri->arg2)->getValue() + ((RInteger*)ri->arg3)->getValue());
+        }else
+          ((RDecimal*)ri->arg1)->setValue(((RNumeric*)ri->arg2)->getDecimalValue() + ((RNumeric*)ri->arg3)->getDecimalValue());
         break;
       case OBJID : if (ri->arg1 != NULL) *((RInteger*)ri->arg1) = getDir(ri->arg2); break;
       case ASSIGN_TMP : assign_tmp((RString *)ri->arg1, ri->arg2); break;
-      case MULT : mult((RString *)ri->arg1, (RString *)ri->arg2, (RString *)ri->arg3); break;
-      case SUB : sub((RString *)ri->arg1, (RString *)ri->arg2, (RString *)ri->arg3); break;
-      case DIV : div((RString *)ri->arg1, (RString *)ri->arg2, (RString *)ri->arg3); break;
-      case POW : pow((RString *)ri->arg1, (RString *)ri->arg2, (RString *)ri->arg3); break;
-      case MOD : mod((RString *)ri->arg1, (RString *)ri->arg2, (RString *)ri->arg3); break;
+      case MULT : 
+        if (((RNumeric*)ri->arg1)->es_int())
+          ((RInteger*)ri->arg1)->setValue(((RInteger*)ri->arg2)->getValue() * ((RInteger*)ri->arg3)->getValue());
+        else
+          ((RDecimal*)ri->arg1)->setValue(((RNumeric*)ri->arg2)->getDecimalValue() * ((RNumeric*)ri->arg3)->getDecimalValue());
+        break;
+      case SUB :
+        if (((RNumeric*)ri->arg1)->es_int())
+          ((RInteger*)ri->arg1)->setValue(((RInteger*)ri->arg2)->getValue() - ((RInteger*)ri->arg3)->getValue());
+        else
+          ((RDecimal*)ri->arg1)->setValue(((RNumeric*)ri->arg2)->getDecimalValue() - ((RNumeric*)ri->arg3)->getDecimalValue());
+        break;
+      case DIV :
+        if (((RNumeric*)ri->arg1)->es_int())
+          ((RInteger*)ri->arg1)->setValue(((RInteger*)ri->arg2)->getValue() - ((RInteger*)ri->arg3)->getValue());
+        else
+          ((RDecimal*)ri->arg1)->setValue(((RNumeric*)ri->arg2)->getDecimalValue() - ((RNumeric*)ri->arg3)->getDecimalValue());
+        break;
+      case POW :
+        if (((RNumeric*)ri->arg1)->es_int())
+          ((RInteger*)ri->arg1)->setValue(pow(((RInteger*)ri->arg2)->getValue(), ((RInteger*)ri->arg3)->getValue()));
+        else
+          ((RDecimal*)ri->arg1)->setValue(pow(((RNumeric*)ri->arg2)->getDecimalValue(), ((RNumeric*)ri->arg3)->getDecimalValue()));
+        break;
+      case MOD :
+        if (((RNumeric*)ri->arg1)->es_int())
+          ((RInteger*)ri->arg1)->setValue(((RInteger*)ri->arg2)->getValue() % ((RInteger*)ri->arg3)->getValue());
+        else
+          ((RDecimal*)ri->arg1)->setValue(((RNumeric*)ri->arg2)->mod((RNumeric*)ri->arg3));
+        break;
       case IF : if (!((RBool*)ri->arg1)->getValue()) it = descartar_if(it); cond_stack.push(((RBool*)ri->arg1)->getValue()); break;
       case ELSIF : if (!((RBool*)ri->arg1)->getValue()) it = descartar_if(it); else { cond_stack.pop(); cond_stack.push(((RBool*)ri->arg1)->getValue());} break;
       case ELSIFCOND : if (cond_stack.top()) it = descartar_hasta_end(it); break;
@@ -148,3 +177,10 @@ Instruccion *nuevaInst(enum code_ops op, RObject* arg1, RObject* arg2, RObject* 
   return inst;
 }
 
+void decimal_add(RDecimal* arg1, RNumeric* arg2, RNumeric* arg3){
+  cout << "decimal add" << endl;
+  if (arg2->es_int())
+    arg1->setValue(((RInteger*)arg2)->getValue() + ((RDecimal*)arg3)->getValue());
+  else
+    arg1->setValue(((RDecimal*)arg2)->getValue() + ((RInteger*)arg3)->getValue());
+}

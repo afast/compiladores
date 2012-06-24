@@ -10,6 +10,8 @@ extern "C" {
 #include "y.tab.h"
 
 %}
+%option yylineno
+
 STRING_DOBLE_CON_SALTO ([^(\"(#{)\n)]*(\\\n)*)*|(([^(\"(#{)\n)]*(\\\")*)*(\\\n)*)*
 STRING_DOBLE_SIN_SALTO [^(\"(#{)\n)]*|([^(\"(#{)\n)]*(\\\")*)*
 STRING_SIMPLE_CON_SALTO ([^(\'\n)]*(\\\n)*)*

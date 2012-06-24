@@ -22,9 +22,14 @@ extern "C"
 
 }
 
+extern char* yytext;
+extern int yylineno;
+
 void yyerror(const char *s)
 {
-        fprintf(stderr, "Error: %s\n", s);
+        //fprintf(stderr, "Error: %s\n", s);
+  	printf("Error (FALTA TIPO DE ERROR) en linea %d - cerca de \"%s\"\n", yylineno, yytext);
+
 }
 
 

@@ -6,9 +6,12 @@ extern "C" {
       int yylex(void);
     }
 #include "ejecucion/stack.h"
+#include "ast.h"
 #include "y.tab.h"
 
 %}
+%option yylineno
+
 STRING_DOBLE_CON_SALTO ([^(\"(#{)\n)]*(\\\n)*)*|(([^(\"(#{)\n)]*(\\\")*)*(\\\n)*)*
 STRING_DOBLE_SIN_SALTO [^(\"(#{)\n)]*|([^(\"(#{)\n)]*(\\\")*)*
 STRING_SIMPLE_CON_SALTO ([^(\'\n)]*(\\\n)*)*
@@ -73,14 +76,14 @@ not|!  {return(T_NOT);};
 =~  {return(T_IGUAL_NIOQUI);};
 \}     {return(T_LLAVE_DER);};
 \{     {return(T_LLAVE_IZQ);};
-[_a-z][_a-zA-Z0-9]*\.object_id {return(T_OBJECT_ID);};
-[_a-z][_a-zA-Z0-9]*\.instance_of\? {return(T_INSTANCE_OF);};
-[_a-z][_a-zA-Z0-9]*\.respond_to\? {return(T_RESPOND_TO);};
-[_a-z][_a-zA-Z0-9]*\.class   {return(T_INSTANCE_CLASS);};
-[A-Z][_a-zA-Z0-9]*\.new   {return(T_NEW);};
-{VARIABLE}\.length {return(T_LENGTH);};
-{VARIABLE}\.size {return(T_SIZE);};
-{VARIABLE}\.each {return(T_EACH);};
+[_a-z][_a-zA-Z0-9]*\.object_id {yylval.text = strdup(yytext); return(T_OBJECT_ID);};
+[_a-z][_a-zA-Z0-9]*\.instance_of\? {yylval.text = strdup(yytext); return(T_INSTANCE_OF);};
+[_a-z][_a-zA-Z0-9]*\.respond_to\? {yylval.text = strdup(yytext); return(T_RESPOND_TO);};
+[_a-z][_a-zA-Z0-9]*\.class   {yylval.text = strdup(yytext); return(T_INSTANCE_CLASS);};
+[A-Z][_a-zA-Z0-9]*\.new   {yylval.text = strdup(yytext); return(T_NEW);};
+{VARIABLE}\.length {yylval.text = strdup(yytext); return(T_LENGTH);};
+{VARIABLE}\.size {yylval.text = strdup(yytext); return(T_SIZE);};
+{VARIABLE}\.each {yylval.text = strdup(yytext); return(T_EACH);};
 [_a-z][_a-zA-Z0-9]*\.[_a-z][_a-zA-Z0-9]* {return(T_INVOCACION_METODO);};
 [A-Z][_a-zA-Z0-9]*	 {return(T_NOM_CONST);};
 [_a-z][_a-zA-Z0-9]*	 {return(T_IDENTIF);};
@@ -96,11 +99,11 @@ not|!  {return(T_NOT);};
 #.*\n {;};
 ^=begin(.*\n)*=end {};
 \'{STRING_SIMPLE_CON_SALTO}\'|\'{STRING_SIMPLE_SIN_SALTO}\' {yylval.text = strdup(yytext); return(T_STRING_1);};
-\"{STRING_DOBLE_CON_SALTO}\"|\"{STRING_DOBLE_SIN_SALTO}\" {return(T_STRING_2);};
+\"{STRING_DOBLE_CON_SALTO}\"|\"{STRING_DOBLE_SIN_SALTO}\" {yylval.text = strdup(yytext); return(T_STRING_2);};
 \"{STRING_DOBLE_CON_SALTO}#\{|\"{STRING_DOBLE_SIN_SALTO}#\{ {return(T_STRING_IZQ);};
 \}{STRING_DOBLE_CON_SALTO}#\{|\}{STRING_DOBLE_SIN_SALTO}#\{ {return(T_STRING_CENTER);};
 \}{STRING_DOBLE_CON_SALTO}\"|\}{STRING_DOBLE_SIN_SALTO}\" {return(T_STRING_DER);};
-`{COMMAND_CON_SALTO}`|`{COMMAND_SIN_SALTO}` {return(T_COMMAND);};
+`{COMMAND_CON_SALTO}`|`{COMMAND_SIN_SALTO}` {yylval.text = strdup(yytext); return(T_COMMAND);};
 (\n|;)* {return T_FIN_INSTRUCCION;};
 \\(\t|\r|" ")*\n|\t|\r|" " {};
 . {};

@@ -7,7 +7,8 @@
 #include "RObject.h"
 
 class RBool;
-class RString;
+class RInteger;
+class RDecimal;
 
 class RString: public RObject {
   protected:
@@ -20,7 +21,10 @@ class RString: public RObject {
     RString(char *arg);
     RString(std::string *arg);
     RString(RString *arg);
+    RString(RInteger *arg);
+    RString(RDecimal *arg);
     RString *get_class();
+    RString *to_s();
     void setValue(const char * param);
     void setValue(std::string param);
     void setValue(std::string *param);

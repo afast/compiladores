@@ -8,10 +8,19 @@ PROGRAM = myruby
 
 all: main
 
-main: y.tab.c lex.yy.c
-	cd ejecucion; make all
-	$(CC) -o $(PROGRAM) y.tab.c lex.yy.c $(CFLAGS) ejecucion/stack.o ejecucion/base.o ejecucion/RObject.o ejecucion/RString.o ejecucion/RInteger.o ejecucion/RBool.o ejecucion/Util.o
+gramatica: y.tab.c lex.yy.c generador.o ast.o
+	$(CC) -o $(PROGRAM) y.tab.c lex.yy.c $(CFLAGS) ejecucion/stack.o ejecucion/base.o ejecucion/RObject.o ejecucion/RString.o ejecucion/RInteger.o ejecucion/RBool.o ejecucion/Util.o ejecucion/memory.o ejecucion/RArray.o ejecucion/RClass.o generador.o ast.o ejecucion/RNumeric.o ejecucion/RDecimal.o
 
+ejecucion:
+	cd ejecucion; make all
+main: y.tab.c lex.yy.c generador.o ast.o
+	cd ejecucion; make all
+	$(CC) -o $(PROGRAM) y.tab.c lex.yy.c $(CFLAGS) ejecucion/stack.o ejecucion/base.o ejecucion/RObject.o ejecucion/RString.o ejecucion/RInteger.o ejecucion/RBool.o ejecucion/Util.o ejecucion/memory.o ejecucion/RArray.o ejecucion/RClass.o generador.o ast.o ejecucion/RNumeric.o ejecucion/RDecimal.o
+
+generador.o: generador.h generador.cpp
+	g++ generador.cpp -c -std=c++0x
+ast.o: ast.h ast.cpp
+	g++ ast.cpp -c
 y.tab.c: gramatica.y
 	bison $(BFLAGS) gramatica.y
 

@@ -6,6 +6,8 @@
 #include <unordered_map>
 
 class RObject;
+class RDecimal;
+class RNumeric;
 
 enum code_ops { FIN, PUTS, GETS, OBJID, ADD, ASSIGN_TMP, MULT, SUB, DIV, POW, MOD, IF, ELSIF, ELSIFCOND, WHILEEND, WHILE, ELSE, END, AND, OR, DO };
 enum tipo_dir { CONSTANTE, TEMPORAL, VARIABLE, ETIQUETA };
@@ -36,4 +38,5 @@ void add_global_function(char* name, std::list<Instruccion*>* codigo);
 void set_variable(char *name, RObject* var);
 RObject *get_variable(char *name);
 void add_symbol(char *name);
+void decimal_add(RDecimal* arg1, RNumeric* arg2, RNumeric* arg3);
 #endif

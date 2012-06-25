@@ -1,8 +1,11 @@
 #include <iostream>
+#include <sstream>
 #include <string>
 
 #include "RBool.h"
 #include "RString.h"
+#include "RInteger.h"
+#include "RDecimal.h"
 #include "memory.h"
 
 RString::RString(){
@@ -11,18 +14,38 @@ RString::RString(){
 
 RString::RString(const char *arg){
   this->str = new std::string(arg);
+  new_pointer(this);
 }
 
 RString::RString(char *arg){
   this->str = new std::string(arg);
+  new_pointer(this);
 }
 
 RString::RString(std::string *arg){
   this->str = new std::string(*arg);
+  new_pointer(this);
 }
 
 RString::RString(RString *arg){
   this->str = new std::string(*arg->getValue());
+  new_pointer(this);
+}
+
+RString::RString(RInteger *arg){
+  this->str = new std::string();
+  std::stringstream s;
+  s << arg->getValue();
+  s >> *str;
+  new_pointer(this);
+}
+
+RString::RString(RDecimal *arg){
+  this->str = new std::string();
+  std::stringstream s;
+  s << arg->getValue();
+  s >> *str;
+  new_pointer(this);
 }
 
 RString::~RString(){
@@ -31,7 +54,6 @@ RString::~RString(){
 
 RString * RString::get_class(){
   RString* s = new RString("String");
-  new_pointer(s);
   return s;
 }
 
@@ -71,6 +93,10 @@ void RString::setValue(std::string param){
   if (this->str != NULL)
     delete str;
   str = new std::string(param);
+}
+
+RString* RString::to_s(){
+  return this;
 }
 
 void RString::setValue(RString * param){

@@ -14,8 +14,8 @@ void add(RString *arg1, RString *arg2, RString *arg3);
 void mult(RString *arg1, RString *arg2, RString *arg3);
 void sub(RString *arg1, RString *arg2, RString *arg3);
 void div(RString *arg1, RString *arg2, RString *arg3);
-void pow(RString *arg1, RString *arg2, RString *arg3);
 void mod(RString *arg1, RString *arg2, RString *arg3);
+RInteger* add(RInteger *arg1, RInteger *arg2);
 void init();
 long int getDir(void* p);
 #endif

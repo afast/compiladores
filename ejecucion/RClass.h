@@ -15,6 +15,7 @@ class RClass : public RObject {
   private:
     RString* name;
     std::list<RString*> method_names;
+    std::list<RObject*> instance_variables;
     std::unordered_map<std::string, std::list<Instruccion*>*> methods;
     void init(RString* param);
   public:
@@ -22,6 +23,7 @@ class RClass : public RObject {
     RClass(std::string* param);
     RClass(RString* param);
     RString* get_class();
+    RString* to_s();
     bool respond_to(RString *method);
     void add_method(std::string* method, std::list<Instruccion*> *codigo);
     void add_method(RString* method, std::list<Instruccion*> *codigo);

@@ -3,20 +3,30 @@
 #include "RString.h"
 #include "memory.h"
 
-RInteger::RInteger(){}
+RInteger::RInteger(){
+  this->value=0;
+  this->integer = true;
+  this->decimal = false;
+  new_pointer(this);
+}
 
 RInteger::RInteger(long int integer){
   this->value = integer;
+  this->integer = true;
+  this->decimal = false;
+  new_pointer(this);
 }
 
 long int RInteger::getValue(){
   return this->value;
 }
-//RInteger *object_id(); use parent method
-RString* RInteger::get_class(){
-  RString *s = new RString("Integer");
-  new_pointer(s);
-  return s;
+
+double RInteger::getDecimalValue(){
+  return (double)this->value;
+}
+
+void RInteger::setValue(long int val){
+  this->value = val;
 }
 
 bool  RInteger::respond_to(RString *method){
@@ -33,4 +43,12 @@ bool  RInteger::operator== (long int param){
 
 long int RInteger::operator= (RInteger param){
   return param.value;
+}
+
+RString* RInteger::to_s(){
+  return new RString(this);
+}
+
+RString* RInteger::get_class(){
+  return new RString("Integer");;
 }

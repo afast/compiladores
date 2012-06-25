@@ -9,6 +9,7 @@ RArray::RArray(){
   value = new RObject*[10];
   arrayLength = 0;
   new_pointer(this);
+  type = RARRAY;
 }
 
 RArray::RArray(RArray *arg){
@@ -16,6 +17,7 @@ RArray::RArray(RArray *arg){
   nextSize = (arg->size()->getValue() % 10)*10 + 10;
   value = new RObject*[nextSize];
   nextSize += 10;
+  type = RARRAY;
   arrayLength = arg->size()->getValue();
   for (int i=0; i<arrayLength; i++)
     value[i] = (*arg)[i];

@@ -17,6 +17,7 @@ RClass::RClass(RString* param){
 
 void RClass::init(RString* param){
   this->name = param;
+  this->type = RCLASS;
 }
 
 RString* RClass::get_class(){

@@ -8,6 +8,7 @@ RDecimal::RDecimal(){
   this->decimal = true;
   this->integer = false;
   new_pointer(this);
+  type = RNUMERIC;
 }
 
 RDecimal::RDecimal(double decimal){
@@ -15,6 +16,7 @@ RDecimal::RDecimal(double decimal){
   this->decimal = true;
   this->integer = false;
   new_pointer(this);
+  type = RNUMERIC;
 }
 
 double RDecimal::getValue(){

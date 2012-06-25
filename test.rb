@@ -7,6 +7,28 @@ puts 2**2
 puts 4%3
 puts 4%3.1
 puts 4.3%3.1
+
+if 2>1
+  puts 'if'
+end
+if 2>1
+  puts 'ifelse'
+else
+  puts 'efelse'
+end
+if (4>2) && (4<9)
+  puts 'jami'
+else
+  puts 'jamo'
+end
+
+if 4>2 && 4<9
+  puts 'elsif'
+elsif 4<2
+  puts 'elsif'
+else
+  puts 5
+end
 =begin
 puts gets
 puts `hello`

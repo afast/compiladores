@@ -8,6 +8,7 @@ RInteger::RInteger(){
   this->integer = true;
   this->decimal = false;
   new_pointer(this);
+  type = RNUMERIC;
 }
 
 RInteger::RInteger(long int integer){
@@ -15,6 +16,7 @@ RInteger::RInteger(long int integer){
   this->integer = true;
   this->decimal = false;
   new_pointer(this);
+  type = RNUMERIC;
 }
 
 long int RInteger::getValue(){

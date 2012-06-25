@@ -10,6 +10,7 @@ class RBool: public RObject {
     bool value;
   public:
     bool getValue();
+    void setValue(bool val);
     RBool();
     RBool(bool arg);
     RBool(RBool *arg);

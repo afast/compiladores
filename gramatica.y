@@ -72,8 +72,13 @@ void printCodigo();
 /*=========================================================================
                           OPERATOR PRECEDENCE
 =========================================================================*/
+%left T_OR
+%left T_AND
+%left T_DOBLE_IGUAL T_NOT_IGUAL
+%left T_MAYOR T_MAYOR_IGUAL T_MENOR T_MENOR_IGUAL
 %left T_MENOS T_MAS
 %left T_ASTER T_BAR T_PORCENTAJE
+%left T_NOT
 %left T_EXPO
 %%
 program : compstmt { printTree($1); generar($1, codigoGlobal); freeTree($1);};
@@ -139,8 +144,7 @@ expr_string : string { $$ = $1; }
 	| T_PAR_IZQ expr_string T_PAR_DER { $$ = $2; };
 expr_bool : T_RESPOND_TO T_PAR_IZQ expr_string T_PAR_DER { $$ = new_object_call($<text>1, new_arguments($3)); }
 	| T_INSTANCE_OF expr_string { $$ = new_object_call($<text>1, new_arguments($2)); }
-	| value T_AND value { std::cout << "T_AND" << std::endl; $$ = new_boolean_op(b_and, $1, $3);}
-	| value T_OR value { $$ = new_boolean_op(b_or, $1, $3);}
+	| T_PAR_IZQ value T_PAR_DER{ std::cout << "PAR BOOL" << std::endl; $$ = new_boolean_op(b_is_bool, $2, NULL);}
 	| T_NOT value { $$ = new_boolean_op(b_not, $2, NULL);}
 	| value  T_MAYOR value { $$ = new_boolean_op(b_mayor, $1, $3);}
 	| value  T_MAYOR_IGUAL value { $$ = new_boolean_op(b_mayor_igual, $1, $3);}
@@ -148,7 +152,8 @@ expr_bool : T_RESPOND_TO T_PAR_IZQ expr_string T_PAR_DER { $$ = new_object_call(
 	| value  T_MENOR_IGUAL value { $$ = new_boolean_op(b_menor_igual, $1, $3);}
 	| value  T_DOBLE_IGUAL value { $$ = new_boolean_op(b_doble_igual, $1, $3);}
 	| value  T_NOT_IGUAL value { $$ = new_boolean_op(b_not_igual, $1, $3);}
-	| T_PAR_IZQ value T_PAR_DER{ std::cout << "PAR BOOL" << std::endl; $$ = new_boolean_op(b_is_bool, $2, NULL);};
+	| value T_AND value { std::cout << "T_AND" << std::endl; $$ = new_boolean_op(b_and, $1, $3);}
+	| value T_OR value { $$ = new_boolean_op(b_or, $1, $3);};
 variable : T_IDENTIF { $$ = new_identificador($<text>1);}
 	| T_ATRIBUTO { $$ = new_atributo($<text>1);}
 	| T_IDENTIF T_CORCHETE_IZQ T_INTEGER_ABS T_CORCHETE_DER { $$ = new_array_pos($<text>1, $<entero>3);};
@@ -213,6 +218,7 @@ main()
   Instruccion *fin = new Instruccion;
   fin->op = FIN;
   codigoGlobal->push_back(fin);
+  printCodigo();
   ejecutar(codigoGlobal);
 }
 
@@ -224,16 +230,27 @@ void printCodigo() {
     ri = *it++;
     switch (ri->op) {
       case FIN   : std::cout << "FIN" << std::endl; break;
-      case PUTS  : std::cout << "PUTS " << *(((RString *)ri->arg1)->getValue()) << std::endl; break;
-      case ADD   : std::cout << "ADD " << ri->arg1 << " " << ri->arg2 << " " << ri->arg3 << std::endl; break;
-      case MULT   : std::cout << "MULT " << ri->arg1 << " " << ri->arg2 << " " << ri->arg3 << std::endl; break;
+      case PUTS  : std::cout << "PUTS " << std::endl; break;
+      case ADD   : std::cout << "ADD " << std::endl; break;
+      case MULT   : std::cout << "MULT " << std::endl; break;
       case IF   : std::cout << "IF "  << std::endl; break;
       case ELSE   : std::cout << "ELSE "  << std::endl; break;
       case ELSIF   : std::cout << "ELSIF "  << std::endl; break;
       case ELSIFCOND   : std::cout << "ELSIFCOND "  << std::endl; break;
       case END   : std::cout << "END "  << std::endl; break;
-      case ASSIGN_TMP   : std::cout << "ASSIGN_TMP "  << *(((RString *)ri->arg1)->getValue()) << std::endl; break;
-
+      case WHILE : std::cout << "WHILE "  << std::endl; break;
+      case WHILEEND : std::cout << "WHILEEND "  << std::endl; break;
+      case NOT : std::cout << "NOT "  << std::endl; break;
+      case G : std::cout << "G "  << std::endl; break;
+      case GE : std::cout << "GE "  << std::endl; break;
+      case L  : std::cout << "L "  << std::endl; break;
+      case LE : std::cout << "LE "  << std::endl; break;
+      case EQ : std::cout << "EQ "  << std::endl; break;
+      case NEQ : std::cout << "NEQ "  << std::endl; break;
+      case TOBOOL : std::cout << "TOBOOL "  << std::endl; break;
+      case AND : std::cout << "AND "  << std::endl; break;
+      case OR : std::cout << "OR "  << std::endl; break;
+      default: break;
     }
   } while (ri->op != FIN);
 }

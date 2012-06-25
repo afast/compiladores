@@ -117,33 +117,43 @@ void decidir_nodo(ast* nodo, list<Instruccion*> *codigo){
       cout << "method call argument: " << endl;
       break;
     case b_and:
+      generar_op_booleana(AND, nodo, codigo);
       cout << "and stmt" << endl;
       break;
     case b_or:
+      generar_op_booleana(OR, nodo, codigo);
       cout << "or stmt" << endl;
       break;
     case b_not:
+      generar_op_booleana(NOT, nodo, codigo);
       cout << "not stmt" << endl;
       break;
     case b_mayor:
+      generar_op_booleana(G, nodo, codigo);
       cout << "mayor stmt" << endl;
       break;
     case b_mayor_igual:
+      generar_op_booleana(GE, nodo, codigo);
       cout << "mayor igual stmt" << endl;
       break;
     case b_menor:
+      generar_op_booleana(L, nodo, codigo);
       cout << "menor stmt" << endl;
       break;
     case b_menor_igual:
+      generar_op_booleana(LE, nodo, codigo);
       cout << "menor igual stmt" << endl;
       break;
     case b_doble_igual:
+      generar_op_booleana(EQ, nodo, codigo);
       cout << "doble igual stmt" << endl;
       break;
     case b_not_igual:
+      generar_op_booleana(NEQ, nodo, codigo);
       cout << "not igual stmt" << endl;
       break;
     case b_is_bool:
+      generar_op_booleana(TOBOOL, nodo, codigo);
       cout << "is bool stmt" << endl;
       break;
     case t_compstmt : // creo q nunca entra aca
@@ -155,18 +165,38 @@ void decidir_nodo(ast* nodo, list<Instruccion*> *codigo){
 void generar_compstmt(list<ast*> *stmt_list, list<Instruccion*> *codigo){
   list<ast*>::iterator it;
   for (it=stmt_list->begin(); it != stmt_list->end(); it++){
-    if ((*it) != NULL)
-      cout << "generar nodo: " << (*it)->tipo << endl;
     decidir_nodo(*it, codigo);
-    if ((*it) != NULL)
-      cout << "nodo generado: " << (*it)->tipo << endl;
   }
   cout << "fin stmt_list" << endl;
 }
 
 
 
-void generar_if(ast* nodo, std::list<Instruccion*> *codigo){}
+void generar_if(ast* nodo, std::list<Instruccion*> *codigo){
+  /*
+   * h1 - condition
+   * h2 - if_block
+   * h3 - rec_elsif - optional
+   * h4 - else      - optional
+   * */
+  /* evaluar condicion */
+  /* if cond */
+  /* cuerpo if */
+  /* generar elsif */
+  /* generar else */
+  /* endif */
+  decidir_nodo(nodo->h1, codigo);
+  RObject* cond = codigo->back()->arg1;
+  codigo->push_back(instr(IF, cond));
+  generar_compstmt(nodo->h2->stmt_list, codigo);
+  generar_elsif(nodo->h3, codigo);
+  if (nodo->h4 != NULL){
+    codigo->push_back(instr(ELSE));
+    generar_compstmt(nodo->h4->stmt_list, codigo);
+  }
+  codigo->push_back(instr(END));
+}
+
 void generar_op_numerica(enum code_ops op, ast* nodo, std::list<Instruccion*>* codigo){
   RNumeric* arg2, *arg3, *arg1;
   if (nodo_hoja(nodo->h1)){ // no preciso variable temporal
@@ -199,9 +229,7 @@ RNumeric* get_numeric_node(ast* hoja){
       arg = new RInteger(hoja->entero);
       break;}
     case f_decimal:{
-      cout << "detectado decimal: " << hoja->decimal << endl;
       arg = new RDecimal(hoja->decimal);
-      cout << "detectado decimal: " << arg->getDecimalValue() << endl;
       break;}
     default:
       cout << "Error de tipo, el operando no es numerico!" << endl;
@@ -210,7 +238,45 @@ RNumeric* get_numeric_node(ast* hoja){
   return arg;
 }
 
-void generar_elsif(ast* nodo, std::list<Instruccion*> *codigo){}
+RObject* get_abstract_node(ast* hoja){
+  RObject* arg=NULL;
+  switch(hoja->tipo){
+    case f_entero:{
+      arg = new RInteger(hoja->entero);
+      break;}
+    case f_decimal:{
+      arg = new RDecimal(hoja->decimal);
+      break;}
+    case f_string :
+      arg = new RString(hoja->str);
+      break;
+    case f_bool :
+      arg = new RBool(hoja->booleano);
+      break;
+    default:
+      cout << "Error de tipo, el operando no es correcto!" << endl;
+      break;
+  }
+  return arg;
+}
+
+void generar_elsif(ast* nodo, std::list<Instruccion*> *codigo){
+  /*
+   * h1 - cond
+   * h2 - cuerpo if
+   * h3 - elsif -optional
+   *
+   * */
+  if (nodo == NULL)
+    return;
+  codigo->push_back(instr(ELSIFCOND));
+  decidir_nodo(nodo->h1, codigo);
+  RObject* cond = codigo->back()->arg1;
+  codigo->push_back(instr(ELSIF, cond));
+  generar_compstmt(nodo->h2->stmt_list, codigo);
+  generar_elsif(nodo->h3, codigo);
+}
+
 void generar_while(ast* nodo, std::list<Instruccion*> *codigo){}
 void generar_string(ast* nodo, std::list<Instruccion*> *codigo){}
 void generar_entero(ast* nodo, std::list<Instruccion*> *codigo){}
@@ -244,6 +310,27 @@ void generar_puts(ast* nodo, std::list<Instruccion*> *codigo){
   i->op = PUTS;
   i->arg1 = arg1;
   codigo->push_back(i);
+}
+
+void generar_op_booleana(enum code_ops op, ast* nodo, list<Instruccion*>* codigo){
+  RObject* arg2, *arg3, *arg1;
+  arg3=NULL;
+  if (nodo_hoja(nodo->h1)){ // no preciso variable temporal
+    arg2 = get_abstract_node(nodo->h1);
+  } else {
+    decidir_nodo(nodo->h1, codigo);
+    arg2 = (RNumeric*)codigo->back()->arg1;
+  }
+  if (op != NOT && op != TOBOOL){
+    if (nodo_hoja(nodo->h2)){ // no preciso variable temporal
+      arg3 = get_abstract_node(nodo->h2);
+    } else {
+      decidir_nodo(nodo->h2, codigo);
+      arg3 = (RNumeric*)codigo->back()->arg1;
+    }
+  }
+
+  codigo->push_back(instr(op, new RBool(), arg2, arg3));
 }
 
 bool nodo_hoja(ast* nodo){

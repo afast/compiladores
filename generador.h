@@ -33,5 +33,6 @@ Instruccion* instr(enum code_ops op);
 Instruccion* instr(enum code_ops op, RObject* arg1);
 Instruccion* instr(enum code_ops op, RObject* arg1, RObject* arg2);
 Instruccion* instr(enum code_ops op, RObject* arg1, RObject* arg2, RObject* arg3);
+void generar_op_booleana(enum code_ops op, ast* nodo, std::list<Instruccion*>* codigo);
 
 #endif

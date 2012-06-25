@@ -61,7 +61,6 @@ void ejecutar(list<Instruccion*> *codigo) {
           ((RDecimal*)ri->arg1)->setValue(((RNumeric*)ri->arg2)->getDecimalValue() + ((RNumeric*)ri->arg3)->getDecimalValue());
         break;
       case OBJID : if (ri->arg1 != NULL) *((RInteger*)ri->arg1) = getDir(ri->arg2); break;
-      case ASSIGN_TMP : assign_tmp((RString *)ri->arg1, ri->arg2); break;
       case MULT : 
         if (((RNumeric*)ri->arg1)->es_int())
           ((RInteger*)ri->arg1)->setValue(((RInteger*)ri->arg2)->getValue() * ((RInteger*)ri->arg3)->getValue());
@@ -99,6 +98,36 @@ void ejecutar(list<Instruccion*> *codigo) {
       case END : cond_stack.pop(); break;
       case WHILE : if (((RBool*)ri->arg1)->getValue()) while_stack.push(it); else it=descartar_whileend(it); break;
       case WHILEEND : if (((RBool*)ri->arg1)->getValue()) it = while_stack.top(); else while_stack.pop(); break;
+      case AND :
+        ((RBool*)ri->arg1)->setValue(*((RBool*)ri->arg2) && *((RBool*)ri->arg3));
+        break;
+      case OR :
+        ((RBool*)ri->arg1)->setValue(*((RBool*)ri->arg2) || *((RBool*)ri->arg3));
+        break;
+      case NOT :
+        ((RBool*)ri->arg1)->setValue(!((RBool*)ri->arg2)->getValue());
+        break;
+      case G :
+        ((RBool*)ri->arg1)->setValue(mayor(ri->arg2, ri->arg3)->getValue());
+        break;
+      case GE :
+        ((RBool*)ri->arg1)->setValue(mayor_igual(ri->arg2, ri->arg3));
+        break;
+      case L  :
+        ((RBool*)ri->arg1)->setValue(menor(ri->arg2, ri->arg3));
+        break;
+      case LE :
+        ((RBool*)ri->arg1)->setValue(menor_igual(ri->arg2, ri->arg3));
+        break;
+      case EQ :
+        ((RBool*)ri->arg1)->setValue(igual(ri->arg2, ri->arg3));
+        break;
+      case NEQ :
+        ((RBool*)ri->arg1)->setValue(!igual(ri->arg2, ri->arg3));
+        break;
+      case TOBOOL :
+        ((RBool*)ri->arg1)->setValue(extraer_bool(ri->arg2));
+        break;
     }
   } while (ri->op != FIN);
 

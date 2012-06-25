@@ -6,15 +6,24 @@ bool RBool::getValue(){
   return this->value;
 }
 
-RBool::RBool(){new_pointer(this);}
+void RBool::setValue(bool val){
+  this->value = val;
+}
+
+RBool::RBool(){
+  new_pointer(this);
+  type = RBOOL;
+}
 
 RBool::RBool(bool arg){
   value = arg;
   new_pointer(this);
+  type = RBOOL;
 }
 
 RBool::RBool(RBool *arg){
   value = arg->getValue();
+  type = RBOOL;
 }
 
 RString* RBool::get_class(){

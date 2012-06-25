@@ -8,6 +8,7 @@
 
 RObject::RObject(){
   this->object_id=0;
+  this->type = ROBJECT;
 }
 
 RInteger *RObject::objectId(){

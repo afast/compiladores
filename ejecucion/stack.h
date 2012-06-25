@@ -9,7 +9,16 @@ class RObject;
 class RDecimal;
 class RNumeric;
 
-enum code_ops { FIN, PUTS, GETS, OBJID, ADD, ASSIGN_TMP, MULT, SUB, DIV, POW, MOD, IF, ELSIF, ELSIFCOND, WHILEEND, WHILE, ELSE, END, AND, OR, DO };
+enum code_ops { FIN, PUTS, GETS, OBJID, ADD, ASSIGN_TMP, MULT, SUB, DIV, POW, MOD, IF, ELSIF, ELSIFCOND, WHILEEND, WHILE, ELSE, END, AND, OR, NOT, G, GE, L, LE, EQ, NEQ, TOBOOL, DO };
+/*
+ * G  - mayor
+ * GE - mayor igual
+ * L  - menor
+ * LE - menor igual
+ * EQ - igualdad
+ * NEQ - !igualdad
+ * TOBOOL - (value)
+ * */
 enum tipo_dir { CONSTANTE, TEMPORAL, VARIABLE, ETIQUETA };
 
 struct RInstruccion {

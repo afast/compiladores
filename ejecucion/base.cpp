@@ -4,6 +4,8 @@
 #include "base.h"
 #include "RString.h"
 #include "RInteger.h"
+#include "RNumeric.h"
+#include "RBool.h"
 #include "Util.h"
 #include "memory.h"
 
@@ -59,4 +61,90 @@ long int getDir(void* p){
 void init(){
   //Default methods
   
+}
+
+RBool* mayor(RObject* arg1, RObject* arg2){
+  RBool* res = NULL;
+  if (arg1->type != arg2->type)
+    error_generando("No se puede comparar objetos de tipo diferente");
+  else{
+    bool resultado;
+    switch(arg1->type){
+      case RNUMERIC:
+        resultado = ((RNumeric*)arg1)->getDecimalValue() > ((RNumeric*)arg2)->getDecimalValue();
+        break;
+      case RBOOL:
+        resultado = ((RBool*)arg1)->getValue() > ((RBool*)arg2)->getValue();
+        break;
+      case RSTRING:
+        resultado = *((RString*)arg1)->getValue() > *((RString*)arg2)->getValue();
+        break;
+    }
+    res = new RBool(resultado);
+  }
+  return res;
+}
+
+RBool* mayor_igual(RObject* arg1, RObject* arg2){
+  RBool* res = NULL;
+  if (arg1->type != arg2->type)
+    error_generando("No se puede comparar objetos de tipo diferente");
+  else{
+    bool resultado;
+    switch(arg1->type){
+      case RNUMERIC:
+        resultado = ((RNumeric*)arg1)->getDecimalValue() >= ((RNumeric*)arg2)->getDecimalValue();
+        break;
+      case RBOOL:
+        resultado = ((RBool*)arg1)->getValue() >= ((RBool*)arg2)->getValue();
+        break;
+      case RSTRING:
+        resultado = *((RString*)arg1)->getValue() >= *((RString*)arg2)->getValue();
+        break;
+    }
+    res = new RBool(resultado);
+  }
+
+  return res;
+}
+
+RBool* menor(RObject* arg1, RObject* arg2){
+  return mayor_igual(arg2, arg1);
+}
+
+RBool* menor_igual(RObject* arg1, RObject* arg2){
+  return mayor(arg2, arg1);
+}
+
+RBool* igual(RObject* arg1, RObject* arg2){
+  RBool* res = NULL;
+  if (arg1->type != arg2->type){
+    error_generando("No se puede comparar objetos de tipo diferente");
+    res = new RBool(false);
+  }else {
+    bool resultado;
+    switch(arg1->type){
+      case RNUMERIC:
+        resultado = ((RNumeric*)arg1)->getDecimalValue() == ((RNumeric*)arg2)->getDecimalValue();
+        break;
+      case RBOOL:
+        resultado = ((RBool*)arg1)->getValue() == ((RBool*)arg2)->getValue();
+        break;
+      case RSTRING:
+        resultado = *((RString*)arg1)->getValue() == *((RString*)arg2)->getValue();
+        break;
+    }
+    res = new RBool(resultado);
+  }
+
+  return res;
+}
+
+bool extraer_bool(RObject* arg){
+  return arg->type != RNIL && !(arg->type == RBOOL && ((RBool*)arg)->getValue());
+}
+
+void error_generando(const char * msj){
+  std::cout << "Error generando codigo!" << std::endl;
+  std::cout << msj << std::endl;
 }

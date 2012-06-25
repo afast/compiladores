@@ -3,19 +3,20 @@
 #include <iostream>
 #include <string>
 #include <unordered_map>
-#include "RObject.h"
 
-enum obj_type { RSTRING, TOBJECT, RINT, RCLASS, RARRAY, RNIL };
+class RString;
+class RObject;
+class RBool;
 
 void puts(RString *string_arg);
 void gets(RString *string_arg);
-void assign_tmp(RString *name, RObject * value);
-void add(RString *arg1, RString *arg2, RString *arg3);
-void mult(RString *arg1, RString *arg2, RString *arg3);
-void sub(RString *arg1, RString *arg2, RString *arg3);
-void div(RString *arg1, RString *arg2, RString *arg3);
-void mod(RString *arg1, RString *arg2, RString *arg3);
-RInteger* add(RInteger *arg1, RInteger *arg2);
 void init();
 long int getDir(void* p);
+RBool* mayor(RObject* arg1, RObject* arg2);
+RBool* mayor_igual(RObject* arg1, RObject* arg);
+RBool* menor(RObject* arg1, RObject* arg);
+RBool* menor_igual(RObject* arg1, RObject* arg);
+RBool* igual(RObject* arg1, RObject* arg);
+bool extraer_bool(RObject* arg);
+void error_generando(const char * msj);
 #endif

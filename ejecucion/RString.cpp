@@ -10,26 +10,31 @@
 
 RString::RString(){
   str = new std::string();
+  type = RSTRING;
 }
 
 RString::RString(const char *arg){
   this->str = new std::string(arg);
   new_pointer(this);
+  type = RSTRING;
 }
 
 RString::RString(char *arg){
   this->str = new std::string(arg);
   new_pointer(this);
+  type = RSTRING;
 }
 
 RString::RString(std::string *arg){
   this->str = new std::string(*arg);
   new_pointer(this);
+  type = RSTRING;
 }
 
 RString::RString(RString *arg){
   this->str = new std::string(*arg->getValue());
   new_pointer(this);
+  type = RSTRING;
 }
 
 RString::RString(RInteger *arg){
@@ -38,6 +43,7 @@ RString::RString(RInteger *arg){
   s << arg->getValue();
   s >> *str;
   new_pointer(this);
+  type = RSTRING;
 }
 
 RString::RString(RDecimal *arg){
@@ -46,6 +52,7 @@ RString::RString(RDecimal *arg){
   s << arg->getValue();
   s >> *str;
   new_pointer(this);
+  type = RSTRING;
 }
 
 RString::~RString(){

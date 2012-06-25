@@ -25,7 +25,7 @@ RObject* generar_objeto(ast* nodo){
   RObject* objeto;
   switch(nodo->tipo){
     case f_string :{
-      RString* s = new RString(nodo->str);
+      RString* s = new RString(nodo->str, true);
       objeto = s;
       break;}
     case f_entero :{
@@ -33,7 +33,6 @@ RObject* generar_objeto(ast* nodo){
       objeto = s;
       break;}
     case f_decimal :{
-      cout << "detectado decimal: " << nodo->decimal << endl;
       RDecimal* s = new RDecimal(nodo->decimal);
       objeto = s;
       break;}
@@ -50,7 +49,6 @@ void decidir_nodo(ast* nodo, list<Instruccion*> *codigo){
     return;
   switch(nodo->tipo){
     case c_if :
-      cout << "generar if" << endl;
       generar_if(nodo, codigo);
       break;
     case op_mul :
@@ -96,65 +94,48 @@ void decidir_nodo(ast* nodo, list<Instruccion*> *codigo){
       generar_gets(codigo);
       break;
     case t_method_call:
-      cout << "method call " << nodo->str << endl;
       break;
     case t_command :
-      cout << "command stmt" << nodo->str << endl;
       break;
     case t_nil :
-      cout << "nil stmt" << endl;
       break;
     case t_mul_string :
-      cout << "mul string stmt: " << nodo->entero << endl;
       break;
     case t_add_string :
-      cout << "add string stmt" << endl;
       break;
     case t_method_with_args:
-      cout << "method call with args: " << nodo->str << endl;
       break;
     case t_args:
-      cout << "method call argument: " << endl;
       break;
     case b_and:
       generar_op_booleana(AND, nodo, codigo);
-      cout << "and stmt" << endl;
       break;
     case b_or:
       generar_op_booleana(OR, nodo, codigo);
-      cout << "or stmt" << endl;
       break;
     case b_not:
       generar_op_booleana(NOT, nodo, codigo);
-      cout << "not stmt" << endl;
       break;
     case b_mayor:
       generar_op_booleana(G, nodo, codigo);
-      cout << "mayor stmt" << endl;
       break;
     case b_mayor_igual:
       generar_op_booleana(GE, nodo, codigo);
-      cout << "mayor igual stmt" << endl;
       break;
     case b_menor:
       generar_op_booleana(L, nodo, codigo);
-      cout << "menor stmt" << endl;
       break;
     case b_menor_igual:
       generar_op_booleana(LE, nodo, codigo);
-      cout << "menor igual stmt" << endl;
       break;
     case b_doble_igual:
       generar_op_booleana(EQ, nodo, codigo);
-      cout << "doble igual stmt" << endl;
       break;
     case b_not_igual:
       generar_op_booleana(NEQ, nodo, codigo);
-      cout << "not igual stmt" << endl;
       break;
     case b_is_bool:
       generar_op_booleana(TOBOOL, nodo, codigo);
-      cout << "is bool stmt" << endl;
       break;
     case t_compstmt : // creo q nunca entra aca
       generar_compstmt(nodo->stmt_list, codigo);
@@ -167,7 +148,6 @@ void generar_compstmt(list<ast*> *stmt_list, list<Instruccion*> *codigo){
   for (it=stmt_list->begin(); it != stmt_list->end(); it++){
     decidir_nodo(*it, codigo);
   }
-  cout << "fin stmt_list" << endl;
 }
 
 
@@ -248,7 +228,7 @@ RObject* get_abstract_node(ast* hoja){
       arg = new RDecimal(hoja->decimal);
       break;}
     case f_string :
-      arg = new RString(hoja->str);
+      arg = new RString(hoja->str, true);
       break;
     case f_bool :
       arg = new RBool(hoja->booleano);
@@ -288,8 +268,7 @@ void generar_puts(ast* nodo, std::list<Instruccion*> *codigo){
     ast* hoja = nodo->h1;
     switch(hoja->tipo){
       case f_string:
-        cout << "hoja string" << endl;
-        arg1= new RString(hoja->str);
+        arg1= new RString(hoja->str, true);
         break;
       case f_entero:
         arg1= (new RInteger(hoja->entero))->to_s();
@@ -303,7 +282,6 @@ void generar_puts(ast* nodo, std::list<Instruccion*> *codigo){
     }
   } else {
     decidir_nodo(nodo->h1, codigo);
-    cout << "last op " << codigo->back()->op << endl;
     arg1 = codigo->back()->arg1;
   }
   Instruccion* i = new Instruccion;
@@ -319,14 +297,14 @@ void generar_op_booleana(enum code_ops op, ast* nodo, list<Instruccion*>* codigo
     arg2 = get_abstract_node(nodo->h1);
   } else {
     decidir_nodo(nodo->h1, codigo);
-    arg2 = (RNumeric*)codigo->back()->arg1;
+    arg2 = codigo->back()->arg1;
   }
   if (op != NOT && op != TOBOOL){
     if (nodo_hoja(nodo->h2)){ // no preciso variable temporal
       arg3 = get_abstract_node(nodo->h2);
     } else {
       decidir_nodo(nodo->h2, codigo);
-      arg3 = (RNumeric*)codigo->back()->arg1;
+      arg3 = codigo->back()->arg1;
     }
   }
 

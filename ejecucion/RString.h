@@ -19,6 +19,7 @@ class RString: public RObject {
     ~RString();
     RString(const char *arg);
     RString(char *arg);
+    RString(char *arg, bool cortar_extremos);
     RString(std::string *arg);
     RString(RString *arg);
     RString(RInteger *arg);

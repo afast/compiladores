@@ -99,10 +99,10 @@ void ejecutar(list<Instruccion*> *codigo) {
       case WHILE : if (((RBool*)ri->arg1)->getValue()) while_stack.push(it); else it=descartar_whileend(it); break;
       case WHILEEND : if (((RBool*)ri->arg1)->getValue()) it = while_stack.top(); else while_stack.pop(); break;
       case AND :
-        ((RBool*)ri->arg1)->setValue(*((RBool*)ri->arg2) && *((RBool*)ri->arg3));
+        ((RBool*)ri->arg1)->setValue(((RBool*)ri->arg2)->getValue() && ((RBool*)ri->arg3)->getValue());
         break;
       case OR :
-        ((RBool*)ri->arg1)->setValue(*((RBool*)ri->arg2) || *((RBool*)ri->arg3));
+        ((RBool*)ri->arg1)->setValue(((RBool*)ri->arg2)->getValue() || ((RBool*)ri->arg3)->getValue());
         break;
       case NOT :
         ((RBool*)ri->arg1)->setValue(!((RBool*)ri->arg2)->getValue());
@@ -207,7 +207,6 @@ Instruccion *nuevaInst(enum code_ops op, RObject* arg1, RObject* arg2, RObject* 
 }
 
 void decimal_add(RDecimal* arg1, RNumeric* arg2, RNumeric* arg3){
-  cout << "decimal add" << endl;
   if (arg2->es_int())
     arg1->setValue(((RInteger*)arg2)->getValue() + ((RDecimal*)arg3)->getValue());
   else

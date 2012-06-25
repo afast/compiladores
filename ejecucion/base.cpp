@@ -32,19 +32,6 @@ void mod(RString *arg1, RString *arg2, RString *arg3) {
   vTemporales[*(arg3->getValue())] = new RInteger(op1->getValue() % op2->getValue());
 }
 
-
-void assign_tmp(RString *name, RObject * value){
-	vTemporales[*(((RString *)name)->getValue())] = value;
-  std::cout << "-QQQQQQQQQ----------------->   " << ((RInteger *)vTemporales[*(((RString *)name)->getValue())])->getValue() << std::endl;
-  //RInteger *add(RInteger *arg1, RInteger *arg2) {
-  //RInteger *result = new RInteger(arg1->getValue() + arg2->getValue());
-  /*if (arg1->getValue() != NULL)
-    delete arg1->getValue();
-  if (arg2->getValue() != NULL)
-    delete arg2->getValue();*/
-  //return result;
-}
-
 long int getDir(void* p){
   long int id;
   std::stringstream s, sp;
@@ -141,7 +128,7 @@ RBool* igual(RObject* arg1, RObject* arg2){
 }
 
 bool extraer_bool(RObject* arg){
-  return arg->type != RNIL && !(arg->type == RBOOL && ((RBool*)arg)->getValue());
+  return arg->type != RNIL && !(arg->type == RBOOL && !((RBool*)arg)->getValue());
 }
 
 void error_generando(const char * msj){

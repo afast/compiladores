@@ -31,6 +31,16 @@ RString::RString(std::string *arg){
   type = RSTRING;
 }
 
+RString::RString(char *arg, bool cortar_extremos){
+  str = new std::string(arg);
+  new_pointer(this);
+  type = RSTRING;
+  if (cortar_extremos){
+    str->erase(str->begin());
+    str->erase(str->end()-1);
+  }
+}
+
 RString::RString(RString *arg){
   this->str = new std::string(*arg->getValue());
   new_pointer(this);

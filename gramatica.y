@@ -81,7 +81,7 @@ void printCodigo();
 %left T_NOT
 %left T_EXPO
 %%
-program : compstmt { printTree($1); generar($1, codigoGlobal); freeTree($1);};
+program : compstmt { /*printTree($1);*/ generar($1, codigoGlobal); freeTree($1);};
 compstmt : stmt { $$ = new_compstmt($1);}
          | stmt T_FIN_INSTRUCCION {$$ = new_compstmt($1);}
          | stmt texpr {$$ = add_front_stmt_compstmt($1, $2);}
@@ -105,7 +105,6 @@ stmt : /* Vacio */ { $$ = NULL; }
 	| load
 	| require;
 value : T_GETS { $$ = new_gets(); }
-	| T_BOOL {$$ = new_bool($<entero>1);}
 	| T_INSTANCE_CLASS
 	| T_NEW T_PAR_IZQ args_new T_PAR_DER
 	| expr_numeric { $$ = $1; }
@@ -142,9 +141,10 @@ expr_string : string { $$ = $1; }
 	| expr_string T_ASTER T_INTEGER_ABS { $$ = new_mul_string($1, $<entero>3);}
 	| expr_string T_MAS expr_string { $$ = new_add_string($1, $3); }
 	| T_PAR_IZQ expr_string T_PAR_DER { $$ = $2; };
-expr_bool : T_RESPOND_TO T_PAR_IZQ expr_string T_PAR_DER { $$ = new_object_call($<text>1, new_arguments($3)); }
+expr_bool : T_BOOL {$$ = new_boolean_op(b_is_bool, new_bool($<entero>1), NULL); }
+  | T_RESPOND_TO T_PAR_IZQ expr_string T_PAR_DER { $$ = new_object_call($<text>1, new_arguments($3)); }
 	| T_INSTANCE_OF expr_string { $$ = new_object_call($<text>1, new_arguments($2)); }
-	| T_PAR_IZQ value T_PAR_DER{ std::cout << "PAR BOOL" << std::endl; $$ = new_boolean_op(b_is_bool, $2, NULL);}
+	| T_PAR_IZQ value T_PAR_DER{ $$ = new_boolean_op(b_is_bool, $2, NULL);}
 	| T_NOT value { $$ = new_boolean_op(b_not, $2, NULL);}
 	| value  T_MAYOR value { $$ = new_boolean_op(b_mayor, $1, $3);}
 	| value  T_MAYOR_IGUAL value { $$ = new_boolean_op(b_mayor_igual, $1, $3);}
@@ -152,7 +152,7 @@ expr_bool : T_RESPOND_TO T_PAR_IZQ expr_string T_PAR_DER { $$ = new_object_call(
 	| value  T_MENOR_IGUAL value { $$ = new_boolean_op(b_menor_igual, $1, $3);}
 	| value  T_DOBLE_IGUAL value { $$ = new_boolean_op(b_doble_igual, $1, $3);}
 	| value  T_NOT_IGUAL value { $$ = new_boolean_op(b_not_igual, $1, $3);}
-	| value T_AND value { std::cout << "T_AND" << std::endl; $$ = new_boolean_op(b_and, $1, $3);}
+	| value T_AND value { $$ = new_boolean_op(b_and, $1, $3);}
 	| value T_OR value { $$ = new_boolean_op(b_or, $1, $3);};
 variable : T_IDENTIF { $$ = new_identificador($<text>1);}
 	| T_ATRIBUTO { $$ = new_atributo($<text>1);}
@@ -218,7 +218,7 @@ main()
   Instruccion *fin = new Instruccion;
   fin->op = FIN;
   codigoGlobal->push_back(fin);
-  printCodigo();
+  //printCodigo();
   ejecutar(codigoGlobal);
 }
 

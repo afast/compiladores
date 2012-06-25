@@ -8,8 +8,8 @@ puts 4%3
 puts 4%3.1
 puts 4.3%3.1
 
-if 2>1
-  puts 'if'
+if true
+  puts 'true'
 end
 if 2>1
   puts 'ifelse'
@@ -22,7 +22,7 @@ else
   puts 'jamo'
 end
 
-if 4>2 && 4<9
+if 4>2 || 4<9
   puts 'elsif'
 elsif 4<2
   puts 'elsif'

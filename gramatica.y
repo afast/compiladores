@@ -40,8 +40,6 @@ node_tac* generar_oper_binario(code_ops oper, node_tac* op1, node_tac* op2);
 node_tac* insert_tmp(RObject *value);
 node_tac* generar_elsif(node_tac* condition, node_tac* stmt, node_tac* op_elsif);
 node_tac* generar_if(node_tac* condition, node_tac* stmt, node_tac* op_elsif, node_tac* op_else);
-//node_tac* generar_if_sigue(node_tac* result, node_tac* stmt, node_tac* op_elsif, node_tac* op_else);
-//node_tac* generar_if(node_tac* condition);
 node_tac* generar_else(node_tac* stmt);
 void printCodigo();
 
@@ -201,19 +199,31 @@ expr_string_interpolado_recur : /*vacio*/
 
 %%
 
-main()
-{
+main( int argc, char *argv[] )
+{ 
+	if(argc > 1){
+		extern FILE *yyin;
+		++argv;
+		--argc;
+		yyin = fopen( argv[0], "r" );
 
-  codigoGlobal = new std::list<Instruccion*>();
-  initializer();
-  /*Acciones a ejecutar antes del análisis*/
-  yyparse();
-  /*Acciones a ejecutar después del análisis*/
-  /* Indicar final del programa */
-  Instruccion *fin = new Instruccion;
-  fin->op = FIN;
-  codigoGlobal->push_back(fin);
-  ejecutar(codigoGlobal);
+		int i = 1;
+		while(i < argc){
+			std::cout << "argv[" << i << "] = " << argv[i] << std::endl;
+			i++;
+		}
+		codigoGlobal = new std::list<Instruccion*>();
+		initializer();
+		yyparse();
+		Instruccion *fin = new Instruccion;
+		fin->op = FIN;
+		codigoGlobal->push_back(fin);
+		ejecutar(codigoGlobal);
+	} else {
+		std::cout << "No se indica archivo para ejecutar. La ejecucion debe usar el formato:" << std::endl;
+		std::cout << "       myruby archivo.rb arg1 arg2 arg3 ... argN" << std::endl;
+	}
+
 }
 
 void printCodigo() {

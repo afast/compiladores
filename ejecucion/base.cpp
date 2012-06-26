@@ -128,7 +128,7 @@ RBool* igual(RObject* arg1, RObject* arg2){
 }
 
 bool extraer_bool(RObject* arg){
-  return arg->type != RNIL && !(arg->type == RBOOL && !((RBool*)arg)->getValue());
+  return arg->type != RNIL && (arg->type != RBOOL || ((RBool*)arg)->getValue());
 }
 
 void error_generando(const char * msj){

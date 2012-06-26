@@ -11,6 +11,7 @@ class RBool: public RObject {
   public:
     bool getValue();
     void setValue(bool val);
+    void setValue(RBool* val);
     RBool();
     RBool(bool arg);
     RBool(RBool *arg);

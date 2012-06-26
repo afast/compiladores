@@ -10,6 +10,10 @@ void RBool::setValue(bool val){
   this->value = val;
 }
 
+void RBool::setValue(RBool* val){
+  this->value = val->getValue();
+}
+
 RBool::RBool(){
   new_pointer(this);
   type = RBOOL;

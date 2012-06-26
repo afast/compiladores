@@ -52,7 +52,8 @@ void ejecutar(list<Instruccion*> *codigo) {
     ri = *it++;
     switch (ri->op) {
       case FIN   : cout << "Fin ejecución" << endl; break;
-      case PUTS  : puts(ri->arg1->to_s()); break;
+      case PUTS  : puts(ri->arg1->to_s());
+        break;
       case GETS  : gets((RString *)ri->arg1); break;
       case ADD   : 
         if (((RNumeric*)ri->arg1)->es_int()){
@@ -91,7 +92,11 @@ void ejecutar(list<Instruccion*> *codigo) {
         else
           ((RDecimal*)ri->arg1)->setValue(((RNumeric*)ri->arg2)->mod((RNumeric*)ri->arg3));
         break;
-      case IF : if (!((RBool*)ri->arg1)->getValue()) it = descartar_if(it); cond_stack.push(((RBool*)ri->arg1)->getValue()); break;
+      case IF : 
+        if (!((RBool*)ri->arg1)->getValue())
+          it = descartar_if(it);
+        cond_stack.push(((RBool*)ri->arg1)->getValue());
+        break;
       case ELSIF : if (!((RBool*)ri->arg1)->getValue()) it = descartar_if(it); else { cond_stack.pop(); cond_stack.push(((RBool*)ri->arg1)->getValue());} break;
       case ELSIFCOND : if (cond_stack.top()) it = descartar_hasta_end(it); break;
       case ELSE : if (cond_stack.top()) it = descartar_hasta_end(it); break;
@@ -111,19 +116,19 @@ void ejecutar(list<Instruccion*> *codigo) {
         ((RBool*)ri->arg1)->setValue(mayor(ri->arg2, ri->arg3)->getValue());
         break;
       case GE :
-        ((RBool*)ri->arg1)->setValue(mayor_igual(ri->arg2, ri->arg3));
+        ((RBool*)ri->arg1)->setValue(mayor_igual(ri->arg2, ri->arg3)->getValue());
         break;
       case L  :
-        ((RBool*)ri->arg1)->setValue(menor(ri->arg2, ri->arg3));
+        ((RBool*)ri->arg1)->setValue(menor(ri->arg2, ri->arg3)->getValue());
         break;
       case LE :
-        ((RBool*)ri->arg1)->setValue(menor_igual(ri->arg2, ri->arg3));
+        ((RBool*)ri->arg1)->setValue(menor_igual(ri->arg2, ri->arg3)->getValue());
         break;
       case EQ :
-        ((RBool*)ri->arg1)->setValue(igual(ri->arg2, ri->arg3));
+        ((RBool*)ri->arg1)->setValue(igual(ri->arg2, ri->arg3)->getValue());
         break;
       case NEQ :
-        ((RBool*)ri->arg1)->setValue(!igual(ri->arg2, ri->arg3));
+        ((RBool*)ri->arg1)->setValue(!igual(ri->arg2, ri->arg3)->getValue());
         break;
       case TOBOOL :
         ((RBool*)ri->arg1)->setValue(extraer_bool(ri->arg2));

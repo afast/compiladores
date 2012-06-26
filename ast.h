@@ -49,5 +49,6 @@ ast* new_boolean_op(enum ast_node_t op, ast* left, ast* right);
 ast* new_bool(int b);
 ast* new_if(ast* cond, ast* compstmt, ast* opt_rec_elsif, ast* opt_else);
 ast* new_elsif(ast* cond, ast* compstmt, ast* opt_rec_elsif);
+ast* new_while(ast* cond, ast* compstmt);
 
 #endif

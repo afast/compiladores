@@ -22,10 +22,10 @@ else
   puts 'jamo'
 end
 
-if 4>2 || 4<9
+if 4>2 && 40<9
   puts 'elsif'
 elsif 4<2
-  puts 'elsif'
+  puts 'elsif2'
 else
   puts 5
 end

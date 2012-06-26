@@ -66,7 +66,7 @@ void printCodigo();
 %token T_ATRIBUTO T_VAR_PESOS_CERO T_VAR_PESOS T_VAR_PESOS_PESOS T_INTEGER_ABS T_ATRIBUTO_ACCESOR
 %token T_FLOAT_ABS T_STRING_1 T_STRING_2 T_STRING_IZQ T_STRING_DER T_COMMAND T_ESPACIOS T_ERROR
 
-%type <a> expr_numeric compstmt stmt texpr value output number variable string expr_string expr_bool if recursive_elsif opt_else
+%type <a> expr_numeric compstmt stmt texpr value output number variable string expr_string expr_bool if recursive_elsif opt_else while
 /*=========================================================================
                           OPERATOR PRECEDENCE
 =========================================================================*/
@@ -77,9 +77,9 @@ void printCodigo();
 %left T_MENOS T_MAS
 %left T_ASTER T_BAR T_PORCENTAJE
 %left T_NOT
-%left T_EXPO
+%right T_EXPO
 %%
-program : compstmt { /*printTree($1);*/ generar($1, codigoGlobal); freeTree($1);};
+program : compstmt { printTree($1); generar($1, codigoGlobal); freeTree($1);};
 compstmt : stmt { $$ = new_compstmt($1);}
          | stmt T_FIN_INSTRUCCION {$$ = new_compstmt($1);}
          | stmt texpr {$$ = add_front_stmt_compstmt($1, $2);}
@@ -101,7 +101,10 @@ stmt : /* Vacio */ { $$ = NULL; }
 	| T_ACCESSOR args_accesores
 	| T_INVOCACION_METODO
 	| load
-	| require;
+	| require
+	| bloque;
+bloque: T_LLAVE_IZQ compstmt T_LLAVE_DER
+	| T_DO compstmt T_END;
 value : T_GETS { $$ = new_gets(); }
 	| T_INSTANCE_CLASS
 	| T_NEW T_PAR_IZQ args_new T_PAR_DER
@@ -161,7 +164,7 @@ recursive_elsif : /* Vacio */ { $$ = NULL; }
                 | T_ELSIF expr_bool compstmt recursive_elsif { $$ = new_elsif($2, $3, $4); };
 opt_else : /* Vacio */ { $$ = NULL; }
          | T_ELSE compstmt { $$ = $2; };
-while : T_WHILE expr_bool compstmt T_END;
+while : T_WHILE expr_bool compstmt T_END { $$ = new_while($2, $3); };
 case : T_CASE rec_when_then T_END
 	| T_CASE T_FIN_INSTRUCCION rec_when_then T_END;
 
@@ -223,6 +226,7 @@ main( int argc, char *argv[] )
 		Instruccion *fin = new Instruccion;
 		fin->op = FIN;
 		codigoGlobal->push_back(fin);
+printCodigo();
 		ejecutar(codigoGlobal);
 	} else {
 		std::cout << "No se indica archivo para ejecutar. La ejecucion debe usar el formato:" << std::endl;

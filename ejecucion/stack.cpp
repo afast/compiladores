@@ -101,8 +101,8 @@ void ejecutar(list<Instruccion*> *codigo) {
       case ELSIFCOND : if (cond_stack.top()) it = descartar_hasta_end(it); break;
       case ELSE : if (cond_stack.top()) it = descartar_hasta_end(it); break;
       case END : cond_stack.pop(); break;
-      case WHILE : if (((RBool*)ri->arg1)->getValue()) while_stack.push(it); else it=descartar_whileend(it); break;
-      case WHILEEND : if (((RBool*)ri->arg1)->getValue()) it = while_stack.top(); else while_stack.pop(); break;
+      case WHILE : std::cout << "entro: " << ((RBool*)ri->arg1)->getValue() << std::endl; if (((RBool*)ri->arg1)->getValue()) while_stack.push(it); else it=descartar_whileend(it); break;
+      case WHILEEND : std::cout << "entro2: " << ((RBool*)ri->arg1)->getValue() << std::endl; if (((RBool*)ri->arg1)->getValue()) it = while_stack.top(); else while_stack.pop(); break;
       case AND :
         ((RBool*)ri->arg1)->setValue(((RBool*)ri->arg2)->getValue() && ((RBool*)ri->arg3)->getValue());
         break;
@@ -196,8 +196,10 @@ list<Instruccion*>::iterator descartar_hasta_end(list<Instruccion*>::iterator it
 
 std::list<Instruccion*>::iterator descartar_whileend(std::list<Instruccion*>::iterator it){
   Instruccion *ri = *it;
+std::cout <<"entre a descartar "<< std::endl;
   while (ri->op != WHILEEND) {
     ri = *(++it);
+	std::cout <<"descarte: "<< std::endl;
   }
   return ++it;
 }

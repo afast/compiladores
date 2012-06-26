@@ -80,14 +80,14 @@ void printCodigo();
 %left T_EXPO
 %%
 program : compstmt { /*printTree($1);*/ generar($1, codigoGlobal); freeTree($1);};
-compstmt : stmt { $$ = new_compstmt($1);}
+compstmt : /* Vacio */ { $$ = NULL; }
+         | stmt { $$ = new_compstmt($1);}
          | stmt T_FIN_INSTRUCCION {$$ = new_compstmt($1);}
          | stmt texpr {$$ = add_front_stmt_compstmt($1, $2);}
          | stmt texpr T_FIN_INSTRUCCION {$$ = add_front_stmt_compstmt($1, $2);};
 texpr : T_FIN_INSTRUCCION stmt { $$ = new_compstmt($2);}
       | texpr T_FIN_INSTRUCCION stmt { $$ = add_stmt_compstmt($3, $1);};
-stmt : /* Vacio */ { $$ = NULL; }
-	| output
+stmt : output
 	| if
 	| while
 	| each
@@ -108,12 +108,10 @@ value : T_GETS { $$ = new_gets(); }
 	| expr_numeric { $$ = $1; }
 	| expr_string { $$ = $1; }
 	| expr_bool { $$ = $1; }
+	| variable { $$ = $1; }
 	| case
 	| expr_string_interpolado
 	| array;
-string : T_STRING_1 { $$ = new_string($<text>1); }
-	| T_STRING_2 { $$ = new_string($<text>1); }
-	| T_COMMAND { $$ = new_command($<text>1); }
 output : T_PUTS value { $$ = new_puts($2); }
 number : T_INTEGER_ABS {$$ = new_number($<entero>1);}
 	| T_MENOS T_INTEGER_ABS { $$ = new_number((-1)*$<entero>2); }
@@ -122,7 +120,6 @@ number : T_INTEGER_ABS {$$ = new_number($<entero>1);}
 	| T_MENOS T_FLOAT_ABS { $$ = new_number((-1)*$<real>2); }
 	| T_MAS T_FLOAT_ABS { $$ = new_number($<real>2); };
 expr_numeric : number { $$ = $1; }
-	| variable { $$ = $1; }
 	| T_OBJECT_ID { $$ = new_object_call($<text>1); }
 	| T_SIZE { $$ = new_object_call($<text>1); }
 	| T_LENGTH { $$ = new_object_call($<text>1); }
@@ -134,11 +131,13 @@ expr_numeric : number { $$ = $1; }
 	| expr_numeric T_PORCENTAJE expr_numeric { $$ = new_numeric_op(op_mod, $1, $3);}
 	| T_PAR_IZQ expr_numeric T_PAR_DER{ $$ = $2; }; 
 expr_string : string { $$ = $1; }
-	| variable { $$ = $1; }
 	| T_NIL { $$ = new_nil(); }
 	| expr_string T_ASTER T_INTEGER_ABS { $$ = new_mul_string($1, $<entero>3);}
 	| expr_string T_MAS expr_string { $$ = new_add_string($1, $3); }
 	| T_PAR_IZQ expr_string T_PAR_DER { $$ = $2; };
+string : T_STRING_1 { $$ = new_string($<text>1); }
+	| T_STRING_2 { $$ = new_string($<text>1); }
+	| T_COMMAND { $$ = new_command($<text>1); }
 expr_bool : T_BOOL {$$ = new_boolean_op(b_is_bool, new_bool($<entero>1), NULL); }
   | T_RESPOND_TO T_PAR_IZQ expr_string T_PAR_DER { $$ = new_object_call($<text>1, new_arguments($3)); }
 	| T_INSTANCE_OF expr_string { $$ = new_object_call($<text>1, new_arguments($2)); }
@@ -167,12 +166,12 @@ case : T_CASE rec_when_then T_END
 
 rec_when_then : T_WHEN expr_bool T_THEN value T_FIN_INSTRUCCION
               | rec_when_then T_WHEN expr_bool T_THEN value T_FIN_INSTRUCCION
-	      | T_WHEN expr_bool T_THEN value
+	            | T_WHEN expr_bool T_THEN value
               | rec_when_then T_WHEN expr_bool T_THEN value;
 def :	T_DEF T_IDENTIF	argdecl compstmt T_END
 	| T_DEF T_IDENTIF compstmt T_END;
 argdecl : T_PAR_IZQ arglist T_PAR_DER T_FIN_INSTRUCCION
-	| T_PAR_IZQ T_PAR_DER T_FIN_INSTRUCCION; /*para representar pej: funcion()*/
+	| T_PAR_IZQ T_PAR_DER T_FIN_INSTRUCCION /*para representar pej: funcion()*/
 	| arglist T_FIN_INSTRUCCION;
 arglist : T_IDENTIF arglist_recur;  /*ver lo de recursion por la izq y por la der*/
 arglist_recur :	/*vacio*/
@@ -223,6 +222,7 @@ main( int argc, char *argv[] )
 		Instruccion *fin = new Instruccion;
 		fin->op = FIN;
 		codigoGlobal->push_back(fin);
+    printCodigo();
 		ejecutar(codigoGlobal);
 	} else {
 		std::cout << "No se indica archivo para ejecutar. La ejecucion debe usar el formato:" << std::endl;

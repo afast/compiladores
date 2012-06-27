@@ -273,7 +273,7 @@ void generar_while(ast* nodo, std::list<Instruccion*> *codigo){
   generar_compstmt(nodo->h2->stmt_list, codigo);
   decidir_nodo(nodo->h1, codigo);
   RObject* cond2 = codigo->back()->arg1;
-  codigo->push_back(instr(WHILEEND)); //END o WHILEEND
+  codigo->push_back(instr(WHILEEND, cond2)); //END o WHILEEND
 }
 
 void generar_string(ast* nodo, std::list<Instruccion*> *codigo){}

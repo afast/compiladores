@@ -29,6 +29,15 @@ elsif 4<2
 else
   puts 5
 end
+
+while false
+  puts 10
+end
+while true
+  puts 10
+  puts 11
+end
+
 =begin
 puts gets
 puts `hello`

@@ -178,3 +178,12 @@ ast* new_elsif(ast* cond, ast* compstmt, ast* opt_rec_elsif) {
   res->h3 = opt_rec_elsif;
   return res;
 }
+
+ast* new_while(ast* cond, ast* compstmt){
+  ast* res = new ast;
+  res->tipo = c_while;
+  res->h1 = cond;
+  res->h2 = compstmt;
+  return res;
+}
+

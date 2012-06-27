@@ -52,7 +52,8 @@ void ejecutar(list<Instruccion*> *codigo) {
     ri = *it++;
     switch (ri->op) {
       case FIN   : cout << "Fin ejecución" << endl; break;
-      case PUTS  : puts(ri->arg1->to_s()); break;
+      case PUTS  : puts(ri->arg1->to_s());
+        break;
       case GETS  : gets((RString *)ri->arg1); break;
       case ADD   : 
         if (((RNumeric*)ri->arg1)->es_int()){
@@ -91,13 +92,29 @@ void ejecutar(list<Instruccion*> *codigo) {
         else
           ((RDecimal*)ri->arg1)->setValue(((RNumeric*)ri->arg2)->mod((RNumeric*)ri->arg3));
         break;
-      case IF : if (!((RBool*)ri->arg1)->getValue()) it = descartar_if(it); cond_stack.push(((RBool*)ri->arg1)->getValue()); break;
+      case IF : 
+        if (!((RBool*)ri->arg1)->getValue())
+          it = descartar_if(it);
+        cond_stack.push(((RBool*)ri->arg1)->getValue());
+        break;
       case ELSIF : if (!((RBool*)ri->arg1)->getValue()) it = descartar_if(it); else { cond_stack.pop(); cond_stack.push(((RBool*)ri->arg1)->getValue());} break;
       case ELSIFCOND : if (cond_stack.top()) it = descartar_hasta_end(it); break;
       case ELSE : if (cond_stack.top()) it = descartar_hasta_end(it); break;
       case END : cond_stack.pop(); break;
-      case WHILE : if (((RBool*)ri->arg1)->getValue()) while_stack.push(it); else it=descartar_whileend(it); break;
-      case WHILEEND : if (((RBool*)ri->arg1)->getValue()) it = while_stack.top(); else while_stack.pop(); break;
+      case WHILE : 
+        if (((RBool*)ri->arg1)->getValue())
+          while_stack.push(it);
+        else
+          it=descartar_whileend(it);
+        cout << "WHILE excecuted " << (((RBool*)ri->arg1)->getValue() ? "true" : "false")  << endl;
+        break;
+      case WHILEEND :
+        if (((RBool*)ri->arg1)->getValue())
+          it = while_stack.top();
+        else
+          while_stack.pop();
+        cout << "WHILEEND excecuted " << (((RBool*)ri->arg1)->getValue() ? "true" : "false") << endl;
+        break;
       case AND :
         ((RBool*)ri->arg1)->setValue(((RBool*)ri->arg2)->getValue() && ((RBool*)ri->arg3)->getValue());
         break;
@@ -111,19 +128,19 @@ void ejecutar(list<Instruccion*> *codigo) {
         ((RBool*)ri->arg1)->setValue(mayor(ri->arg2, ri->arg3)->getValue());
         break;
       case GE :
-        ((RBool*)ri->arg1)->setValue(mayor_igual(ri->arg2, ri->arg3));
+        ((RBool*)ri->arg1)->setValue(mayor_igual(ri->arg2, ri->arg3)->getValue());
         break;
       case L  :
-        ((RBool*)ri->arg1)->setValue(menor(ri->arg2, ri->arg3));
+        ((RBool*)ri->arg1)->setValue(menor(ri->arg2, ri->arg3)->getValue());
         break;
       case LE :
-        ((RBool*)ri->arg1)->setValue(menor_igual(ri->arg2, ri->arg3));
+        ((RBool*)ri->arg1)->setValue(menor_igual(ri->arg2, ri->arg3)->getValue());
         break;
       case EQ :
-        ((RBool*)ri->arg1)->setValue(igual(ri->arg2, ri->arg3));
+        ((RBool*)ri->arg1)->setValue(igual(ri->arg2, ri->arg3)->getValue());
         break;
       case NEQ :
-        ((RBool*)ri->arg1)->setValue(!igual(ri->arg2, ri->arg3));
+        ((RBool*)ri->arg1)->setValue(!igual(ri->arg2, ri->arg3)->getValue());
         break;
       case TOBOOL :
         ((RBool*)ri->arg1)->setValue(extraer_bool(ri->arg2));
@@ -191,8 +208,10 @@ list<Instruccion*>::iterator descartar_hasta_end(list<Instruccion*>::iterator it
 
 std::list<Instruccion*>::iterator descartar_whileend(std::list<Instruccion*>::iterator it){
   Instruccion *ri = *it;
+std::cout <<"entre a descartar "<< std::endl;
   while (ri->op != WHILEEND) {
     ri = *(++it);
+	std::cout <<"descarte: "<< std::endl;
   }
   return ++it;
 }

@@ -133,6 +133,8 @@ void ejecutar(list<Instruccion*> *codigo) {
       case TOBOOL :
         ((RBool*)ri->arg1)->setValue(extraer_bool(ri->arg2));
         break;
+      case EVAL : // Evaluar variable o metodo
+        break;
     }
   } while (ri->op != FIN);
 
@@ -152,8 +154,10 @@ RObject *get_variable(char *name){ //aca hay q considerar el tema del scope?
   RObject *object;
   do {
     object = (**rit)[name];
-  } while (rit != scope_stack.rend());
-  return global_variables[name];
+  } while (object == NULL && rit != scope_stack.rend());
+  if (object == NULL)
+    object = global_variables[name];
+  return object;
 }
 
 void set_variable(char *name, RObject* var){ //aca hay q considerar el tema del scope?

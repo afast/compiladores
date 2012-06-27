@@ -40,6 +40,8 @@ RObject* generar_objeto(ast* nodo){
       RBool* s = new RBool(nodo->booleano);
       objeto = s;
       break;}
+    case t_identif :{
+      break;}
   }
   return objeto;
 }
@@ -312,7 +314,7 @@ void generar_op_booleana(enum code_ops op, ast* nodo, list<Instruccion*>* codigo
 }
 
 bool nodo_hoja(ast* nodo){
-  return (nodo->tipo == f_string || nodo->tipo == f_entero || nodo->tipo == f_decimal || nodo->tipo == f_bool);
+  return (nodo->tipo == f_string || nodo->tipo == f_entero || nodo->tipo == f_decimal || nodo->tipo == f_bool || nodo->tipo == t_identif);
 }
 
 Instruccion* instr(enum code_ops op){

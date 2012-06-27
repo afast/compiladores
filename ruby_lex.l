@@ -1,6 +1,6 @@
 %{
 #include <iostream>
-#include <list>
+#include <set>
 
 extern "C" {
       int yylex(void);
@@ -8,12 +8,13 @@ extern "C" {
 #include "ejecucion/stack.h"
 #include "ast.h"
 #include "y.tab.h"
-#define MAX_INCLUDE_DEPTH 20
+#define MAX_INCLUDE_DEPTH 40
 int include_stack_ptr = 0;
+std::set<char *> archivos_cargados;
 YY_BUFFER_STATE include_stack[MAX_INCLUDE_DEPTH];
 %}
 %option yylineno
-%x load
+%x load require
 STRING_DOBLE_CON_SALTO ([^(\"(#{)\n)]*(\\\n)*)*|(([^(\"(#{)\n)]*(\\\")*)*(\\\n)*)*
 STRING_DOBLE_SIN_SALTO [^(\"(#{)\n)]*|([^(\"(#{)\n)]*(\\\")*)*
 STRING_SIMPLE_CON_SALTO ([^(\'\n)]*(\\\n)*)*
@@ -23,6 +24,7 @@ COMMAND_SIN_SALTO [^(`\n)]*
 VARIABLE [_a-z][_a-zA-Z0-9]*|[_a-z][_a-zA-Z0-9]*\[([1-9][0-9]*|0)\]
 %%
 load(\t|" ")*\' BEGIN(load);
+require(\t|" ")*\' BEGIN(require);
 then      {return(T_THEN);};
 nil      {return(T_NIL);};
 puts   {return(T_PUTS);};
@@ -71,7 +73,39 @@ attr_accessor {return(T_ACCESSOR);};
 			yy_switch_to_buffer(include_stack[include_stack_ptr] );
 		}
 	};
-require {return(T_REQUIRE);};
+<require>[^\t|^\n]+\' { // obtiene el nombre de fichero a incluir
+printf("linea 844444444444444444444" );
+			yyless(yyleng-1);
+			if ( include_stack_ptr >= MAX_INCLUDE_DEPTH )
+			{
+				fprintf( stderr, "Demasiados load(require) anidados" );
+				exit( 1 );
+			}
+printf("linea 844444444444444444444" );
+			include_stack[include_stack_ptr++] = YY_CURRENT_BUFFER;
+			char* text = strdup(yytext);
+			text = strcat(text, ".rb");
+printf("linea aaaaaaaaaaaaaaaaaaaa" );
+			if(archivos_cargados.count(text)){
+				yyin = fopen( text, "r" );
+printf("linea bbbbbbbbbbbbbbbbbbbbb" );
+
+				if (!yyin){
+					yyin = fopen( yytext, "r" );
+					if(!yyin) {
+						fprintf( stderr, "No se encontraron los archivo %s o %s.\n", text, yytext);
+						exit( 1 );
+					} else {
+						char* text2 = strdup(yytext);
+						archivos_cargados.insert(text2);
+					}
+				} else {
+					archivos_cargados.insert(text);
+				}
+				yy_switch_to_buffer(yy_create_buffer( yyin, YY_BUF_SIZE ) );	
+			}
+			BEGIN(INITIAL);
+		};
 true {yylval.entero = 1;return(T_BOOL);};
 false {yylval.entero = 0;return(T_BOOL);};
 = 	 {return(T_IGUAL);};

@@ -4,6 +4,7 @@
 #include <iostream>
 #include <list>
 #include <unordered_map>
+#include <string>
 
 class RObject;
 class RDecimal;

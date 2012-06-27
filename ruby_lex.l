@@ -8,10 +8,12 @@ extern "C" {
 #include "ejecucion/stack.h"
 #include "ast.h"
 #include "y.tab.h"
-
+#define MAX_INCLUDE_DEPTH 20
+int include_stack_ptr = 0;
+YY_BUFFER_STATE include_stack[MAX_INCLUDE_DEPTH];
 %}
 %option yylineno
-
+%x load
 STRING_DOBLE_CON_SALTO ([^(\"(#{)\n)]*(\\\n)*)*|(([^(\"(#{)\n)]*(\\\")*)*(\\\n)*)*
 STRING_DOBLE_SIN_SALTO [^(\"(#{)\n)]*|([^(\"(#{)\n)]*(\\\")*)*
 STRING_SIMPLE_CON_SALTO ([^(\'\n)]*(\\\n)*)*
@@ -20,6 +22,7 @@ COMMAND_CON_SALTO ([^(`\n)]*(\\\n)*)*
 COMMAND_SIN_SALTO [^(`\n)]*
 VARIABLE [_a-z][_a-zA-Z0-9]*|[_a-z][_a-zA-Z0-9]*\[([1-9][0-9]*|0)\]
 %%
+load(\t|" ")*\' BEGIN(load);
 then      {return(T_THEN);};
 nil      {return(T_NIL);};
 puts   {return(T_PUTS);};
@@ -38,7 +41,36 @@ class   {return(T_CLASS);};
 attr_reader {return(T_ATTR_READER);};
 attr_writer {return(T_ATTR_WRITER);};
 attr_accessor {return(T_ACCESSOR);};
-load {return(T_LOAD);};
+<load>[^\t|^\n]+\' { // obtiene el nombre de fichero a incluir
+			yyless(yyleng-1);
+			if ( include_stack_ptr >= MAX_INCLUDE_DEPTH )
+			{
+				fprintf( stderr, "Demasiados load(require) anidados" );
+				exit( 1 );
+			}
+			include_stack[include_stack_ptr++] = YY_CURRENT_BUFFER;
+			char * text = strdup(yytext);
+			text = strcat(text, ".rb");
+			yyin = fopen( text, "r" );
+			if (!yyin){
+				yyin = fopen( yytext, "r" );
+				if(!yyin) {
+					fprintf( stderr, "No se encontraron los archivo %s o %s.\n", text, yytext);
+					exit( 1 );
+				}
+			}
+			yy_switch_to_buffer(yy_create_buffer( yyin, YY_BUF_SIZE ) );
+			BEGIN(INITIAL);
+		};
+<<EOF>> { if ( --include_stack_ptr < 0 )
+		{
+			yyterminate();
+		}
+		else {
+			yy_delete_buffer( YY_CURRENT_BUFFER );
+			yy_switch_to_buffer(include_stack[include_stack_ptr] );
+		}
+	};
 require {return(T_REQUIRE);};
 true {yylval.entero = 1;return(T_BOOL);};
 false {yylval.entero = 0;return(T_BOOL);};

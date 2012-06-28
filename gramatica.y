@@ -79,7 +79,7 @@ void printCodigo();
 %left T_NOT
 %left T_EXPO
 %%
-program : compstmt { /*printTree($1);*/ generar($1, codigoGlobal); freeTree($1);};
+program : compstmt { printTree($1); generar($1, codigoGlobal); freeTree($1);};
 compstmt : /* Vacio */ { $$ = NULL; }
          | stmt { $$ = new_compstmt($1);}
          | stmt T_FIN_INSTRUCCION {$$ = new_compstmt($1);}
@@ -91,7 +91,7 @@ stmt : output
 	| if
 	| while
 	| each
-	| variable T_IGUAL value
+	| variable T_IGUAL value { $$ = new_asgn($1, $3); std::cout << "detectada asignacion" << std::endl;}
 	| variable T_MAS_IGUAL number
 	| variable T_MENOS_IGUAL number
 	| def
@@ -101,7 +101,10 @@ stmt : output
 	| T_ACCESSOR args_accesores
 	| T_INVOCACION_METODO
 	| load
+	| bloque
 	| require;
+bloque: T_LLAVE_IZQ compstmt T_LLAVE_DER
+	| T_DO compstmt T_END;
 value : T_GETS { $$ = new_gets(); }
 	| T_INSTANCE_CLASS
 	| T_NEW T_PAR_IZQ args_new T_PAR_DER
@@ -129,6 +132,24 @@ expr_numeric : number { $$ = $1; }
 	| expr_numeric T_BAR expr_numeric   { $$ = new_numeric_op(op_div, $1, $3);}	
 	| expr_numeric T_EXPO expr_numeric  { $$ = new_numeric_op(op_pow, $1, $3);}
 	| expr_numeric T_PORCENTAJE expr_numeric { $$ = new_numeric_op(op_mod, $1, $3);}
+	| expr_numeric T_MAS variable { $$ = new_numeric_op(op_plus, $1, $3);}
+	| expr_numeric T_ASTER variable { $$ = new_numeric_op(op_mul, $1, $3);}
+	| expr_numeric T_MENOS variable { $$ = new_numeric_op(op_sub, $1, $3);}
+	| expr_numeric T_BAR variable   { $$ = new_numeric_op(op_div, $1, $3);}	
+	| expr_numeric T_EXPO variable  { $$ = new_numeric_op(op_pow, $1, $3);}
+	| expr_numeric T_PORCENTAJE variable { $$ = new_numeric_op(op_mod, $1, $3);}
+	| variable T_MAS expr_numeric { $$ = new_numeric_op(op_plus, $1, $3);}
+	| variable T_ASTER expr_numeric { $$ = new_numeric_op(op_mul, $1, $3);}
+	| variable T_MENOS expr_numeric { $$ = new_numeric_op(op_sub, $1, $3);}
+	| variable T_BAR expr_numeric   { $$ = new_numeric_op(op_div, $1, $3);}	
+	| variable T_EXPO expr_numeric  { $$ = new_numeric_op(op_pow, $1, $3);}
+	| variable T_PORCENTAJE expr_numeric { $$ = new_numeric_op(op_mod, $1, $3);}
+	| variable T_MAS variable { $$ = new_numeric_op(op_plus, $1, $3);}
+	| variable T_ASTER variable { $$ = new_numeric_op(op_mul, $1, $3);}
+	| variable T_MENOS variable { $$ = new_numeric_op(op_sub, $1, $3);}
+	| variable T_BAR variable   { $$ = new_numeric_op(op_div, $1, $3);}	
+	| variable T_EXPO variable  { $$ = new_numeric_op(op_pow, $1, $3);}
+	| variable T_PORCENTAJE variable { $$ = new_numeric_op(op_mod, $1, $3);}
 	| T_PAR_IZQ expr_numeric T_PAR_DER{ $$ = $2; }; 
 expr_string : string { $$ = $1; }
 	| T_NIL { $$ = new_nil(); }
@@ -141,7 +162,7 @@ string : T_STRING_1 { $$ = new_string($<text>1); }
 expr_bool : T_BOOL {$$ = new_boolean_op(b_is_bool, new_bool($<entero>1), NULL); }
   | T_RESPOND_TO T_PAR_IZQ expr_string T_PAR_DER { $$ = new_object_call($<text>1, new_arguments($3)); }
 	| T_INSTANCE_OF expr_string { $$ = new_object_call($<text>1, new_arguments($2)); }
-	| T_PAR_IZQ value T_PAR_DER{ $$ = new_boolean_op(b_is_bool, $2, NULL);}
+	/*| T_PAR_IZQ value T_PAR_DER{ $$ = new_boolean_op(b_is_bool, $2, NULL);}*/
 	| T_NOT value { $$ = new_boolean_op(b_not, $2, NULL);}
 	| value  T_MAYOR value { $$ = new_boolean_op(b_mayor, $1, $3);}
 	| value  T_MAYOR_IGUAL value { $$ = new_boolean_op(b_mayor_igual, $1, $3);}
@@ -150,7 +171,8 @@ expr_bool : T_BOOL {$$ = new_boolean_op(b_is_bool, new_bool($<entero>1), NULL); 
 	| value  T_DOBLE_IGUAL value { $$ = new_boolean_op(b_doble_igual, $1, $3);}
 	| value  T_NOT_IGUAL value { $$ = new_boolean_op(b_not_igual, $1, $3);}
 	| value T_AND value { $$ = new_boolean_op(b_and, $1, $3);}
-	| value T_OR value { $$ = new_boolean_op(b_or, $1, $3);};
+	| value T_OR value { $$ = new_boolean_op(b_or, $1, $3);}
+  | T_PAR_IZQ expr_bool T_PAR_DER {$$ = $2;};
 variable : T_IDENTIF { $$ = new_identificador($<text>1);}
 	| T_ATRIBUTO { $$ = new_atributo($<text>1);}
 	| T_IDENTIF T_CORCHETE_IZQ T_INTEGER_ABS T_CORCHETE_DER { $$ = new_array_pos($<text>1, $<entero>3);};

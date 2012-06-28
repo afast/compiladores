@@ -5,10 +5,16 @@
 #include "RInteger.h"
 #include "RString.h"
 #include "RBool.h"
+#include "memory.h"
 
 RObject::RObject(){
   this->object_id=0;
-  this->type = ROBJECT;
+  this->type = RNIL;
+  new_pointer(this);
+}
+
+bool RObject::is_numeric(){
+  return type == RNUMERIC || type == RINT;
 }
 
 RInteger *RObject::objectId(){

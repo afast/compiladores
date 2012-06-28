@@ -9,7 +9,7 @@
 #include "memory.h"
 
 RString::RString(){
-  str = new std::string();
+  str = NULL;
   type = RSTRING;
 }
 
@@ -109,7 +109,7 @@ void RString::setValue(std::string *param){
 void RString::setValue(std::string param){
   if (this->str != NULL)
     delete str;
-  str = new std::string(param);
+  str = new std::string(param.data());
 }
 
 RString* RString::to_s(){

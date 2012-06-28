@@ -8,15 +8,23 @@
 #include "RClass.h"
 #include "RBool.h"
 #include "RArray.h"
+#include "RVariable.h"
+#include "RObject.h"
 
 std::list<RString*> strings;
+std::list<RVariable*> variables;
 std::list<RInteger*> integers;
 std::list<RDecimal*> decimals;
 std::list<RClass*> classes;
 std::list<RBool*> booleans;
 std::list<RArray*> arrays;
+std::list<RObject*> objects;
+void new_pointer(RVariable* obj){
+  variables.push_back(obj);
+}
+
 void new_pointer(RString* obj){
-  strings.push_back(obj);
+    strings.push_back(obj);
 }
 
 void new_pointer(RInteger* obj){
@@ -39,7 +47,39 @@ void new_pointer(RArray* obj){
   arrays.push_back(obj);
 }
 
+void new_pointer(RObject* obj){
+  switch (obj->type){
+    case RNIL :
+      objects.push_back(obj);
+      break;
+    case RVARIABLE :
+      variables.push_back((RVariable*)obj);
+      break;
+    case RSTRING :
+      strings.push_back((RString*)obj);
+      break;
+    case RINT :
+      integers.push_back((RInteger*)obj);
+      break;
+    case RNUMERIC :
+      decimals.push_back((RDecimal*)obj);
+      break;
+    case RCLASS :
+      classes.push_back((RClass*)obj);
+      break;
+    case RBOOL :
+      booleans.push_back((RBool*)obj);
+      break;
+    case RARRAY :
+      arrays.push_back((RArray*)obj);
+      break;
+  }
+}
+
 void free_memory(){
+  std::list<RVariable*>::iterator itv;
+  for (itv=variables.begin(); itv != variables.end(); itv++)
+    delete (*itv);
   std::list<RString*>::iterator its;
   for (its=strings.begin(); its != strings.end(); its++)
     delete (*its);
@@ -58,4 +98,7 @@ void free_memory(){
   std::list<RArray*>::iterator ita;
   for (ita=arrays.begin(); ita != arrays.end(); ita++)
     delete (*ita);
+  std::list<RObject*>::iterator ito;
+  for (ito=objects.begin(); ito != objects.end(); ito++)
+    delete (*ito);
 }

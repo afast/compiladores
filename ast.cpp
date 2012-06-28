@@ -178,3 +178,11 @@ ast* new_elsif(ast* cond, ast* compstmt, ast* opt_rec_elsif) {
   res->h3 = opt_rec_elsif;
   return res;
 }
+
+ast* new_asgn(ast* variable, ast* valor){
+  ast* res = new ast;
+  res->tipo = op_asgn;
+  res->h1 = variable;
+  res->h2 = valor;
+  return res;
+}

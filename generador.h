@@ -23,16 +23,18 @@ void generar_decimal(ast* nodo, std::list<Instruccion*> *codigo);
 void generar_bool(ast* nodo, std::list<Instruccion*> *codigo);
 void generar_puts(ast* nodo, std::list<Instruccion*> *codigo);
 void generar_op_numerica(enum code_ops op, ast* nodo, std::list<Instruccion*>* codigo);
+void generar_op_asgn(ast* nodo, std::list<Instruccion*>* codigo);
 void printList(std::list<ast*> *stmt_list);
 void printTree(ast* tree);
 void freeTree(ast* tree);
 bool nodo_hoja(ast* nodo);
 void generar_gets(std::list<Instruccion*>* codigo);
-RNumeric* get_numeric_node(ast* hoja);
+RObject* get_numeric_node(ast* hoja);
 Instruccion* instr(enum code_ops op);
 Instruccion* instr(enum code_ops op, RObject* arg1);
 Instruccion* instr(enum code_ops op, RObject* arg1, RObject* arg2);
 Instruccion* instr(enum code_ops op, RObject* arg1, RObject* arg2, RObject* arg3);
 void generar_op_booleana(enum code_ops op, ast* nodo, std::list<Instruccion*>* codigo);
+RObject* get_abstract_node(ast* hoja);
 
 #endif

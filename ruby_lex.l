@@ -86,7 +86,7 @@ not|!  {return(T_NOT);};
 {VARIABLE}\.each {yylval.text = strdup(yytext); return(T_EACH);};
 [_a-z][_a-zA-Z0-9]*\.[_a-z][_a-zA-Z0-9]* {return(T_INVOCACION_METODO);};
 [A-Z][_a-zA-Z0-9]*	 {return(T_NOM_CONST);};
-[_a-z][_a-zA-Z0-9]*	 {return(T_IDENTIF);};
+[_a-z][_a-zA-Z0-9]*	 {yylval.text = strdup(yytext); return(T_IDENTIF);};
 \$[_a-z][_a-zA-Z0-9]* {return(T_IDENTIF_GLOBAL);};
 @[_a-z][_a-zA-Z0-9]* {return(T_ATRIBUTO);};
 :[_a-z][_a-zA-Z0-9]* {return(T_ATRIBUTO_ACCESOR);};

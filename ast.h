@@ -5,7 +5,7 @@
 #include <list>
 
 enum ast_node_t {
-  c_if, op_mul, op_plus, op_div, op_sub, op_pow, op_mod, c_elsif,
+  c_if, op_mul, op_plus, op_div, op_sub, op_pow, op_mod, op_asgn, c_elsif,
   c_while, f_string, f_entero, f_decimal, f_bool, t_puts, t_compstmt,
   t_identif, t_atributo, t_arr_place, t_gets, t_command, t_method_call,
   t_nil, t_mul_string, t_add_string, t_method_with_args, t_args,
@@ -49,5 +49,6 @@ ast* new_boolean_op(enum ast_node_t op, ast* left, ast* right);
 ast* new_bool(int b);
 ast* new_if(ast* cond, ast* compstmt, ast* opt_rec_elsif, ast* opt_else);
 ast* new_elsif(ast* cond, ast* compstmt, ast* opt_rec_elsif);
+ast* new_asgn(ast* variable, ast* valor);
 
 #endif

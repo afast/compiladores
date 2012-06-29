@@ -100,8 +100,6 @@ stmt : /* Vacio */ { $$ = NULL; }
 	| T_ATTR_WRITER args_accesores
 	| T_ACCESSOR args_accesores
 	| T_INVOCACION_METODO
-	| load
-	| require
 	| bloque;
 bloque: T_LLAVE_IZQ compstmt T_LLAVE_DER
 	| T_DO compstmt T_END;
@@ -191,13 +189,6 @@ args_accesores_recur :	/*vacio*/
 args_new : value args_new_recur;
 args_new_recur :	/*vacio*/
 	| args_new_recur T_COMA	value;
-load : T_LOAD expr_string_load_require;
-require : T_REQUIRE expr_string_load_require;
-expr_string_load_require : T_STRING_1
-	| variable
-	| T_NIL
-	| expr_string_load_require T_ASTER T_INTEGER_ABS
-	| expr_string_load_require T_MAS expr_string_load_require;
 each : T_EACH T_DO T_PIPE T_IDENTIF T_PIPE compstmt T_END;
 expr_string_interpolado : T_STRING_IZQ expr_string_interpolado_recur T_STRING_DER;
 expr_string_interpolado_recur : /*vacio*/

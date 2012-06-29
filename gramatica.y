@@ -223,6 +223,7 @@ main( int argc, char *argv[] )
 		codigoGlobal = new std::list<Instruccion*>();
 		initializer();
 		yyparse();
+		std::cout << "luego del Parserrrrrrrrrrrrrrrrrr" << std::endl;
 		Instruccion *fin = new Instruccion;
 		fin->op = FIN;
 		codigoGlobal->push_back(fin);

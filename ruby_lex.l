@@ -10,11 +10,13 @@ extern "C" {
 #include "y.tab.h"
 #define MAX_INCLUDE_DEPTH 40
 int include_stack_ptr = 0;
-std::set<char *> archivos_cargados;
+std::set<std::string> *archivos_cargados = new std::set<std::string>();
 YY_BUFFER_STATE include_stack[MAX_INCLUDE_DEPTH];
+void cargarArchivo(char* textIn, int largo, bool isLoad);
 %}
 %option yylineno
-%x load require
+%x load
+%x require
 STRING_DOBLE_CON_SALTO ([^(\"(#{)\n)]*(\\\n)*)*|(([^(\"(#{)\n)]*(\\\")*)*(\\\n)*)*
 STRING_DOBLE_SIN_SALTO [^(\"(#{)\n)]*|([^(\"(#{)\n)]*(\\\")*)*
 STRING_SIMPLE_CON_SALTO ([^(\'\n)]*(\\\n)*)*
@@ -23,8 +25,8 @@ COMMAND_CON_SALTO ([^(`\n)]*(\\\n)*)*
 COMMAND_SIN_SALTO [^(`\n)]*
 VARIABLE [_a-z][_a-zA-Z0-9]*|[_a-z][_a-zA-Z0-9]*\[([1-9][0-9]*|0)\]
 %%
-load(\t|" ")*\' BEGIN(load);
-require(\t|" ")*\' BEGIN(require);
+require(\t|" ")*\' {BEGIN(require);};
+load(\t|" ")*\' {BEGIN(load);};
 then      {return(T_THEN);};
 nil      {return(T_NIL);};
 puts   {return(T_PUTS);};
@@ -43,29 +45,8 @@ class   {return(T_CLASS);};
 attr_reader {return(T_ATTR_READER);};
 attr_writer {return(T_ATTR_WRITER);};
 attr_accessor {return(T_ACCESSOR);};
-<load>[^\t|^\n]+\' { // obtiene el nombre de fichero a incluir
-			yyless(yyleng-1);
-			if ( include_stack_ptr >= MAX_INCLUDE_DEPTH )
-			{
-				fprintf( stderr, "Demasiados load(require) anidados" );
-				exit( 1 );
-			}
-			include_stack[include_stack_ptr++] = YY_CURRENT_BUFFER;
-			char * text = strdup(yytext);
-			text = strcat(text, ".rb");
-			yyin = fopen( text, "r" );
-			if (!yyin){
-				yyin = fopen( yytext, "r" );
-				if(!yyin) {
-					fprintf( stderr, "No se encontraron los archivo %s o %s.\n", text, yytext);
-					exit( 1 );
-				}
-			}
-			yy_switch_to_buffer(yy_create_buffer( yyin, YY_BUF_SIZE ) );
-			BEGIN(INITIAL);
-		};
-<<EOF>> { if ( --include_stack_ptr < 0 )
-		{
+<load>[^\t|^\n]+\' { cargarArchivo(yytext, yyleng-1, true);};
+<<EOF>> { 	if ( --include_stack_ptr < 0 ){
 			yyterminate();
 		}
 		else {
@@ -73,39 +54,7 @@ attr_accessor {return(T_ACCESSOR);};
 			yy_switch_to_buffer(include_stack[include_stack_ptr] );
 		}
 	};
-<require>[^\t|^\n]+\' { // obtiene el nombre de fichero a incluir
-printf("linea 844444444444444444444" );
-			yyless(yyleng-1);
-			if ( include_stack_ptr >= MAX_INCLUDE_DEPTH )
-			{
-				fprintf( stderr, "Demasiados load(require) anidados" );
-				exit( 1 );
-			}
-printf("linea 844444444444444444444" );
-			include_stack[include_stack_ptr++] = YY_CURRENT_BUFFER;
-			char* text = strdup(yytext);
-			text = strcat(text, ".rb");
-printf("linea aaaaaaaaaaaaaaaaaaaa" );
-			if(archivos_cargados.count(text)){
-				yyin = fopen( text, "r" );
-printf("linea bbbbbbbbbbbbbbbbbbbbb" );
-
-				if (!yyin){
-					yyin = fopen( yytext, "r" );
-					if(!yyin) {
-						fprintf( stderr, "No se encontraron los archivo %s o %s.\n", text, yytext);
-						exit( 1 );
-					} else {
-						char* text2 = strdup(yytext);
-						archivos_cargados.insert(text2);
-					}
-				} else {
-					archivos_cargados.insert(text);
-				}
-				yy_switch_to_buffer(yy_create_buffer( yyin, YY_BUF_SIZE ) );	
-			}
-			BEGIN(INITIAL);
-		};
+<require>[^\t|^\n]+\' { cargarArchivo(yytext, yyleng-1, false);};
 true {yylval.entero = 1;return(T_BOOL);};
 false {yylval.entero = 0;return(T_BOOL);};
 = 	 {return(T_IGUAL);};
@@ -173,4 +122,38 @@ not|!  {return(T_NOT);};
 (\n|;)* {return T_FIN_INSTRUCCION;};
 \\(\t|\r|" ")*\n|\t|\r|" " {};
 . {};
-
+%%
+void cargarArchivo(char* textIn, int largo, bool isLoad){
+// obtiene el nombre de fichero a incluir
+char* text = strndup(textIn, largo);
+text = strcat(text, ".rb");
+std::string *nombre = new std::string(text);
+char* text2 = strndup(textIn, largo);
+std::string *nombre2 = new std::string(text2);
+if ( include_stack_ptr >= MAX_INCLUDE_DEPTH )
+{
+	fprintf( stderr, "Demasiados load(require) anidados" );
+	exit( 1 );
+}
+include_stack[include_stack_ptr++] = YY_CURRENT_BUFFER;
+if((isLoad) || ((archivos_cargados->count(*nombre) == 0) && (archivos_cargados->count(*nombre2) == 0))){
+	yyin = fopen( text, "r" );
+	if (!yyin){
+		yyin = fopen( text2, "r" );
+		if(!yyin) {
+			fprintf( stderr, "No se encontraron los archivos %s o %s\n", text, text2);
+			exit( 1 );
+		} else {
+			if(!isLoad){
+				archivos_cargados->insert(*nombre2);
+			}
+		}
+	} else {
+		if(!isLoad){
+			archivos_cargados->insert(*nombre);
+		}
+	}
+}
+yy_switch_to_buffer(yy_create_buffer( yyin, YY_BUF_SIZE ) );	
+BEGIN(INITIAL);	
+}

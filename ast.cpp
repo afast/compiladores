@@ -231,7 +231,7 @@ ast* new_when_rec(ast* cond, ast* value, ast* when_rec) {
   res->tipo = c_case_rec;
   res->h1 = cond;
   res->h2 = value;
-  res->h2 = when_rec;
+  res->h3 = when_rec;
   return res;
 }
 

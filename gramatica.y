@@ -92,8 +92,8 @@ stmt : output
 	| while
 	| each
 	| variable T_IGUAL value { $$ = new_asgn($1, $3, yylineno); std::cout << "detectada asignacion" << std::endl;}
-	| variable T_MAS_IGUAL number
-	| variable T_MENOS_IGUAL number
+	| variable T_MAS_IGUAL value { $$ = new_asgn($1, new_numeric_op(op_plus, $1, $3, yylineno), yylineno); std::cout << "detectada suma asignacion" << std::endl;}
+	| variable T_MENOS_IGUAL value { $$ = new_asgn($1, new_numeric_op(op_sub, $1, $3, yylineno), yylineno); std::cout << "detectada resta asignacion" << std::endl;}
 	| def
 	| class
 	| T_ATTR_READER args_accesores

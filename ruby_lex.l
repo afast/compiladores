@@ -27,7 +27,7 @@ VARIABLE [_a-z][_a-zA-Z0-9]*|[_a-z][_a-zA-Z0-9]*\[([1-9][0-9]*|0)\]
 %%
 require(\t|" ")*\' {BEGIN(require);};
 load(\t|" ")*\' {BEGIN(load);};
-#.*\n {};
+#.*\n? {};
 ^=begin(.*\n)*=end(" ")*\n* {};
 then      {return(T_THEN);};
 nil      {return(T_NIL);};

@@ -9,6 +9,7 @@
 
 class RNumeric;
 class RInteger;
+class RVariable;
 
 void generar(ast* arbol, std::list<Instruccion*> *codigo);
 void generar_compstmt(std::list<ast*> *stmt_list, std::list<Instruccion*> *codigo);
@@ -18,7 +19,7 @@ void generar_mod(ast* nodo, std::list<Instruccion*> *codigo);
 void generar_elsif(ast* nodo, std::list<Instruccion*> *codigo);
 void generar_while(ast* nodo, std::list<Instruccion*> *codigo);
 void generar_case(ast* nodo, std::list<Instruccion*> *codigo);
-void generar_case_rec(ast* nodo, std::list<Instruccion*> *codigo);
+void generar_case_rec(ast* nodo, std::list<Instruccion*> *codigo, RVariable* var);
 void generar_string(ast* nodo, std::list<Instruccion*> *codigo);
 void generar_entero(ast* nodo, std::list<Instruccion*> *codigo);
 void generar_decimal(ast* nodo, std::list<Instruccion*> *codigo);

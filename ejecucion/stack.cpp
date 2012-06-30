@@ -50,7 +50,7 @@ void ejecutar(list<Instruccion*> *codigo) {
   Instruccion *ri;
   RObject *arg1, *arg2, *arg3;
   bool set_tmp;
-  cout << "Excecution started!" << endl;
+  cout << "Ejecucion comenzada!" << endl;
   do {
     ri = *it++;
     arg1 = ri->arg1; arg2 = ri->arg2; arg3 = ri->arg3;
@@ -61,6 +61,8 @@ void ejecutar(list<Instruccion*> *codigo) {
     if (arg3 != NULL && arg3->type == RVARIABLE)
       arg3 = get_variable(((RVariable*)arg3)->getValue()->data());
     set_tmp = (arg1 != NULL && arg1->type == RNIL);
+    if (set_tmp && operacion_es_booleana(ri->op))
+      arg1 = new RBool();
     switch (ri->op) {
       case FIN   : cout << "Fin ejecución" << endl; break;
       case PUTS  : puts(arg1->to_s());
@@ -68,7 +70,7 @@ void ejecutar(list<Instruccion*> *codigo) {
       case GETS  : gets((RString *)ri->arg1); break;
       case ADD   :
         if (arg2->is_numeric() && arg3->is_numeric()){
-          if (((RNumeric*)arg1)->es_int()){
+          if (!set_tmp && arg1->is_int() || arg2->is_int() && arg3->is_int()){
             if (set_tmp)
               arg1 = new RInteger();
             ((RInteger*)arg1)->setValue(((RInteger*)arg2)->getValue() + ((RInteger*)arg3)->getValue());
@@ -78,46 +80,89 @@ void ejecutar(list<Instruccion*> *codigo) {
             ((RDecimal*)arg1)->setValue(((RNumeric*)arg2)->getDecimalValue() + ((RNumeric*)arg3)->getDecimalValue());
           }
         }else{
-          if (arg2->type == arg3->type && arg2->type == RSTRING){
+          if (arg2->is_string() && arg3->is_string()){
             if (set_tmp)
               arg1 = new RString();
             ((RString*)arg1)->setValue(*((RString*)arg2)->getValue() + *((RString*)arg3)->getValue());
           }else
             cout << "Error de tipos, no se puede sumar " << *arg2->get_class()->getValue() << " con " << *arg3->get_class()->getValue() << endl;
         }
-        if (set_tmp)
-          set_global_variable(((RVariable*)ri->arg1)->getValue(), arg1);
         break;
       case OBJID : if (arg1 != NULL) *((RInteger*)arg1) = getDir(arg2); break;
       case MULT : 
-        if (((RNumeric*)arg1)->es_int())
-          ((RInteger*)arg1)->setValue(((RInteger*)arg2)->getValue() * ((RInteger*)arg3)->getValue());
-        else
-          ((RDecimal*)arg1)->setValue(((RNumeric*)arg2)->getDecimalValue() * ((RNumeric*)arg3)->getDecimalValue());
+        if (arg2->is_numeric() && arg3->is_numeric()){
+          if (!set_tmp && arg1->is_int() || arg2->is_int() && arg3->is_int()){
+            if (set_tmp)
+              arg1 = new RInteger();
+            ((RInteger*)arg1)->setValue(((RInteger*)arg2)->getValue() * ((RInteger*)arg3)->getValue());
+          }else{
+            if (set_tmp)
+              arg1 = new RDecimal();
+            ((RDecimal*)arg1)->setValue(((RNumeric*)arg2)->getDecimalValue() * ((RNumeric*)arg3)->getDecimalValue());
+          }
+        }else{
+          cout << "Error de tipos, no se puede multiplicar " << *arg2->get_class()->getValue() << " con " << *arg3->get_class()->getValue() << endl;
+        }
         break;
       case SUB :
-        if (((RNumeric*)arg1)->es_int())
-          ((RInteger*)arg1)->setValue(((RInteger*)arg2)->getValue() - ((RInteger*)arg3)->getValue());
-        else
-          ((RDecimal*)arg1)->setValue(((RNumeric*)arg2)->getDecimalValue() - ((RNumeric*)arg3)->getDecimalValue());
+        if (arg2->is_numeric() && arg3->is_numeric()){
+          if (!set_tmp && arg1->is_int() || arg2->is_int() && arg3->is_int()){
+            if (set_tmp)
+              arg1 = new RInteger();
+            ((RInteger*)arg1)->setValue(((RInteger*)arg2)->getValue() - ((RInteger*)arg3)->getValue());
+          }else{
+            if (set_tmp)
+              arg1 = new RDecimal();
+            ((RDecimal*)arg1)->setValue(((RNumeric*)arg2)->getDecimalValue() - ((RNumeric*)arg3)->getDecimalValue());
+          }
+        }else{
+          cout << "Error de tipos, no se puede restar " << *arg2->get_class()->getValue() << " con " << *arg3->get_class()->getValue() << endl;
+        }
         break;
       case DIV :
-        if (((RNumeric*)arg1)->es_int())
-          ((RInteger*)arg1)->setValue(((RInteger*)arg2)->getValue() - ((RInteger*)arg3)->getValue());
-        else
-          ((RDecimal*)arg1)->setValue(((RNumeric*)arg2)->getDecimalValue() - ((RNumeric*)arg3)->getDecimalValue());
+        if (arg2->is_numeric() && arg3->is_numeric()){
+          if (!set_tmp && arg1->is_int() || arg2->is_int() && arg3->is_int()){
+            if (set_tmp)
+              arg1 = new RInteger();
+            ((RInteger*)arg1)->setValue(((RInteger*)arg2)->getValue() / ((RInteger*)arg3)->getValue());
+          }else{
+            if (set_tmp)
+              arg1 = new RDecimal();
+            ((RDecimal*)arg1)->setValue(((RNumeric*)arg2)->getDecimalValue() / ((RNumeric*)arg3)->getDecimalValue());
+          }
+        }else{
+          cout << "Error de tipos, no se puede multiplicar " << *arg2->get_class()->getValue() << " con " << *arg3->get_class()->getValue() << endl;
+        }
         break;
       case POW :
-        if (((RNumeric*)arg1)->es_int())
-          ((RInteger*)arg1)->setValue(pow(((RInteger*)arg2)->getValue(), ((RInteger*)arg3)->getValue()));
-        else
+        if (arg2->is_numeric() && arg3->is_numeric()){
+          if (!set_tmp && arg1->is_int() || arg2->is_int() && arg3->is_int()){
+            if (set_tmp)
+              arg1 = new RInteger();
+            ((RInteger*)arg1)->setValue(pow(((RInteger*)arg2)->getValue(), ((RInteger*)arg3)->getValue()));
+          }else{
+            if (set_tmp)
+              arg1 = new RDecimal();
           ((RDecimal*)arg1)->setValue(pow(((RNumeric*)arg2)->getDecimalValue(), ((RNumeric*)arg3)->getDecimalValue()));
+          }
+        }else{
+          cout << "Error de tipos, no se puede multiplicar " << *arg2->get_class()->getValue() << " con " << *arg3->get_class()->getValue() << endl;
+        }
         break;
       case MOD :
-        if (((RNumeric*)arg1)->es_int())
-          ((RInteger*)arg1)->setValue(((RInteger*)arg2)->getValue() % ((RInteger*)arg3)->getValue());
-        else
-          ((RDecimal*)arg1)->setValue(((RNumeric*)arg2)->mod((RNumeric*)arg3));
+        if (arg2->is_numeric() && arg3->is_numeric()){
+          if (!set_tmp && arg1->is_int() || arg2->is_int() && arg3->is_int()){
+            if (set_tmp)
+              arg1 = new RInteger();
+            ((RInteger*)arg1)->setValue(((RInteger*)arg2)->getValue() % ((RInteger*)arg3)->getValue());
+          }else{
+            if (set_tmp)
+              arg1 = new RDecimal();
+            ((RDecimal*)arg1)->setValue(((RNumeric*)arg2)->mod((RNumeric*)arg3));
+          }
+        }else{
+          cout << "Error de tipos, no se puede multiplicar " << *arg2->get_class()->getValue() << " con " << *arg3->get_class()->getValue() << endl;
+        }
         break;
       case IF : 
         if (!((RBool*)arg1)->getValue())
@@ -170,6 +215,8 @@ void ejecutar(list<Instruccion*> *codigo) {
         set_variable((RString*)arg1, arg2);
         break;
     }
+    if (set_tmp)
+      set_global_variable(((RVariable*)ri->arg1)->getValue(), arg1);
   } while (ri->op != FIN);
 
   clean_up();
@@ -269,4 +316,8 @@ void decimal_add(RDecimal* arg1, RNumeric* arg2, RNumeric* arg3){
     arg1->setValue(((RInteger*)arg2)->getValue() + ((RDecimal*)arg3)->getValue());
   else
     arg1->setValue(((RDecimal*)arg2)->getValue() + ((RInteger*)arg3)->getValue());
+}
+
+bool operacion_es_booleana(enum code_ops op){
+  return (op == AND || op == OR || op == NOT || op == G || op == GE || op == L || op == LE || op == EQ || op == NEQ || op == TOBOOL);
 }

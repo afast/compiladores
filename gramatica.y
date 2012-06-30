@@ -80,11 +80,11 @@ void printCodigo();
 %left T_EXPO
 %%
 program : compstmt { printTree($1); generar($1, codigoGlobal); freeTree($1);};
-compstmt : /* Vacio */ { $$ = NULL; }
-         | stmt { $$ = new_compstmt($1);}
-         | stmt T_FIN_INSTRUCCION {$$ = new_compstmt($1);}
-         | stmt texpr {$$ = add_front_stmt_compstmt($1, $2);}
-         | stmt texpr T_FIN_INSTRUCCION {$$ = add_front_stmt_compstmt($1, $2);};
+compstmt : /* Vacio */ { $$ = NULL; std::cout << "NULL DETECTED!" << std::endl; }
+         | stmt { $$ = new_compstmt($1); std::cout << "new compstmt" << std::endl;}
+         | stmt T_FIN_INSTRUCCION {$$ = new_compstmt($1); std::cout << "new compstmt1" << std::endl;}
+         | stmt texpr {$$ = add_front_stmt_compstmt($1, $2); std::cout << "new compstmt2" << std::endl;}
+         | stmt texpr T_FIN_INSTRUCCION {$$ = add_front_stmt_compstmt($1, $2); std::cout << "new compstmt3" << std::endl;};
 texpr : T_FIN_INSTRUCCION stmt { $$ = new_compstmt($2);}
       | texpr T_FIN_INSTRUCCION stmt { $$ = add_stmt_compstmt($3, $1);};
 stmt : output
@@ -115,7 +115,7 @@ value : T_GETS { $$ = new_gets(); }
 	| case
 	| expr_string_interpolado
 	| array;
-output : T_PUTS value { $$ = new_puts($2); }
+output : T_PUTS value { $$ = new_puts($2); std::cout << "gramatica puts" << std::endl; };
 number : T_INTEGER_ABS {$$ = new_number($<entero>1);}
 	| T_MENOS T_INTEGER_ABS { $$ = new_number((-1)*$<entero>2); }
 	| T_MAS T_INTEGER_ABS { $$ = new_number($<entero>2); }
@@ -158,7 +158,7 @@ expr_string : string { $$ = $1; }
 	| T_PAR_IZQ expr_string T_PAR_DER { $$ = $2; };
 string : T_STRING_1 { $$ = new_string($<text>1); }
 	| T_STRING_2 { $$ = new_string($<text>1); }
-	| T_COMMAND { $$ = new_command($<text>1); }
+	| T_COMMAND { $$ = new_command($<text>1); };
 expr_bool : T_BOOL {$$ = new_boolean_op(b_is_bool, new_bool($<entero>1), NULL); }
   | T_RESPOND_TO T_PAR_IZQ expr_string T_PAR_DER { $$ = new_object_call($<text>1, new_arguments($3)); }
 	| T_INSTANCE_OF expr_string { $$ = new_object_call($<text>1, new_arguments($2)); }
@@ -166,7 +166,7 @@ expr_bool : T_BOOL {$$ = new_boolean_op(b_is_bool, new_bool($<entero>1), NULL); 
 	| T_NOT value { $$ = new_boolean_op(b_not, $2, NULL);}
 	| value  T_MAYOR value { $$ = new_boolean_op(b_mayor, $1, $3);}
 	| value  T_MAYOR_IGUAL value { $$ = new_boolean_op(b_mayor_igual, $1, $3);}
-	| value  T_MENOR value { $$ = new_boolean_op(b_menor, $1, $3);}
+	| value  T_MENOR value { $$ = new_boolean_op(b_menor, $1, $3); std::cout << "menor" << std::endl;}
 	| value  T_MENOR_IGUAL value { $$ = new_boolean_op(b_menor_igual, $1, $3);}
 	| value  T_DOBLE_IGUAL value { $$ = new_boolean_op(b_doble_igual, $1, $3);}
 	| value  T_NOT_IGUAL value { $$ = new_boolean_op(b_not_igual, $1, $3);}
@@ -177,11 +177,11 @@ variable : T_IDENTIF { $$ = new_identificador($<text>1);}
 	| T_ATRIBUTO { $$ = new_atributo($<text>1);}
 	| T_IDENTIF T_CORCHETE_IZQ T_INTEGER_ABS T_CORCHETE_DER { $$ = new_array_pos($<text>1, $<entero>3);};
 
-if : T_IF expr_bool compstmt recursive_elsif opt_else T_END { $$ = new_if($2, $3, $4, $5); }
+if : T_IF expr_bool T_FIN_INSTRUCCION compstmt recursive_elsif opt_else T_END { $$ = new_if($2, $4, $5, $6); std::cout << "gramatica if " << std::endl; };
 recursive_elsif : /* Vacio */ { $$ = NULL; }
-                | T_ELSIF expr_bool compstmt recursive_elsif { $$ = new_elsif($2, $3, $4); };
+                | recursive_elsif T_ELSIF expr_bool T_FIN_INSTRUCCION compstmt { $$ = new_elsif($3, $5, $1); };
 opt_else : /* Vacio */ { $$ = NULL; }
-         | T_ELSE compstmt { $$ = $2; };
+         | T_ELSE T_FIN_INSTRUCCION compstmt { $$ = $3; };
 while : T_WHILE expr_bool compstmt T_END;
 case : T_CASE rec_when_then T_END
 	| T_CASE T_FIN_INSTRUCCION rec_when_then T_END;
@@ -244,7 +244,7 @@ main( int argc, char *argv[] )
 		Instruccion *fin = new Instruccion;
 		fin->op = FIN;
 		codigoGlobal->push_back(fin);
-    printCodigo();
+    //printCodigo();
 		ejecutar(codigoGlobal);
 	} else {
 		std::cout << "No se indica archivo para ejecutar. La ejecucion debe usar el formato:" << std::endl;

@@ -17,6 +17,30 @@ bool RObject::is_numeric(){
   return type == RNUMERIC || type == RINT;
 }
 
+bool RObject::is_string(){
+  return type == RSTRING;
+}
+
+bool RObject::is_int(){
+  return type == RINT;
+
+}
+
+bool RObject::is_decimal(){
+  return type == RNUMERIC;
+
+}
+
+bool RObject::is_array(){
+  return type == RARRAY;
+
+}
+
+bool RObject::is_nil(){
+  return type == RNIL;
+}
+
+
 RInteger *RObject::objectId(){
   RInteger *res;
   if (object_id != 0)

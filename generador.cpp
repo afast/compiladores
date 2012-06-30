@@ -228,12 +228,9 @@ void generar_op_numerica(enum code_ops op, ast* nodo, std::list<Instruccion*>* c
     }
   } else {
     string tmp = get_tmp_var();
-    cout << "as" << endl;
     RVariable* var = new RVariable(&tmp);
     arg1 = var;
-    cout << "as" << *var->getValue() << endl;
     set_global_variable(var->getValue(), new RObject());
-    cout << "as" << endl;
   }
   codigo->push_back(instr(op, arg1, arg2, arg3));
 }

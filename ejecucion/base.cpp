@@ -96,11 +96,15 @@ RBool* mayor_igual(RObject* arg1, RObject* arg2){
 }
 
 RBool* menor(RObject* arg1, RObject* arg2){
-  return mayor_igual(arg2, arg1);
+  RBool* res = mayor_igual(arg1, arg2);
+  res->setValue(!res->getValue());
+  return res;
 }
 
 RBool* menor_igual(RObject* arg1, RObject* arg2){
-  return mayor(arg2, arg1);
+  RBool* res = mayor(arg1, arg2);
+  res->setValue(!res->getValue());
+  return res;
 }
 
 RBool* igual(RObject* arg1, RObject* arg2){

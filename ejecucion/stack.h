@@ -52,4 +52,5 @@ RObject *get_variable(const char *name);
 RObject* get_variable(RString* str);
 void add_symbol(char *name);
 void decimal_add(RDecimal* arg1, RNumeric* arg2, RNumeric* arg3);
+bool operacion_es_booleana(enum code_ops op);
 #endif

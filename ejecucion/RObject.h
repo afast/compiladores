@@ -15,6 +15,11 @@ class RObject {
     RObject();
     RInteger *objectId();
     bool is_numeric();
+    bool is_string();
+    bool is_int();
+    bool is_decimal();
+    bool is_array();
+    bool is_nil();
     virtual RString *get_class();
     virtual bool respond_to(RString *method);
     virtual RString* to_s();

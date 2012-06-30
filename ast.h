@@ -36,6 +36,7 @@ ast* add_front_stmt_compstmt(ast* stmt, ast* compstmt);
 ast* new_case(ast* cond, ast* value, ast* when_rec);
 ast* new_when_rec(ast* cond, ast* value, ast* when_rec);
 ast* new_identificador(char* name, int linea);
+ast* new_identificador_global(char* name, int linea);
 ast* new_atributo(char* name, int linea);
 ast* new_array_pos(char* name, int place, int linea);
 ast* new_gets(int linea);;

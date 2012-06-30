@@ -51,6 +51,11 @@ bool RArray::respond_to(RString *method){
   return RObject::respond_to(method);
 }
 
+void RArray::setValue(int pos, RObject *val){
+  value[pos] = val;
+}
+
+
 bool RArray::operator== (RArray param){
   bool res;
   if (param.size() != this->size())

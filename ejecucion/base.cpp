@@ -14,11 +14,14 @@
 std::unordered_map<std::string, RObject*> vTemporales;
 
 void puts(RString *string_arg) {
-  std::string *str = new std::string(string_arg->getValue()->data());
-  while (str->at(str->size()-1) == '\n')
-    str->erase(str->size()-1);
-  std::cout << str->data() << std::endl;
-  delete str;
+  if (string_arg->getValue()->size()>0){
+    std::string *str = new std::string(string_arg->getValue()->data());
+    while (str->at(str->size()-1) == '\n')
+      str->erase(str->size()-1);
+    std::cout << str->data() << std::endl;
+    delete str;
+  } else
+    std::cout << string_arg->getValue()->data() << std::endl;
 }
 
 void gets(RString *string_arg) {

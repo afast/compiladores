@@ -117,7 +117,7 @@ void decidir_nodo(ast* nodo, list<Instruccion*> *codigo){
       generar_puts(nodo, codigo);
       break;
     case t_gets : //Leer de la entrada estandar
-      generar_gets(codigo);
+      generar_gets(codigo, nodo->linea);
       break;
     case t_method_call:
       break;
@@ -126,8 +126,10 @@ void decidir_nodo(ast* nodo, list<Instruccion*> *codigo){
     case t_nil :
       break;
     case t_mul_string :
+      generar_mul_string(nodo, codigo);
       break;
     case t_add_string :
+      generar_suma_string(nodo, codigo);
       break;
     case t_method_with_args:
       break;
@@ -193,14 +195,38 @@ void generar_if(ast* nodo, std::list<Instruccion*> *codigo){
   /* endif */
   decidir_nodo(nodo->h1, codigo);
   RObject* cond = codigo->back()->arg1;
-  codigo->push_back(instr(IF, cond));
+  codigo->push_back(instr(IF, cond, nodo->linea));
   generar_compstmt(nodo->h2->stmt_list, codigo);
   generar_elsif(nodo->h3, codigo);
   if (nodo->h4 != NULL){
-    codigo->push_back(instr(ELSE));
+    codigo->push_back(instr(ELSE, nodo->h4->linea));
     generar_compstmt(nodo->h4->stmt_list, codigo);
   }
-  codigo->push_back(instr(END));
+  codigo->push_back(instr(END, nodo->linea));
+}
+
+void generar_suma_string(ast* nodo, std::list<Instruccion*>* codigo){
+  RObject* arg2, *arg3;
+  arg2 = get_abstract_node(nodo->h1);
+  arg3 = get_abstract_node(nodo->h2);
+  codigo->push_back(instr(ADD, new RString(), arg2, arg3, nodo->linea));
+}
+
+void generar_mul_string(ast* nodo, std::list<Instruccion*>* codigo){
+  RObject* arg2, *arg3;
+  if (nodo_hoja(nodo->h1)){ // no preciso variable temporal
+    arg2 = get_abstract_node(nodo->h1);
+  } else {
+    decidir_nodo(nodo->h1, codigo); //ultima operacion debe ser numerica y guardar el resultado en arg1
+    arg2 = codigo->back()->arg1;
+  }
+  if (nodo_hoja(nodo->h2)){ // no preciso variable temporal
+    arg3 = get_numeric_node(nodo->h2);
+  } else {
+    decidir_nodo(nodo->h2, codigo); //ultima operacion debe ser numerica y guardar el resultado en arg1
+    arg3 = codigo->back()->arg1;
+  }
+  codigo->push_back(instr(MULT, new RString(), arg2, arg3, nodo->linea));
 }
 
 void generar_op_numerica(enum code_ops op, ast* nodo, std::list<Instruccion*>* codigo){
@@ -232,7 +258,7 @@ void generar_op_numerica(enum code_ops op, ast* nodo, std::list<Instruccion*>* c
     arg1 = var;
     set_global_variable(var->getValue(), new RObject());
   }
-  codigo->push_back(instr(op, arg1, arg2, arg3));
+  codigo->push_back(instr(op, arg1, arg2, arg3, nodo->linea));
 }
 
 void generar_op_asgn(ast* nodo, std::list<Instruccion*>* codigo){
@@ -244,7 +270,7 @@ void generar_op_asgn(ast* nodo, std::list<Instruccion*>* codigo){
     decidir_nodo(nodo->h2, codigo);
     arg = codigo->back()->arg1;
   }
-  codigo->push_back(instr(ASGN, new RString(nodo->h1->str), arg));
+  codigo->push_back(instr(ASGN, new RString(nodo->h1->str), arg, nodo->linea));
 }
 
 RObject* get_numeric_node(ast* hoja){
@@ -300,10 +326,10 @@ void generar_elsif(ast* nodo, std::list<Instruccion*> *codigo){
    * */
   if (nodo == NULL)
     return;
-  codigo->push_back(instr(ELSIFCOND));
+  codigo->push_back(instr(ELSIFCOND, nodo->linea));
   decidir_nodo(nodo->h1, codigo);
   RObject* cond = codigo->back()->arg1;
-  codigo->push_back(instr(ELSIF, cond));
+  codigo->push_back(instr(ELSIF, cond, nodo->linea));
   generar_compstmt(nodo->h2->stmt_list, codigo);
   generar_elsif(nodo->h3, codigo);
 }
@@ -320,11 +346,11 @@ void generar_while(ast* nodo, std::list<Instruccion*> *codigo){
   /* endwhile */
   decidir_nodo(nodo->h1, codigo);
   RObject* cond = codigo->back()->arg1;
-  codigo->push_back(instr(WHILE, cond));
+  codigo->push_back(instr(WHILE, cond, nodo->linea));
   generar_compstmt(nodo->h2->stmt_list, codigo);
   decidir_nodo(nodo->h1, codigo);
   RObject* cond2 = codigo->back()->arg1;
-  codigo->push_back(instr(WHILEEND, cond2)); //END o WHILEEND
+  codigo->push_back(instr(WHILEEND, cond2, nodo->linea)); //END o WHILEEND
 }
 
 void generar_string(ast* nodo, std::list<Instruccion*> *codigo){}
@@ -380,39 +406,40 @@ void generar_op_booleana(enum code_ops op, ast* nodo, list<Instruccion*>* codigo
     }
   }
 
-  codigo->push_back(instr(op, new RBool(), arg2, arg3));
+  codigo->push_back(instr(op, new RBool(), arg2, arg3, nodo->linea));
 }
 
 bool nodo_hoja(ast* nodo){
   return (nodo->tipo == f_string || nodo->tipo == f_entero || nodo->tipo == f_decimal || nodo->tipo == f_bool || nodo->tipo == t_identif);
 }
 
-Instruccion* instr(enum code_ops op){
+Instruccion* instr(enum code_ops op, int linea){
   Instruccion* inst = new Instruccion;
   inst->op = op;
+  inst->linea = linea;
   return inst;
 }
 
-Instruccion* instr(enum code_ops op, RObject* arg1){
-  Instruccion* inst = instr(op);
+Instruccion* instr(enum code_ops op, RObject* arg1, int linea){
+  Instruccion* inst = instr(op, linea);
   inst->arg1=arg1;
   return inst;
 }
 
-Instruccion* instr(enum code_ops op, RObject* arg1, RObject* arg2){
-  Instruccion* inst = instr(op, arg1);
+Instruccion* instr(enum code_ops op, RObject* arg1, RObject* arg2, int linea){
+  Instruccion* inst = instr(op, arg1, linea);
   inst->arg2=arg2;
   return inst;
 }
 
-Instruccion* instr(enum code_ops op, RObject* arg1, RObject* arg2, RObject* arg3){
-  Instruccion* inst = instr(op, arg1, arg2);
+Instruccion* instr(enum code_ops op, RObject* arg1, RObject* arg2, RObject* arg3, int linea){
+  Instruccion* inst = instr(op, arg1, arg2, linea);
   inst->arg3=arg3;
   return inst;
 }
 
-void generar_gets(list<Instruccion*>* codigo){
-  codigo->push_back(instr(GETS, new RString()));
+void generar_gets(list<Instruccion*>* codigo, int linea){
+  codigo->push_back(instr(GETS, new RString(), linea));
 }
 
 void freeList(list<ast*> *stmt_list){

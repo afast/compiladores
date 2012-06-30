@@ -28,7 +28,7 @@ extern int yylineno;
 void yyerror(const char *s)
 {
         //fprintf(stderr, "Error: %s\n", s);
-  	printf("Error (FALTA TIPO DE ERROR) en linea %d - cerca de \"%s\"\n", yylineno, yytext);
+  	printf("Error de sintaxis en linea %d - cerca de \"%s\"\n", yylineno, yytext);
 
 }
 
@@ -91,7 +91,7 @@ stmt : output
 	| if
 	| while
 	| each
-	| variable T_IGUAL value { $$ = new_asgn($1, $3); std::cout << "detectada asignacion" << std::endl;}
+	| variable T_IGUAL value { $$ = new_asgn($1, $3, yylineno); std::cout << "detectada asignacion" << std::endl;}
 	| variable T_MAS_IGUAL number
 	| variable T_MENOS_IGUAL number
 	| def
@@ -100,12 +100,10 @@ stmt : output
 	| T_ATTR_WRITER args_accesores
 	| T_ACCESSOR args_accesores
 	| T_INVOCACION_METODO
-	| load
-	| bloque
-	| require;
+	| bloque;
 bloque: T_LLAVE_IZQ compstmt T_LLAVE_DER
 	| T_DO compstmt T_END;
-value : T_GETS { $$ = new_gets(); }
+value : T_GETS { $$ = new_gets(yylineno); }
 	| T_INSTANCE_CLASS
 	| T_NEW T_PAR_IZQ args_new T_PAR_DER
 	| expr_numeric { $$ = $1; }
@@ -115,74 +113,77 @@ value : T_GETS { $$ = new_gets(); }
 	| case
 	| expr_string_interpolado
 	| array;
-output : T_PUTS value { $$ = new_puts($2); std::cout << "gramatica puts" << std::endl; };
-number : T_INTEGER_ABS {$$ = new_number($<entero>1);}
-	| T_MENOS T_INTEGER_ABS { $$ = new_number((-1)*$<entero>2); }
-	| T_MAS T_INTEGER_ABS { $$ = new_number($<entero>2); }
-	| T_FLOAT_ABS { $$ = new_number($<real>1); }
-	| T_MENOS T_FLOAT_ABS { $$ = new_number((-1)*$<real>2); }
-	| T_MAS T_FLOAT_ABS { $$ = new_number($<real>2); };
+output : T_PUTS value { $$ = new_puts($2, yylineno); std::cout << "gramatica puts" << std::endl; };
+number : T_INTEGER_ABS {$$ = new_number($<entero>1, yylineno);}
+	| T_MENOS T_INTEGER_ABS { $$ = new_number((-1)*$<entero>2, yylineno); }
+	| T_MAS T_INTEGER_ABS { $$ = new_number($<entero>2, yylineno); }
+	| T_FLOAT_ABS { $$ = new_number($<real>1, yylineno); }
+	| T_MENOS T_FLOAT_ABS { $$ = new_number((-1)*$<real>2, yylineno); }
+	| T_MAS T_FLOAT_ABS { $$ = new_number($<real>2, yylineno); };
 expr_numeric : number { $$ = $1; }
-	| T_OBJECT_ID { $$ = new_object_call($<text>1); }
-	| T_SIZE { $$ = new_object_call($<text>1); }
-	| T_LENGTH { $$ = new_object_call($<text>1); }
-	| expr_numeric T_MAS expr_numeric { $$ = new_numeric_op(op_plus, $1, $3);}
-	| expr_numeric T_ASTER expr_numeric { $$ = new_numeric_op(op_mul, $1, $3);}
-	| expr_numeric T_MENOS expr_numeric { $$ = new_numeric_op(op_sub, $1, $3);}
-	| expr_numeric T_BAR expr_numeric   { $$ = new_numeric_op(op_div, $1, $3);}	
-	| expr_numeric T_EXPO expr_numeric  { $$ = new_numeric_op(op_pow, $1, $3);}
-	| expr_numeric T_PORCENTAJE expr_numeric { $$ = new_numeric_op(op_mod, $1, $3);}
-	| expr_numeric T_MAS variable { $$ = new_numeric_op(op_plus, $1, $3);}
-	| expr_numeric T_ASTER variable { $$ = new_numeric_op(op_mul, $1, $3);}
-	| expr_numeric T_MENOS variable { $$ = new_numeric_op(op_sub, $1, $3);}
-	| expr_numeric T_BAR variable   { $$ = new_numeric_op(op_div, $1, $3);}	
-	| expr_numeric T_EXPO variable  { $$ = new_numeric_op(op_pow, $1, $3);}
-	| expr_numeric T_PORCENTAJE variable { $$ = new_numeric_op(op_mod, $1, $3);}
-	| variable T_MAS expr_numeric { $$ = new_numeric_op(op_plus, $1, $3);}
-	| variable T_ASTER expr_numeric { $$ = new_numeric_op(op_mul, $1, $3);}
-	| variable T_MENOS expr_numeric { $$ = new_numeric_op(op_sub, $1, $3);}
-	| variable T_BAR expr_numeric   { $$ = new_numeric_op(op_div, $1, $3);}	
-	| variable T_EXPO expr_numeric  { $$ = new_numeric_op(op_pow, $1, $3);}
-	| variable T_PORCENTAJE expr_numeric { $$ = new_numeric_op(op_mod, $1, $3);}
-	| variable T_MAS variable { $$ = new_numeric_op(op_plus, $1, $3);}
-	| variable T_ASTER variable { $$ = new_numeric_op(op_mul, $1, $3);}
-	| variable T_MENOS variable { $$ = new_numeric_op(op_sub, $1, $3);}
-	| variable T_BAR variable   { $$ = new_numeric_op(op_div, $1, $3);}	
-	| variable T_EXPO variable  { $$ = new_numeric_op(op_pow, $1, $3);}
-	| variable T_PORCENTAJE variable { $$ = new_numeric_op(op_mod, $1, $3);}
+	| T_OBJECT_ID { $$ = new_object_call($<text>1, yylineno); }
+	| T_SIZE { $$ = new_object_call($<text>1, yylineno); }
+	| T_LENGTH { $$ = new_object_call($<text>1, yylineno); }
+	| expr_numeric T_MAS expr_numeric { $$ = new_numeric_op(op_plus, $1, $3, yylineno);}
+	| expr_numeric T_ASTER expr_numeric { $$ = new_numeric_op(op_mul, $1, $3, yylineno);}
+	| expr_numeric T_MENOS expr_numeric { $$ = new_numeric_op(op_sub, $1, $3, yylineno);}
+	| expr_numeric T_BAR expr_numeric   { $$ = new_numeric_op(op_div, $1, $3, yylineno);}	
+	| expr_numeric T_EXPO expr_numeric  { $$ = new_numeric_op(op_pow, $1, $3, yylineno);}
+	| expr_numeric T_PORCENTAJE expr_numeric { $$ = new_numeric_op(op_mod, $1, $3, yylineno);}
+	| expr_numeric T_MAS variable { $$ = new_numeric_op(op_plus, $1, $3, yylineno);}
+	| expr_numeric T_ASTER variable { $$ = new_numeric_op(op_mul, $1, $3, yylineno);}
+	| expr_numeric T_MENOS variable { $$ = new_numeric_op(op_sub, $1, $3, yylineno);}
+	| expr_numeric T_BAR variable   { $$ = new_numeric_op(op_div, $1, $3, yylineno);}	
+	| expr_numeric T_EXPO variable  { $$ = new_numeric_op(op_pow, $1, $3, yylineno);}
+	| expr_numeric T_PORCENTAJE variable { $$ = new_numeric_op(op_mod, $1, $3, yylineno);}
+	| variable T_MAS expr_numeric { $$ = new_numeric_op(op_plus, $1, $3, yylineno);}
+	| variable T_ASTER expr_numeric { $$ = new_numeric_op(op_mul, $1, $3, yylineno);}
+	| variable T_MENOS expr_numeric { $$ = new_numeric_op(op_sub, $1, $3, yylineno);}
+	| variable T_BAR expr_numeric   { $$ = new_numeric_op(op_div, $1, $3, yylineno);}	
+	| variable T_EXPO expr_numeric  { $$ = new_numeric_op(op_pow, $1, $3, yylineno);}
+	| variable T_PORCENTAJE expr_numeric { $$ = new_numeric_op(op_mod, $1, $3, yylineno);}
+	| variable T_MAS variable { $$ = new_numeric_op(op_plus, $1, $3, yylineno);}
+	| variable T_ASTER variable { $$ = new_numeric_op(op_mul, $1, $3, yylineno);}
+	| variable T_MENOS variable { $$ = new_numeric_op(op_sub, $1, $3, yylineno);}
+	| variable T_BAR variable   { $$ = new_numeric_op(op_div, $1, $3, yylineno);}	
+	| variable T_EXPO variable  { $$ = new_numeric_op(op_pow, $1, $3, yylineno);}
+	| variable T_PORCENTAJE variable { $$ = new_numeric_op(op_mod, $1, $3, yylineno);}
 	| T_PAR_IZQ expr_numeric T_PAR_DER{ $$ = $2; }; 
 expr_string : string { $$ = $1; }
-	| T_NIL { $$ = new_nil(); }
-	| expr_string T_ASTER T_INTEGER_ABS { $$ = new_mul_string($1, $<entero>3);}
-	| expr_string T_MAS expr_string { $$ = new_add_string($1, $3); }
+	| T_NIL { $$ = new_nil(yylineno); }
+	| expr_string T_ASTER expr_numeric { $$ = new_mul_string($1, $3, yylineno);}
+	| expr_string T_ASTER variable { $$ = new_mul_string($1, $3, yylineno);}
+	| expr_string T_MAS expr_string { $$ = new_add_string($1, $3, yylineno); }
+	| variable T_MAS expr_string { $$ = new_add_string($1, $3, yylineno); }
+	| expr_string T_MAS variable { $$ = new_add_string($1, $3, yylineno); }
 	| T_PAR_IZQ expr_string T_PAR_DER { $$ = $2; };
-string : T_STRING_1 { $$ = new_string($<text>1); }
-	| T_STRING_2 { $$ = new_string($<text>1); }
-	| T_COMMAND { $$ = new_command($<text>1); };
-expr_bool : T_BOOL {$$ = new_boolean_op(b_is_bool, new_bool($<entero>1), NULL); }
-  | T_RESPOND_TO T_PAR_IZQ expr_string T_PAR_DER { $$ = new_object_call($<text>1, new_arguments($3)); }
-	| T_INSTANCE_OF expr_string { $$ = new_object_call($<text>1, new_arguments($2)); }
-	/*| T_PAR_IZQ value T_PAR_DER{ $$ = new_boolean_op(b_is_bool, $2, NULL);}*/
-	| T_NOT value { $$ = new_boolean_op(b_not, $2, NULL);}
-	| value  T_MAYOR value { $$ = new_boolean_op(b_mayor, $1, $3);}
-	| value  T_MAYOR_IGUAL value { $$ = new_boolean_op(b_mayor_igual, $1, $3);}
-	| value  T_MENOR value { $$ = new_boolean_op(b_menor, $1, $3); std::cout << "menor" << std::endl;}
-	| value  T_MENOR_IGUAL value { $$ = new_boolean_op(b_menor_igual, $1, $3);}
-	| value  T_DOBLE_IGUAL value { $$ = new_boolean_op(b_doble_igual, $1, $3);}
-	| value  T_NOT_IGUAL value { $$ = new_boolean_op(b_not_igual, $1, $3);}
-	| value T_AND value { $$ = new_boolean_op(b_and, $1, $3);}
-	| value T_OR value { $$ = new_boolean_op(b_or, $1, $3);}
+string : T_STRING_1 { $$ = new_string($<text>1, yylineno); }
+	| T_STRING_2 { $$ = new_string($<text>1, yylineno); }
+	| T_COMMAND { $$ = new_command($<text>1, yylineno); };
+expr_bool : T_BOOL {$$ = new_boolean_op(b_is_bool, new_bool($<entero>1, yylineno), NULL, yylineno); }
+  | T_RESPOND_TO T_PAR_IZQ expr_string T_PAR_DER { $$ = new_object_call($<text>1, new_arguments($3, yylineno), yylineno); }
+	| T_INSTANCE_OF expr_string { $$ = new_object_call($<text>1, new_arguments($2, yylineno), yylineno); }
+	/*| T_PAR_IZQ value T_PAR_DER{ $$ = new_boolean_op(b_is_bool, $2, NULL, yylineno);}*/
+	| T_NOT value { $$ = new_boolean_op(b_not, $2, NULL, yylineno);}
+	| value  T_MAYOR value { $$ = new_boolean_op(b_mayor, $1, $3, yylineno);}
+	| value  T_MAYOR_IGUAL value { $$ = new_boolean_op(b_mayor_igual, $1, $3, yylineno);}
+	| value  T_MENOR value { $$ = new_boolean_op(b_menor, $1, $3, yylineno); std::cout << "menor" << std::endl;}
+	| value  T_MENOR_IGUAL value { $$ = new_boolean_op(b_menor_igual, $1, $3, yylineno);}
+	| value  T_DOBLE_IGUAL value { $$ = new_boolean_op(b_doble_igual, $1, $3, yylineno);}
+	| value  T_NOT_IGUAL value { $$ = new_boolean_op(b_not_igual, $1, $3, yylineno);}
+	| value T_AND value { $$ = new_boolean_op(b_and, $1, $3, yylineno);}
+	| value T_OR value { $$ = new_boolean_op(b_or, $1, $3, yylineno);}
   | T_PAR_IZQ expr_bool T_PAR_DER {$$ = $2;};
-variable : T_IDENTIF { $$ = new_identificador($<text>1);}
-	| T_ATRIBUTO { $$ = new_atributo($<text>1);}
-	| T_IDENTIF T_CORCHETE_IZQ T_INTEGER_ABS T_CORCHETE_DER { $$ = new_array_pos($<text>1, $<entero>3);};
+variable : T_IDENTIF { $$ = new_identificador($<text>1, yylineno);}
+	| T_ATRIBUTO { $$ = new_atributo($<text>1, yylineno);}
+	| T_IDENTIF T_CORCHETE_IZQ T_INTEGER_ABS T_CORCHETE_DER { $$ = new_array_pos($<text>1, $<entero>3, yylineno);};
 
-if : T_IF expr_bool T_FIN_INSTRUCCION compstmt recursive_elsif opt_else T_END { $$ = new_if($2, $4, $5, $6); std::cout << "gramatica if " << std::endl; };
+if : T_IF expr_bool T_FIN_INSTRUCCION compstmt recursive_elsif opt_else T_END { $$ = new_if($2, $4, $5, $6, yylineno); std::cout << "gramatica if " << std::endl; };
 recursive_elsif : /* Vacio */ { $$ = NULL; }
-                | recursive_elsif T_ELSIF expr_bool T_FIN_INSTRUCCION compstmt { $$ = new_elsif($3, $5, $1); };
+                | recursive_elsif T_ELSIF expr_bool T_FIN_INSTRUCCION compstmt { $$ = new_elsif($3, $5, $1, yylineno); };
 opt_else : /* Vacio */ { $$ = NULL; }
          | T_ELSE T_FIN_INSTRUCCION compstmt { $$ = $3; };
-while : T_WHILE expr_bool T_FIN_INSTRUCCION compstmt T_END { $$ = new_while($2, $4); };
+while : T_WHILE expr_bool T_FIN_INSTRUCCION compstmt T_END { $$ = new_while($2, $4, yylineno); };
 case : T_CASE rec_when_then T_END
 	| T_CASE T_FIN_INSTRUCCION rec_when_then T_END;
 
@@ -209,13 +210,6 @@ args_accesores_recur :	/*vacio*/
 args_new : value args_new_recur;
 args_new_recur :	/*vacio*/
 	| args_new_recur T_COMA	value;
-load : T_LOAD expr_string_load_require;
-require : T_REQUIRE expr_string_load_require;
-expr_string_load_require : T_STRING_1
-	| variable
-	| T_NIL
-	| expr_string_load_require T_ASTER T_INTEGER_ABS
-	| expr_string_load_require T_MAS expr_string_load_require;
 each : T_EACH T_DO T_PIPE T_IDENTIF T_PIPE compstmt T_END;
 expr_string_interpolado : T_STRING_IZQ expr_string_interpolado_recur T_STRING_DER;
 expr_string_interpolado_recur : /*vacio*/
@@ -241,6 +235,7 @@ main( int argc, char *argv[] )
 		codigoGlobal = new std::list<Instruccion*>();
 		initializer();
 		yyparse();
+		std::cout << "luego del Parserrrrrrrrrrrrrrrrrr" << std::endl;
 		Instruccion *fin = new Instruccion;
 		fin->op = FIN;
 		codigoGlobal->push_back(fin);
@@ -264,8 +259,8 @@ void printCodigo() {
       case PUTS  : std::cout << "PUTS " << *ri->arg1->to_s()->getValue() << std::endl; break;
       case ADD   : std::cout << "ADD " << *ri->arg2->to_s()->getValue() << *ri->arg3->to_s()->getValue() << std::endl; break;
       case SUB   : std::cout << "SUB " << *ri->arg2->to_s()->getValue() << *ri->arg3->to_s()->getValue() << std::endl; break;
-      case MULT   : std::cout << "MULT " << *ri->arg2->to_s()->getValue() << *ri->arg3->to_s()->getValue() << std::endl; break;
-      case ASGN   : std::cout << "ASGN " << *ri->arg1->to_s()->getValue() << *ri->arg2->to_s()->getValue() << std::endl; break;
+      //case MULT   : std::cout << "MULT " << *ri->arg2->to_s()->getValue() << *ri->arg3->to_s()->getValue() << std::endl; break;
+      //case ASGN   : std::cout << "ASGN " << *ri->arg1->to_s()->getValue() << (ri->arg2->to_s()->getValue() != NULL ? *ri->arg2->to_s()->getValue() : "uninitialized") << std::endl; break;
       case IF   : std::cout << "IF "  << std::endl; break;
       case ELSE   : std::cout << "ELSE "  << std::endl; break;
       case ELSIF   : std::cout << "ELSIF "  << std::endl; break;

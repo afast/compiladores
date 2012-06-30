@@ -169,11 +169,12 @@ char* replaceContinuacionLinea(char* textIn){
 
 	int n = tmp->find("\\\n");
 
+  if (n>0)
     tmp->replace(n,  // start position in str
             2,      // how character(s)
             1,      // how many copies of character
             ' ');   // character for replasment
-    std::cout << "-----------       str is: " << *tmp << std::endl;
+  std::cout << "-----------       str is: " << *tmp << std::endl;
 
 
 

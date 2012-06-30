@@ -178,10 +178,10 @@ void decidir_nodo(ast* nodo, list<Instruccion*> *codigo){
     case call_method:
       generar_method_call(nodo, codigo);
       break;
-    case a_method:
+    case a_method:{
       list<Instruccion*> *funcion = generar_metodo(nodo);
       add_global_function(nodo->str, funcion);
-      break;
+      break;}
     case t_arr_place :
       // std::cout << ".....................................sssss        " << get_variable(nodo->str) << std::endl;
       //((RArray*)get_variable(nodo->str))[nodo->entero];

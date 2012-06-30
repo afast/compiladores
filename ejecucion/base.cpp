@@ -129,6 +129,9 @@ RBool* igual(RObject* arg1, RObject* arg2){
       case RNUMERIC:
         resultado = ((RNumeric*)arg1)->getDecimalValue() == ((RNumeric*)arg2)->getDecimalValue();
         break;
+      case RINT:
+        resultado = ((RInteger*)arg1)->getValue() == ((RInteger*)arg2)->getValue();
+        break;
       case RBOOL:
         resultado = ((RBool*)arg1)->getValue() == ((RBool*)arg2)->getValue();
         break;

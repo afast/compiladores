@@ -1,6 +1,7 @@
 a=10
 puts a
 puts a + 2
+puts 5.0*5*5
 a='hola'
 puts a
 b=' caro'

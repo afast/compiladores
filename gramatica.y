@@ -182,7 +182,7 @@ recursive_elsif : /* Vacio */ { $$ = NULL; }
                 | recursive_elsif T_ELSIF expr_bool T_FIN_INSTRUCCION compstmt { $$ = new_elsif($3, $5, $1); };
 opt_else : /* Vacio */ { $$ = NULL; }
          | T_ELSE T_FIN_INSTRUCCION compstmt { $$ = $3; };
-while : T_WHILE expr_bool compstmt T_END;
+while : T_WHILE expr_bool T_FIN_INSTRUCCION compstmt T_END;
 case : T_CASE rec_when_then T_END
 	| T_CASE T_FIN_INSTRUCCION rec_when_then T_END;
 

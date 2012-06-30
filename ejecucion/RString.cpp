@@ -1,6 +1,8 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <cmath>
+#include <iomanip>
 
 #include "RBool.h"
 #include "RString.h"
@@ -57,8 +59,18 @@ RString::RString(RInteger *arg){
 }
 
 RString::RString(RDecimal *arg){
+  long int base = floor(arg->getValue());
+  if (base < 0) base *= -1;
+  int length = 1;
+  while (base > 10){
+    length++;
+    base /=10;
+  }
   this->str = new std::string();
   std::stringstream s;
+  s << std::setprecision(length+12);
+  if (floor(arg->getValue()) - arg->getValue() == 0)
+    s << std::fixed << std::setprecision(1);
   s << arg->getValue();
   s >> *str;
   new_pointer(this);

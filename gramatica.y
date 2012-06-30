@@ -66,7 +66,7 @@ void printCodigo();
 %token T_ATRIBUTO T_VAR_PESOS_CERO T_VAR_PESOS T_VAR_PESOS_PESOS T_INTEGER_ABS T_ATRIBUTO_ACCESOR
 %token T_FLOAT_ABS T_STRING_1 T_STRING_2 T_STRING_IZQ T_STRING_DER T_COMMAND T_ESPACIOS T_ERROR
 
-%type <a> expr_numeric compstmt stmt texpr value output number variable string expr_string expr_bool if recursive_elsif opt_else while rec_when_then case argdecl def
+%type <a> expr_numeric compstmt stmt texpr value output number variable string expr_string expr_bool if recursive_elsif opt_else while rec_when_then case argdecl def arglist list_values
 /*=========================================================================
                           OPERATOR PRECEDENCE
 =========================================================================*/
@@ -100,6 +100,8 @@ stmt : output
 	| T_ATTR_WRITER args_accesores
 	| T_ACCESSOR args_accesores
 	| T_INVOCACION_METODO
+  | T_IDENTIF { $$ = new_method_call($<text>1, NULL, yylineno); }
+  | T_IDENTIF list_values { $$ = new_method_call($<text>1, $2, yylineno); }
 	| bloque;
 bloque: T_LLAVE_IZQ compstmt T_LLAVE_DER
 	| T_DO compstmt T_END;
@@ -189,18 +191,17 @@ rec_when_then : /* Vacio */ { $$ = NULL; }
                 | rec_when_then T_WHEN expr_bool T_THEN value T_FIN_INSTRUCCION { $$ = new_when_rec($3, $5, $1); };
 
 while : T_WHILE expr_bool T_FIN_INSTRUCCION compstmt T_END { $$ = new_while($2, $4, yylineno); };
-def :	T_DEF T_IDENTIF	argdecl compstmt T_END { $$ = new_method($<text>2, $3, $4,yylineno);}
-	| T_DEF T_IDENTIF compstmt T_END { $$ = new_method($<text>2, NULL, $3, yylineno);};
-argdecl : T_PAR_IZQ arglist T_PAR_DER T_FIN_INSTRUCCION
-	| T_PAR_IZQ T_PAR_DER T_FIN_INSTRUCCION /*para representar pej: funcion()*/
-	| arglist T_FIN_INSTRUCCION;
-arglist : T_IDENTIF arglist_recur;  /*ver lo de recursion por la izq y por la der*/
-arglist_recur :	/*vacio*/
-	| T_COMA T_IDENTIF arglist_recur;
+def :	T_DEF T_IDENTIF argdecl T_FIN_INSTRUCCION compstmt T_END { $$ = new_method($<text>2, $3, $5,yylineno);}
+	| T_DEF T_IDENTIF T_FIN_INSTRUCCION compstmt T_END { $$ = new_method($<text>2, NULL, $4, yylineno);};
+argdecl : T_PAR_IZQ arglist T_PAR_DER
+	| T_PAR_IZQ T_PAR_DER /*para representar pej: funcion()*/
+	| arglist;
+arglist :	T_IDENTIF { $$ = new_arguments(new_identificador($<text>1, yylineno), yylineno);}
+	| arglist T_COMA T_IDENTIF { $$ = add_argument(new_identificador($<text>3, yylineno), $1, yylineno);};
 array :	T_CORCHETE_IZQ list_values T_CORCHETE_DER
 	| T_CORCHETE_IZQ T_CORCHETE_DER;
-list_values: value
-	| value T_COMA list_values;
+list_values: value { $$ = new_params($1, yylineno);}
+	| list_values T_COMA value { $$ = add_param($1, $3, yylineno);};
 class :	T_CLASS T_NOM_CONST compstmt T_END;
 args_accesores : T_ATRIBUTO_ACCESOR args_accesores_recur;
 args_accesores_recur :	/*vacio*/

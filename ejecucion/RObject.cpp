@@ -57,7 +57,7 @@ RInteger *RObject::objectId(){
 }
 
 RString *RObject::get_class(){
-  return new RString("Object");
+  return new RString("nil");
 }
 
 RString* RObject::to_s(){

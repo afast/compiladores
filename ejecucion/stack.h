@@ -11,7 +11,7 @@ class RDecimal;
 class RNumeric;
 class RString;
 
-enum code_ops { FIN, PUTS, GETS, OBJID, ADD, ASSIGN_TMP, MULT, SUB, DIV, POW, MOD, IF, ELSIF, ELSIFCOND, WHILEEND, WHILE, CASE, CASEREC, CASERECCOND, ELSE, END, AND, OR, NOT, G, GE, L, LE, EQ, NEQ, TOBOOL, DO, GETV, PUTV, ASGN };
+enum code_ops { FIN, PUTS, GETS, CALL, OBJID, ADD, ASSIGN_TMP, MULT, SUB, DIV, POW, MOD, IF, ELSIF, ELSIFCOND, WHILEEND, WHILE, CASE, CASEREC, CASERECCOND, ELSE, END, AND, OR, NOT, G, GE, L, LE, EQ, NEQ, TOBOOL, DO, GETV, PUTV, ASGN, PUSH_ARG, ENDFUNC, RETURN, POP_ARG };
 /*
  * G  - mayor
  * GE - mayor igual
@@ -57,4 +57,7 @@ RObject* get_variable(RString* str);
 void add_symbol(char *name);
 void decimal_add(RDecimal* arg1, RNumeric* arg2, RNumeric* arg3);
 bool operacion_es_booleana(enum code_ops op);
+std::list<Instruccion*>::iterator get_function_iterator(RString* name);
+void new_scope();
+void drop_scope();
 #endif

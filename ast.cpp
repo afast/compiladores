@@ -58,6 +58,7 @@ ast* add_front_stmt_compstmt(ast* stmt, ast* compstmt){
 }
 
 ast* new_identificador(char* name, int linea){
+  std::cout << "nuevo identificador - " << name << std::endl;
   ast* res = new ast;
   res->tipo = t_identif;
   res->linea = linea;
@@ -237,10 +238,33 @@ ast* new_when_rec(ast* cond, ast* value, ast* when_rec) {
 
 ast* new_method(char* name, ast* args, ast* comp_stmt, int linea){
   ast* res = new ast;
-  res->tipo = a_method;
+  res->tipo = a_method; //method defined
   res->linea = linea;
   res->h1 = args; //puede ser NULL
-  res->h2 = comp_stmt;
-  res->str = name;
+  res->h2 = comp_stmt; //Lineas del metodo
+  res->str = name; //nombre del metodo
   return res;
+}
+
+ast* new_method_call(char* variable, ast* args, int linea){
+  ast* res = new ast;
+  res->tipo = call_method;
+  res->linea = linea;
+  res->str = variable;
+  res->h1 = args; //puede ser NULL
+  return res;
+}
+
+ast* new_params(ast* param, int linea){
+  ast* res = new ast;
+  res->tipo = t_params;
+  res->linea = linea;
+  res->stmt_list = new std::list<ast*>;
+  res->stmt_list->push_back(param);
+  return res;
+}
+
+ast* add_param(ast* args, ast* arg, int linea){
+  args->stmt_list->push_back(arg);
+  return args;
 }

@@ -48,21 +48,21 @@ RObject* generar_objeto(ast* nodo){
   RObject* objeto;
   switch(nodo->tipo){
     case f_string :{
-      RString* s = new RString(nodo->str, true);
-      objeto = s;
-      break;}
+                     RString* s = new RString(nodo->str, true);
+                     objeto = s;
+                     break;}
     case f_entero :{
-      RInteger* s = new RInteger(nodo->entero);
-      objeto = s;
-      break;}
+                     RInteger* s = new RInteger(nodo->entero);
+                     objeto = s;
+                     break;}
     case f_decimal :{
-      RDecimal* s = new RDecimal(nodo->decimal);
-      objeto = s;
-      break;}
+                      RDecimal* s = new RDecimal(nodo->decimal);
+                      objeto = s;
+                      break;}
     case f_bool :{
-      RBool* s = new RBool(nodo->booleano);
-      objeto = s;
-      break;}
+                   RBool* s = new RBool(nodo->booleano);
+                   objeto = s;
+                   break;}
   }
   return objeto;
 }
@@ -174,7 +174,14 @@ void decidir_nodo(ast* nodo, list<Instruccion*> *codigo){
     case t_compstmt : // creo q nunca entra aca
       generar_compstmt(nodo->stmt_list, codigo);
       break;
-    }
+    case call_method:
+      generar_method_call(nodo, codigo);
+      break;
+    case a_method:
+      list<Instruccion*> *funcion = generar_metodo(nodo);
+      add_global_function(nodo->str, funcion);
+      break;
+  }
 }
 
 void generar_compstmt(list<ast*> *stmt_list, list<Instruccion*> *codigo){
@@ -283,17 +290,17 @@ RObject* get_numeric_node(ast* hoja){
   RObject* arg=NULL;
   switch(hoja->tipo){
     case f_entero:{
-      arg = new RInteger(hoja->entero);
-      break;}
+                    arg = new RInteger(hoja->entero);
+                    break;}
     case f_decimal:{
-      arg = new RDecimal(hoja->decimal);
-      break;}
+                     arg = new RDecimal(hoja->decimal);
+                     break;}
     case t_identif :
-      arg = new RVariable(hoja->str);
-      break;
+                   arg = new RVariable(hoja->str);
+                   break;
     default:
-      cout << "Error de tipo, el operando no es numerico!" << endl;
-      break;
+                   cout << "Error de tipo, el operando no es numerico!" << endl;
+                   break;
   }
   return arg;
 }
@@ -302,23 +309,23 @@ RObject* get_abstract_node(ast* hoja){
   RObject* arg=NULL;
   switch(hoja->tipo){
     case f_entero:{
-      arg = new RInteger(hoja->entero);
-      break;}
+                    arg = new RInteger(hoja->entero);
+                    break;}
     case f_decimal:{
-      arg = new RDecimal(hoja->decimal);
-      break;}
+                     arg = new RDecimal(hoja->decimal);
+                     break;}
     case f_string :
-      arg = new RString(hoja->str, true);
-      break;
+                   arg = new RString(hoja->str, true);
+                   break;
     case f_bool :
-      arg = new RBool(hoja->booleano);
-      break;
+                   arg = new RBool(hoja->booleano);
+                   break;
     case t_identif :
-      arg = new RVariable(hoja->str);
-      break;
+                   arg = new RVariable(hoja->str);
+                   break;
     default:
-      cout << "Error de tipo, el operando no es correcto!" << endl;
-      break;
+                   cout << "Error de tipo, el operando no es correcto!" << endl;
+                   break;
   }
   return arg;
 }
@@ -459,11 +466,45 @@ bool nodo_hoja(ast* nodo){
 
 std::list<Instruccion*>* generar_metodo(ast* nodo){
   std::list<Instruccion*>* res = new std::list<Instruccion*>;
-  if (nodo->h1 != NULL){
-    //manejar argumentos
-  }
+  std::cout << "Generando metodo: "<< nodo->str << " args - " << nodo->h1 << "stmtlist: " << nodo->h2 << " ...";
+  pop_args(nodo->h1, res);
   generar_compstmt(nodo->h2->stmt_list, res);
+  res->push_back(instr(ENDFUNC, nodo->linea));
+  std::cout << "[OK]" <<std::endl;
   return res;
+}
+
+void push_args(ast* n, std::list<Instruccion*>* codigo, int linea){
+  RObject* arg;
+  if (n!=NULL){
+    list<ast*>::iterator it;
+    for (it=n->stmt_list->begin(); it != n->stmt_list->end(); it++){
+      ast* nodo = *it;
+      if (nodo_hoja(nodo)){ // no preciso variable temporal
+        arg = get_abstract_node(nodo);
+      } else {
+        decidir_nodo(nodo, codigo);
+        arg = codigo->back()->arg1;
+      }
+      codigo->push_back(instr(PUSH_ARG, arg, linea));
+    }
+  }
+}
+
+void pop_args(ast* args, std::list<Instruccion*>* codigo){
+  if (args != NULL){
+    list<ast*>::reverse_iterator it;
+    for (it=args->stmt_list->rbegin(); it != args->stmt_list->rend(); it++)
+      codigo->push_back(instr(POP_ARG, new RString((*it)->str), args->linea));
+  }
+}
+
+void generar_method_call(ast* nodo, std::list<Instruccion*>* codigo){
+  push_args(nodo->h1, codigo, nodo->linea);
+  string tmp = get_tmp_var();
+  RVariable* var = new RVariable(&tmp);
+  set_global_variable(var->getValue(), new RObject());
+  codigo->push_back(instr(CALL, var, new RString(nodo->str), nodo->linea));
 }
 
 Instruccion* instr(enum code_ops op, int linea){
@@ -630,7 +671,7 @@ void freeTree(ast* tree){
       freeList(tree->stmt_list);
       delete tree;
       break;
-    }
+  }
 }
 
 void printList(list<ast*> *stmt_list){ list<ast*>::iterator it;
@@ -791,5 +832,5 @@ void printTree(ast* tree){
       cout << "compstmt stmt" << endl;
       printList(tree->stmt_list);
       break;
-    }
+  }
 }

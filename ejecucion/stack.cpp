@@ -27,6 +27,10 @@ unordered_map<string, RObject*>* current_stack;
 list<unordered_map<string, RObject*>*> scope_stack;
 stack<bool> cond_stack;
 stack<list<Instruccion *>::iterator> while_stack;
+stack<list<Instruccion *>::iterator> call_stack;
+stack<RObject*> argument_stack;
+stack<RObject*> return_stack;
+
 
 //RObject *getValue(string* key){
 //	return vTemporales[*key];
@@ -202,7 +206,6 @@ void ejecutar(list<Instruccion*> *codigo) {
         else
           while_stack.pop();
         break;
-
       case CASE : cout << "case excecuted " <<  endl;
         if (!((RBool*)ri->arg1)->getValue())
           it = descartar_case(it);
@@ -210,8 +213,6 @@ void ejecutar(list<Instruccion*> *codigo) {
         break;
       case CASEREC : cout << "caserec excecuted " <<  endl; if (!((RBool*)ri->arg1)->getValue()){cout << "antes descartar case " <<  endl; it = descartar_case(it); cout << "despues descartar case " <<  endl;} else { cond_stack.pop(); cond_stack.push(((RBool*)ri->arg1)->getValue());} break;
       case CASERECCOND : cout << "caserec_COND excecuted " <<  endl; if (cond_stack.top()) it = descartar_case_hasta_end(it); break;
-
-
       case AND :
         ((RBool*)arg1)->setValue(((RBool*)arg2)->getValue() && ((RBool*)arg3)->getValue());
         break;
@@ -248,6 +249,33 @@ void ejecutar(list<Instruccion*> *codigo) {
       case PUTV :
         set_variable((RString*)arg1, arg2);
         break;
+      case PUSH_ARG:
+        argument_stack.push(arg1);
+        break;
+      case POP_ARG:
+        set_variable((RString*)arg1, argument_stack.top());
+        argument_stack.pop();
+        break;
+      case CALL:
+        call_stack.push(it);
+        new_scope();
+        it = get_function_iterator((RString*)arg2);
+        return_stack.push(arg1);
+        break;
+      case ENDFUNC:
+        it=call_stack.top();
+        call_stack.pop();
+        drop_scope();
+        break;
+      case RETURN:{
+        it=call_stack.top();
+        call_stack.pop();
+        //drop_scope();
+        RString* variable = (RString*)return_stack.top();
+        return_stack.pop();
+        set_global_variable(variable->getValue(), arg1);
+        drop_scope();
+        break;}
       case ASGN:
         set_variable((RString*)arg1, arg2);
         break;
@@ -300,7 +328,9 @@ void set_variable(RString* str, RObject* var){ //aca hay q considerar el tema de
 }
 
 void add_global_function(char* name, list<Instruccion*>* codigo){
+  cout << "adding global function - " << name << " ...";
   global_methods[name] = codigo;
+  cout << "[OK]" << endl;
 }
 
 void new_scope(){
@@ -308,7 +338,7 @@ void new_scope(){
   scope_stack.push_back(current_stack);
 }
 
-void pop_stack(){
+void drop_scope(){
   scope_stack.pop_back();
   current_stack = scope_stack.back();
 }
@@ -380,4 +410,8 @@ void decimal_add(RDecimal* arg1, RNumeric* arg2, RNumeric* arg3){
 
 bool operacion_es_booleana(enum code_ops op){
   return (op == AND || op == OR || op == NOT || op == G || op == GE || op == L || op == LE || op == EQ || op == NEQ || op == TOBOOL);
+}
+
+std::list<Instruccion*>::iterator get_function_iterator(RString* name){
+  return global_methods[name->getValue()->data()]->begin();
 }

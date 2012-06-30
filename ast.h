@@ -10,7 +10,8 @@ enum ast_node_t {
   t_identif, t_atributo, t_arr_place, t_gets, t_command, t_method_call,
   t_nil, t_mul_string, t_add_string, t_method_with_args, t_args,
   b_and, b_or, b_not, b_mayor, b_mayor_igual, b_menor, b_menor_igual,
-  b_doble_igual, b_not_igual, b_is_bool, c_case, c_case_rec, a_method, a_method_with_args
+  b_doble_igual, b_not_igual, b_is_bool, c_case, c_case_rec, a_method, a_method_with_args,
+  call_method, t_params
 };
 
 struct ast_node {
@@ -55,5 +56,7 @@ ast* new_elsif(ast* cond, ast* compstmt, ast* opt_rec_elsif, int linea);
 ast* new_asgn(ast* variable, ast* valor, int linea);
 ast* new_while(ast* cond, ast* compstmt, int linea);
 ast* new_method(char* name, ast* args, ast* comp_stmt, int linea);
-
+ast* new_method_call(char* variable, ast* args, int linea);
+ast* new_params(ast* param, int linea);
+ast* add_param(ast* args, ast* arg, int linea);
 #endif

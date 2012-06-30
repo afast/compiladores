@@ -1,4 +1,12 @@
 a=10
+
+def say_hello a, b
+  puts a
+  puts b
+  puts 'hola martin'
+end
+say_hello 'jellou', 3+4+5
+say_hello 'hola', 'martin'
 puts a
 puts a + 2
 puts 5.0*5*5

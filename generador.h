@@ -45,4 +45,5 @@ std::list<Instruccion*>* generar_metodo(ast* nodo);
 void generar_method_call(ast* nodo, std::list<Instruccion*>* codigo);
 void push_args(ast* n, std::list<Instruccion*>* codigo, int linea);
 void pop_args(ast* args, std::list<Instruccion*>* codigo);
+void generar_arr_pos(ast* nodo, std::list<Instruccion*> *codigo);
 #endif

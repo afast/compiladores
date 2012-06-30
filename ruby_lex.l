@@ -11,6 +11,7 @@ extern "C" {
 #define MAX_INCLUDE_DEPTH 40
 int include_stack_ptr = 0;
 std::set<std::string> *archivos_cargados = new std::set<std::string>();
+char* replaceContinuacionLinea(char* textIn);
 YY_BUFFER_STATE include_stack[MAX_INCLUDE_DEPTH];
 void cargarArchivo(char* textIn, int largo, bool isLoad);
 %}
@@ -59,6 +60,7 @@ attr_accessor {return(T_ACCESSOR);};
 <require>[^\t|^\n]+\' { cargarArchivo(yytext, yyleng-1, false);};
 true {yylval.entero = 1;return(T_BOOL);};
 false {yylval.entero = 0;return(T_BOOL);};
+ARGV {yylval.text = strdup(yytext); return(T_VAR_ARGV);};
 = 	 {return(T_IGUAL);};
 ,        {return(T_COMA);};
 #      {return(T_NUMERAL);};
@@ -104,21 +106,23 @@ not|!  {return(T_NOT);};
 [_a-z][_a-zA-Z0-9]*\.[_a-z][_a-zA-Z0-9]* {return(T_INVOCACION_METODO);};
 [A-Z][_a-zA-Z0-9]*	 {return(T_NOM_CONST);};
 [_a-z][_a-zA-Z0-9]*	 {yylval.text = strdup(yytext); return(T_IDENTIF);};
-\$[_a-z][_a-zA-Z0-9]* {return(T_IDENTIF_GLOBAL);};
+\$[_a-z][_a-zA-Z0-9]* {yylval.text = strdup(yytext); return(T_IDENTIF_GLOBAL);};
 @[_a-z][_a-zA-Z0-9]* {return(T_ATRIBUTO);};
 :[_a-z][_a-zA-Z0-9]* {return(T_ATRIBUTO_ACCESOR);};
-\$0	 {return(T_VAR_PESOS_CERO);};
-\$        {return(T_VAR_PESOS);};
-\$\$       {return(T_VAR_PESOS_PESOS);};
+\$0	 {yylval.text = strdup(yytext); return(T_VAR_PESOS_CERO);};
+\$:        {yylval.text = strdup(yytext); return(T_VAR_PESOS);};
+\$\$       {yylval.text = strdup(yytext); return(T_VAR_PESOS_PESOS);};
 \|           {return(T_PIPE);};
 ([1-9][0-9]*)|0 {yylval.entero = atoi(yytext); return(T_INTEGER_ABS);};
 (([1-9][0-9]*)\.[0-9]+)|(((\+|\-)?0)\.[0-9]+) {yylval.real = atof(yytext); return(T_FLOAT_ABS);};
-\'{STRING_SIMPLE_CON_SALTO}\'|\'{STRING_SIMPLE_SIN_SALTO}\' {yylval.text = strdup(yytext); return(T_STRING_1);};
-\"{STRING_DOBLE_CON_SALTO}\"|\"{STRING_DOBLE_SIN_SALTO}\" {yylval.text = strdup(yytext); return(T_STRING_2);};
-\"{STRING_DOBLE_CON_SALTO}#\{|\"{STRING_DOBLE_SIN_SALTO}#\{ {return(T_STRING_IZQ);};
-\}{STRING_DOBLE_CON_SALTO}#\{|\}{STRING_DOBLE_SIN_SALTO}#\{ {return(T_STRING_CENTER);};
-\}{STRING_DOBLE_CON_SALTO}\"|\}{STRING_DOBLE_SIN_SALTO}\" {return(T_STRING_DER);};
-`{COMMAND_CON_SALTO}`|`{COMMAND_SIN_SALTO}` {yylval.text = strdup(yytext); return(T_COMMAND);};
+#.*\n {;};
+^=begin(.*\n)*=end {};
+\'{STRING_SIMPLE_CON_SALTO}\'|\'{STRING_SIMPLE_SIN_SALTO}\' {yylval.text = strdup(replaceContinuacionLinea(yytext)); return(T_STRING_1);};
+\"{STRING_DOBLE_CON_SALTO}\"|\"{STRING_DOBLE_SIN_SALTO}\"   {yylval.text = strdup(replaceContinuacionLinea(yytext)); return(T_STRING_2);};
+\"{STRING_DOBLE_CON_SALTO}#\{|\"{STRING_DOBLE_SIN_SALTO}#\{ {yylval.text = strdup(replaceContinuacionLinea(yytext)); return(T_STRING_IZQ);};
+\}{STRING_DOBLE_CON_SALTO}#\{|\}{STRING_DOBLE_SIN_SALTO}#\{ {yylval.text = strdup(replaceContinuacionLinea(yytext)); return(T_STRING_CENTER);};
+\}{STRING_DOBLE_CON_SALTO}\"|\}{STRING_DOBLE_SIN_SALTO}\"   {yylval.text = strdup(replaceContinuacionLinea(yytext)); return(T_STRING_DER);};
+`{COMMAND_CON_SALTO}`|`{COMMAND_SIN_SALTO}` {yylval.text = strdup(replaceContinuacionLinea(yytext)); return(T_COMMAND);};
 (\n|;)* {return T_FIN_INSTRUCCION;};
 \t|\r|" " {}
 \\(\t|\r|" ")*\n {};
@@ -157,4 +161,24 @@ if((isLoad) || ((archivos_cargados->count(*nombre) == 0) && (archivos_cargados->
 }
 yy_switch_to_buffer(yy_create_buffer( yyin, YY_BUF_SIZE ) );	
 BEGIN(INITIAL);	
+}
+
+char* replaceContinuacionLinea(char* textIn){
+	std::string *tmp = new std::string(textIn);
+
+
+	int n = tmp->find("\\\n");
+
+    tmp->replace(n,  // start position in str
+            2,      // how character(s)
+            1,      // how many copies of character
+            ' ');   // character for replasment
+    std::cout << "-----------       str is: " << *tmp << std::endl;
+
+
+
+	char * result = new char[tmp->size() + 1];
+	std::copy(tmp->begin(), tmp->end(), result);
+	result[tmp->size()] = '\0';
+	return result;
 }

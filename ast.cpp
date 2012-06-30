@@ -66,6 +66,15 @@ ast* new_identificador(char* name, int linea){
   return res;
 }
 
+ast* new_identificador_global(char* name, int linea){
+  ast* res = new ast;
+  res->tipo = t_identif;
+  res->linea = linea;
+  res->str = name;
+  return res;
+}
+
+
 ast* new_atributo(char* name, int linea){
   ast* res = new ast;
   res->tipo = t_atributo;
@@ -79,7 +88,9 @@ ast* new_array_pos(char* name, int place, int linea){
   res->tipo = t_arr_place;
   res->linea = linea;
   res->str = name;
+std::cout << "nombre: " << name << std::endl;
   res->entero = place;
+std::cout << "place: " << place << std::endl;
   return res;
 }
 

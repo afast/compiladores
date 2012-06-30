@@ -13,6 +13,7 @@
 #include "RNumeric.h"
 #include "RString.h"
 #include "RBool.h"
+#include "RArray.h"
 #include "RVariable.h"
 
 using namespace std;
@@ -246,6 +247,12 @@ void ejecutar(list<Instruccion*> *codigo) {
       case GETV : // Evaluar variable o metodo?
         //ri->arg1 = get_variable((RString*)arg2);
         break;
+      case GETV_ARR : // Evaluar variable o metodo?
+          cout << "Error de tipos en li------------------------";
+        arg1 = (*((RArray *)arg2))[((RInteger *)arg3)->getValue()];
+cout << "Error de tipos en l!"<< arg1;
+	puts(arg1->to_s());
+      break;
       case PUTV :
         set_variable((RString*)arg1, arg2);
         break;

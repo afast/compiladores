@@ -8,6 +8,7 @@
 #include "ejecucion/RInteger.h"
 #include "ejecucion/Util.h"
 #include "ejecucion/RBool.h"
+#include "ejecucion/RArray.h"
 #include "ast.h"
 #include "generador.h"
 
@@ -63,7 +64,7 @@ void printCodigo();
 %token T_IGUAL T_FIN_INTERROGACION T_PUTS T_LENGTH T_GETS T_NEW T_SIZE T_EACH T_OBJECT_ID T_RESPOND_TO
 %token T_INSTANCE_OF T_ATTR_READER T_ATTR_WRITER T_ACCESSOR T_LOAD T_REQUIRE T_INVOCACION_METODO
 %token T_BOOL T_ANTI_BAR T_NUMERAL T_MAYOR_IGUAL T_MENOR_IGUAL T_IDENTIF_GLOBAL
-%token T_ATRIBUTO T_VAR_PESOS_CERO T_VAR_PESOS T_VAR_PESOS_PESOS T_INTEGER_ABS T_ATRIBUTO_ACCESOR
+%token T_ATRIBUTO T_VAR_PESOS_CERO T_VAR_PESOS T_VAR_ARGV T_VAR_PESOS_PESOS T_INTEGER_ABS T_ATRIBUTO_ACCESOR
 %token T_FLOAT_ABS T_STRING_1 T_STRING_2 T_STRING_IZQ T_STRING_DER T_COMMAND T_ESPACIOS T_ERROR
 
 %type <a> expr_numeric compstmt stmt texpr value output number variable string expr_string expr_bool if recursive_elsif opt_else while
@@ -176,7 +177,13 @@ expr_bool : T_BOOL {$$ = new_boolean_op(b_is_bool, new_bool($<entero>1, yylineno
   | T_PAR_IZQ expr_bool T_PAR_DER {$$ = $2;};
 variable : T_IDENTIF { $$ = new_identificador($<text>1, yylineno);}
 	| T_ATRIBUTO { $$ = new_atributo($<text>1, yylineno);}
-	| T_IDENTIF T_CORCHETE_IZQ T_INTEGER_ABS T_CORCHETE_DER { $$ = new_array_pos($<text>1, $<entero>3, yylineno);};
+	| T_VAR_PESOS_CERO { $$ = new_identificador_global($<text>1, yylineno);}
+	| T_VAR_PESOS { $$ = new_identificador_global($<text>1, yylineno);}
+	| T_VAR_PESOS_PESOS { $$ = new_identificador_global($<text>1, yylineno);}
+	| T_VAR_ARGV { $$ = new_identificador_global($<text>1, yylineno);}
+	| T_IDENTIF_GLOBAL { $$ = new_identificador_global($<text>1, yylineno);}
+	| T_IDENTIF T_CORCHETE_IZQ T_INTEGER_ABS T_CORCHETE_DER { $$ = new_array_pos($<text>1, $<entero>3, yylineno);}
+	| T_VAR_ARGV T_CORCHETE_IZQ T_INTEGER_ABS T_CORCHETE_DER { std::cout << "--------FFFF-------" << std::endl; $$ = new_array_pos($<text>1, $<entero>3, yylineno);};
 
 if : T_IF expr_bool T_FIN_INSTRUCCION compstmt recursive_elsif opt_else T_END { $$ = new_if($2, $4, $5, $6, yylineno); std::cout << "gramatica if " << std::endl; };
 recursive_elsif : /* Vacio */ { $$ = NULL; }
@@ -226,16 +233,22 @@ main( int argc, char *argv[] )
 		++argv;
 		--argc;
 		yyin = fopen( argv[0], "r" );
+		
+		set_global_variable(new std::string("$0"), new RString(argv[0]));
+		set_global_variable(new std::string("$$"), new RInteger(getpid()));
+		set_global_variable(new std::string("$:"), new RString("."));
 
 		int i = 1;
+		RArray *myArgv = new RArray();
 		while(i < argc){
 			std::cout << "argv[" << i << "] = " << argv[i] << std::endl;
+			myArgv->setValue(i - 1, new RString(argv[i])); 
 			i++;
 		}
+		set_global_variable(new std::string("ARGV"), myArgv);
 		codigoGlobal = new std::list<Instruccion*>();
 		initializer();
 		yyparse();
-		std::cout << "luego del Parserrrrrrrrrrrrrrrrrr" << std::endl;
 		Instruccion *fin = new Instruccion;
 		fin->op = FIN;
 		codigoGlobal->push_back(fin);

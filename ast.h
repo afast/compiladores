@@ -34,6 +34,7 @@ ast* new_compstmt(ast* t);
 ast* add_stmt_compstmt(ast* stmt, ast* compstmt);
 ast* add_front_stmt_compstmt(ast* stmt, ast* compstmt);
 ast* new_identificador(char* name, int linea);
+ast* new_identificador_global(char* name, int linea);
 ast* new_atributo(char* name, int linea);
 ast* new_array_pos(char* name, int place, int linea);
 ast* new_gets(int linea);;

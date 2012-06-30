@@ -13,6 +13,7 @@
 #include "ejecucion/RNumeric.h"
 #include "ejecucion/RVariable.h"
 #include "ejecucion/RBool.h"
+#include "ejecucion/RArray.h"
 #include "ejecucion/stack.h"
 #include "ejecucion/base.h"
 
@@ -168,6 +169,11 @@ void decidir_nodo(ast* nodo, list<Instruccion*> *codigo){
     case t_compstmt : // creo q nunca entra aca
       generar_compstmt(nodo->stmt_list, codigo);
       break;
+    case t_arr_place :
+// std::cout << ".....................................sssss        " << get_variable(nodo->str) << std::endl;
+	//((RArray*)get_variable(nodo->str))[nodo->entero];
+	generar_arr_pos(nodo, codigo);
+	break;
     }
 }
 
@@ -177,6 +183,31 @@ void generar_compstmt(list<ast*> *stmt_list, list<Instruccion*> *codigo){
     decidir_nodo(*it, codigo);
   }
 }
+
+void generar_arr_pos(ast* nodo, std::list<Instruccion*> *codigo){
+  decidir_nodo(nodo->h1, codigo);
+  RObject* arg;
+  string tmp = get_tmp_var();
+  RVariable* var = new RVariable(&tmp);
+  set_global_variable(var->getValue(), new RObject());
+
+  codigo->push_back(instr(GETV_ARR, var, new RVariable(nodo->str), new RInteger(nodo->entero), nodo->linea));
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

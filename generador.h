@@ -38,5 +38,6 @@ void generar_op_booleana(enum code_ops op, ast* nodo, std::list<Instruccion*>* c
 RObject* get_abstract_node(ast* hoja);
 void generar_suma_string(ast* nodo, std::list<Instruccion*>* codigo);
 void generar_mul_string(ast* nodo, std::list<Instruccion*>* codigo);
+void generar_arr_pos(ast* nodo, std::list<Instruccion*> *codigo);
 
 #endif

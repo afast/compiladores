@@ -50,5 +50,6 @@ ast* new_bool(int b);
 ast* new_if(ast* cond, ast* compstmt, ast* opt_rec_elsif, ast* opt_else);
 ast* new_elsif(ast* cond, ast* compstmt, ast* opt_rec_elsif);
 ast* new_asgn(ast* variable, ast* valor);
+ast* new_while(ast* cond, ast* compstmt);
 
 #endif

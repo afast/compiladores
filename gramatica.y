@@ -66,7 +66,7 @@ void printCodigo();
 %token T_ATRIBUTO T_VAR_PESOS_CERO T_VAR_PESOS T_VAR_PESOS_PESOS T_INTEGER_ABS T_ATRIBUTO_ACCESOR
 %token T_FLOAT_ABS T_STRING_1 T_STRING_2 T_STRING_IZQ T_STRING_DER T_COMMAND T_ESPACIOS T_ERROR
 
-%type <a> expr_numeric compstmt stmt texpr value output number variable string expr_string expr_bool if recursive_elsif opt_else
+%type <a> expr_numeric compstmt stmt texpr value output number variable string expr_string expr_bool if recursive_elsif opt_else while
 /*=========================================================================
                           OPERATOR PRECEDENCE
 =========================================================================*/
@@ -77,7 +77,7 @@ void printCodigo();
 %left T_MENOS T_MAS
 %left T_ASTER T_BAR T_PORCENTAJE
 %left T_NOT
-%left T_EXPO
+%right T_EXPO
 %%
 program : compstmt { printTree($1); generar($1, codigoGlobal); freeTree($1);};
 compstmt : /* Vacio */ { $$ = NULL; std::cout << "NULL DETECTED!" << std::endl; }
@@ -182,7 +182,7 @@ recursive_elsif : /* Vacio */ { $$ = NULL; }
                 | recursive_elsif T_ELSIF expr_bool T_FIN_INSTRUCCION compstmt { $$ = new_elsif($3, $5, $1); };
 opt_else : /* Vacio */ { $$ = NULL; }
          | T_ELSE T_FIN_INSTRUCCION compstmt { $$ = $3; };
-while : T_WHILE expr_bool T_FIN_INSTRUCCION compstmt T_END;
+while : T_WHILE expr_bool T_FIN_INSTRUCCION compstmt T_END { $$ = new_while($2, $4); };
 case : T_CASE rec_when_then T_END
 	| T_CASE T_FIN_INSTRUCCION rec_when_then T_END;
 
@@ -244,7 +244,7 @@ main( int argc, char *argv[] )
 		Instruccion *fin = new Instruccion;
 		fin->op = FIN;
 		codigoGlobal->push_back(fin);
-    //printCodigo();
+    printCodigo();
 		ejecutar(codigoGlobal);
 	} else {
 		std::cout << "No se indica archivo para ejecutar. La ejecucion debe usar el formato:" << std::endl;
@@ -261,9 +261,11 @@ void printCodigo() {
     ri = *it++;
     switch (ri->op) {
       case FIN   : std::cout << "FIN" << std::endl; break;
-      case PUTS  : std::cout << "PUTS " << std::endl; break;
-      case ADD   : std::cout << "ADD " << std::endl; break;
-      case MULT   : std::cout << "MULT " << std::endl; break;
+      case PUTS  : std::cout << "PUTS " << *ri->arg1->to_s()->getValue() << std::endl; break;
+      case ADD   : std::cout << "ADD " << *ri->arg2->to_s()->getValue() << *ri->arg3->to_s()->getValue() << std::endl; break;
+      case SUB   : std::cout << "SUB " << *ri->arg2->to_s()->getValue() << *ri->arg3->to_s()->getValue() << std::endl; break;
+      case MULT   : std::cout << "MULT " << *ri->arg2->to_s()->getValue() << *ri->arg3->to_s()->getValue() << std::endl; break;
+      case ASGN   : std::cout << "ASGN " << *ri->arg1->to_s()->getValue() << *ri->arg2->to_s()->getValue() << std::endl; break;
       case IF   : std::cout << "IF "  << std::endl; break;
       case ELSE   : std::cout << "ELSE "  << std::endl; break;
       case ELSIF   : std::cout << "ELSIF "  << std::endl; break;
@@ -271,16 +273,16 @@ void printCodigo() {
       case END   : std::cout << "END "  << std::endl; break;
       case WHILE : std::cout << "WHILE "  << std::endl; break;
       case WHILEEND : std::cout << "WHILEEND "  << std::endl; break;
-      case NOT : std::cout << "NOT "  << std::endl; break;
-      case G : std::cout << "G "  << std::endl; break;
-      case GE : std::cout << "GE "  << std::endl; break;
-      case L  : std::cout << "L "  << std::endl; break;
-      case LE : std::cout << "LE "  << std::endl; break;
-      case EQ : std::cout << "EQ "  << std::endl; break;
-      case NEQ : std::cout << "NEQ "  << std::endl; break;
-      case TOBOOL : std::cout << "TOBOOL "  << std::endl; break;
-      case AND : std::cout << "AND "  << std::endl; break;
-      case OR : std::cout << "OR "  << std::endl; break;
+      case NOT : std::cout << "NOT " << *ri->arg2->to_s()->getValue()  << std::endl; break;
+      case G : std::cout << "G " << *ri->arg2->to_s()->getValue() << *ri->arg3->to_s()->getValue()  << std::endl; break;
+      case GE : std::cout << "GE " << *ri->arg2->to_s()->getValue() << *ri->arg3->to_s()->getValue()  << std::endl; break;
+      case L  : std::cout << "L " << *ri->arg2->to_s()->getValue() << *ri->arg3->to_s()->getValue()  << std::endl; break;
+      case LE : std::cout << "LE " << *ri->arg2->to_s()->getValue() << *ri->arg3->to_s()->getValue()  << std::endl; break;
+      case EQ : std::cout << "EQ " << *ri->arg2->to_s()->getValue() << *ri->arg3->to_s()->getValue()  << std::endl; break;
+      case NEQ : std::cout << "NEQ " << *ri->arg2->to_s()->getValue() << *ri->arg3->to_s()->getValue()  << std::endl; break;
+      case TOBOOL : std::cout << "TOBOOL " << *ri->arg2->to_s()->getValue()  << std::endl; break;
+      case AND : std::cout << "AND " << *ri->arg2->to_s()->getValue() << *ri->arg3->to_s()->getValue()  << std::endl; break;
+      case OR : std::cout << "OR " << *ri->arg2->to_s()->getValue() << *ri->arg3->to_s()->getValue()  << std::endl; break;
       default: break;
     }
   } while (ri->op != FIN);

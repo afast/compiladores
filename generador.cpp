@@ -308,7 +308,25 @@ void generar_elsif(ast* nodo, std::list<Instruccion*> *codigo){
   generar_elsif(nodo->h3, codigo);
 }
 
-void generar_while(ast* nodo, std::list<Instruccion*> *codigo){}
+void generar_while(ast* nodo, std::list<Instruccion*> *codigo){
+
+  /*
+   * h1 - condition
+   * h2 - while_block
+   * */
+  /* evaluar condicion */
+  /* while cond */
+  /* cuerpo while */
+  /* endwhile */
+  decidir_nodo(nodo->h1, codigo);
+  RObject* cond = codigo->back()->arg1;
+  codigo->push_back(instr(WHILE, cond));
+  generar_compstmt(nodo->h2->stmt_list, codigo);
+  decidir_nodo(nodo->h1, codigo);
+  RObject* cond2 = codigo->back()->arg1;
+  codigo->push_back(instr(WHILEEND, cond2)); //END o WHILEEND
+}
+
 void generar_string(ast* nodo, std::list<Instruccion*> *codigo){}
 void generar_entero(ast* nodo, std::list<Instruccion*> *codigo){}
 void generar_decimal(ast* nodo, std::list<Instruccion*> *codigo){}
@@ -579,6 +597,8 @@ void printTree(ast* tree){
       break;
     case c_while :
       cout << "while stmt" << endl;
+      printTree(tree->h1);
+      printTree(tree->h2);
       break;
     case f_string :
       cout << "string stmt: " << tree->str << endl;

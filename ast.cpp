@@ -186,3 +186,11 @@ ast* new_asgn(ast* variable, ast* valor){
   res->h2 = valor;
   return res;
 }
+
+ast* new_while(ast* cond, ast* compstmt){
+  ast* res = new ast;
+  res->tipo = c_while;
+  res->h1 = cond;
+  res->h2 = compstmt;
+  return res;
+}

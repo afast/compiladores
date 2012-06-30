@@ -5,6 +5,8 @@
 #include "RString.h"
 #include "RInteger.h"
 #include "RNumeric.h"
+#include "RDecimal.h"
+#include "RInteger.h"
 #include "RBool.h"
 #include "Util.h"
 #include "memory.h"
@@ -60,6 +62,9 @@ RBool* mayor(RObject* arg1, RObject* arg2){
       case RNUMERIC:
         resultado = ((RNumeric*)arg1)->getDecimalValue() > ((RNumeric*)arg2)->getDecimalValue();
         break;
+      case RINT:
+        resultado = ((RNumeric*)arg1)->getDecimalValue() > ((RNumeric*)arg2)->getDecimalValue();
+        break;
       case RBOOL:
         resultado = ((RBool*)arg1)->getValue() > ((RBool*)arg2)->getValue();
         break;
@@ -80,7 +85,10 @@ RBool* mayor_igual(RObject* arg1, RObject* arg2){
     bool resultado;
     switch(arg1->type){
       case RNUMERIC:
-        resultado = ((RNumeric*)arg1)->getDecimalValue() >= ((RNumeric*)arg2)->getDecimalValue();
+        resultado = ((RDecimal*)arg1)->getValue() >= ((RDecimal*)arg2)->getValue();
+        break;
+      case RINT:
+        resultado = ((RInteger*)arg1)->getValue() >= ((RInteger*)arg2)->getValue();
         break;
       case RBOOL:
         resultado = ((RBool*)arg1)->getValue() >= ((RBool*)arg2)->getValue();

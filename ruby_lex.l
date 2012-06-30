@@ -27,6 +27,8 @@ VARIABLE [_a-z][_a-zA-Z0-9]*|[_a-z][_a-zA-Z0-9]*\[([1-9][0-9]*|0)\]
 %%
 require(\t|" ")*\' {BEGIN(require);};
 load(\t|" ")*\' {BEGIN(load);};
+#.*\n {};
+^=begin(.*\n)*=end(" ")*\n* {};
 then      {return(T_THEN);};
 nil      {return(T_NIL);};
 puts   {return(T_PUTS);};
@@ -101,7 +103,7 @@ not|!  {return(T_NOT);};
 {VARIABLE}\.each {yylval.text = strdup(yytext); return(T_EACH);};
 [_a-z][_a-zA-Z0-9]*\.[_a-z][_a-zA-Z0-9]* {return(T_INVOCACION_METODO);};
 [A-Z][_a-zA-Z0-9]*	 {return(T_NOM_CONST);};
-[_a-z][_a-zA-Z0-9]*	 {return(T_IDENTIF);};
+[_a-z][_a-zA-Z0-9]*	 {yylval.text = strdup(yytext); return(T_IDENTIF);};
 \$[_a-z][_a-zA-Z0-9]* {return(T_IDENTIF_GLOBAL);};
 @[_a-z][_a-zA-Z0-9]* {return(T_ATRIBUTO);};
 :[_a-z][_a-zA-Z0-9]* {return(T_ATRIBUTO_ACCESOR);};
@@ -111,8 +113,6 @@ not|!  {return(T_NOT);};
 \|           {return(T_PIPE);};
 ([1-9][0-9]*)|0 {yylval.entero = atoi(yytext); return(T_INTEGER_ABS);};
 (([1-9][0-9]*)\.[0-9]+)|(((\+|\-)?0)\.[0-9]+) {yylval.real = atof(yytext); return(T_FLOAT_ABS);};
-#.*\n {;};
-^=begin(.*\n)*=end {};
 \'{STRING_SIMPLE_CON_SALTO}\'|\'{STRING_SIMPLE_SIN_SALTO}\' {yylval.text = strdup(yytext); return(T_STRING_1);};
 \"{STRING_DOBLE_CON_SALTO}\"|\"{STRING_DOBLE_SIN_SALTO}\" {yylval.text = strdup(yytext); return(T_STRING_2);};
 \"{STRING_DOBLE_CON_SALTO}#\{|\"{STRING_DOBLE_SIN_SALTO}#\{ {return(T_STRING_IZQ);};
@@ -120,7 +120,8 @@ not|!  {return(T_NOT);};
 \}{STRING_DOBLE_CON_SALTO}\"|\}{STRING_DOBLE_SIN_SALTO}\" {return(T_STRING_DER);};
 `{COMMAND_CON_SALTO}`|`{COMMAND_SIN_SALTO}` {yylval.text = strdup(yytext); return(T_COMMAND);};
 (\n|;)* {return T_FIN_INSTRUCCION;};
-\\(\t|\r|" ")*\n|\t|\r|" " {};
+\t|\r|" " {}
+\\(\t|\r|" ")*\n {};
 . {};
 %%
 void cargarArchivo(char* textIn, int largo, bool isLoad){

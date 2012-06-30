@@ -1,5 +1,8 @@
 #include <iostream>
+#include <sstream>
+#include <string>
 #include <list>
+#include <climits>
 
 #include "generador.h"
 #include "ast.h"
@@ -8,17 +11,37 @@
 #include "ejecucion/RDecimal.h"
 #include "ejecucion/RInteger.h"
 #include "ejecucion/RNumeric.h"
+#include "ejecucion/RVariable.h"
 #include "ejecucion/RBool.h"
 #include "ejecucion/stack.h"
 #include "ejecucion/base.h"
 
 using namespace std;
+unsigned long int tmp_var_count=0;
+string tmp_var_prefix = string("+tmp_");
 
+string get_tmp_var(){
+  cout << "getting tmp...";
+  stringstream s;
+  string tmp;
+  if (tmp_var_count == ULONG_MAX){
+    s << ULONG_MAX;
+    s >> tmp;
+    tmp_var_prefix += tmp;
+  }
+  s << tmp_var_prefix;
+  s << tmp_var_count++;
+  s >> tmp;
+  cout << "OK" << endl;
+  return tmp;
+}
 void generar(ast* arbol, std::list<Instruccion*> *codigo){
+  cout << "Comenzando Generacion..." << endl;
   if (arbol->tipo != t_compstmt)
     cout << "Error detectando programa, arbol deberia ser compstmt!" << endl;
   else
     generar_compstmt(arbol->stmt_list, codigo);
+  cout << "Generacion finalizada!" << endl;
 }
 
 RObject* generar_objeto(ast* nodo){
@@ -69,6 +92,9 @@ void decidir_nodo(ast* nodo, list<Instruccion*> *codigo){
     case op_mod :
       generar_op_numerica(MOD, nodo, codigo);
       break;
+    case op_asgn :
+      generar_op_asgn(nodo, codigo);
+      break;
     case c_elsif :
       generar_elsif(nodo, codigo);
       break;
@@ -91,7 +117,7 @@ void decidir_nodo(ast* nodo, list<Instruccion*> *codigo){
       generar_puts(nodo, codigo);
       break;
     case t_gets : //Leer de la entrada estandar
-      generar_gets(codigo);
+      generar_gets(codigo, nodo->linea);
       break;
     case t_method_call:
       break;
@@ -100,8 +126,10 @@ void decidir_nodo(ast* nodo, list<Instruccion*> *codigo){
     case t_nil :
       break;
     case t_mul_string :
+      generar_mul_string(nodo, codigo);
       break;
     case t_add_string :
+      generar_suma_string(nodo, codigo);
       break;
     case t_method_with_args:
       break;
@@ -167,43 +195,86 @@ void generar_if(ast* nodo, std::list<Instruccion*> *codigo){
   /* endif */
   decidir_nodo(nodo->h1, codigo);
   RObject* cond = codigo->back()->arg1;
-  codigo->push_back(instr(IF, cond));
+  codigo->push_back(instr(IF, cond, nodo->linea));
   generar_compstmt(nodo->h2->stmt_list, codigo);
   generar_elsif(nodo->h3, codigo);
   if (nodo->h4 != NULL){
-    codigo->push_back(instr(ELSE));
+    codigo->push_back(instr(ELSE, nodo->h4->linea));
     generar_compstmt(nodo->h4->stmt_list, codigo);
   }
-  codigo->push_back(instr(END));
+  codigo->push_back(instr(END, nodo->linea));
 }
 
-void generar_op_numerica(enum code_ops op, ast* nodo, std::list<Instruccion*>* codigo){
-  RNumeric* arg2, *arg3, *arg1;
+void generar_suma_string(ast* nodo, std::list<Instruccion*>* codigo){
+  RObject* arg2, *arg3;
+  arg2 = get_abstract_node(nodo->h1);
+  arg3 = get_abstract_node(nodo->h2);
+  codigo->push_back(instr(ADD, new RString(), arg2, arg3, nodo->linea));
+}
+
+void generar_mul_string(ast* nodo, std::list<Instruccion*>* codigo){
+  RObject* arg2, *arg3;
   if (nodo_hoja(nodo->h1)){ // no preciso variable temporal
-    arg2 = get_numeric_node(nodo->h1);
+    arg2 = get_abstract_node(nodo->h1);
   } else {
     decidir_nodo(nodo->h1, codigo); //ultima operacion debe ser numerica y guardar el resultado en arg1
-    arg2 = (RNumeric*)codigo->back()->arg1;
+    arg2 = codigo->back()->arg1;
   }
   if (nodo_hoja(nodo->h2)){ // no preciso variable temporal
     arg3 = get_numeric_node(nodo->h2);
   } else {
     decidir_nodo(nodo->h2, codigo); //ultima operacion debe ser numerica y guardar el resultado en arg1
-    arg3 = (RNumeric*)codigo->back()->arg1;
+    arg3 = codigo->back()->arg1;
   }
-
-  if (arg2->es_dec() || arg3->es_dec()){
-    RDecimal *d = new RDecimal();
-    arg1 = d;
-  }else{
-    RInteger *i = new RInteger();
-    arg1 = i;
-  }
-  codigo->push_back(instr(op, arg1, arg2, arg3));
+  codigo->push_back(instr(MULT, new RString(), arg2, arg3, nodo->linea));
 }
 
-RNumeric* get_numeric_node(ast* hoja){
-  RNumeric* arg=NULL;
+void generar_op_numerica(enum code_ops op, ast* nodo, std::list<Instruccion*>* codigo){
+  RObject* arg2, *arg3, *arg1;
+  if (nodo_hoja(nodo->h1)){ // no preciso variable temporal
+    arg2 = get_numeric_node(nodo->h1);
+  } else {
+    decidir_nodo(nodo->h1, codigo); //ultima operacion debe ser numerica y guardar el resultado en arg1
+    arg2 = codigo->back()->arg1;
+  }
+  if (nodo_hoja(nodo->h2)){ // no preciso variable temporal
+    arg3 = get_numeric_node(nodo->h2);
+  } else {
+    decidir_nodo(nodo->h2, codigo); //ultima operacion debe ser numerica y guardar el resultado en arg1
+    arg3 = codigo->back()->arg1;
+  }
+
+  if (arg2->is_numeric() && arg3->is_numeric()){
+    if (((RNumeric*)arg2)->es_dec() || ((RNumeric*)arg3)->es_dec()){
+      RDecimal *d = new RDecimal();
+      arg1 = d;
+    }else{
+      RInteger *i = new RInteger();
+      arg1 = i;
+    }
+  } else {
+    string tmp = get_tmp_var();
+    RVariable* var = new RVariable(&tmp);
+    arg1 = var;
+    set_global_variable(var->getValue(), new RObject());
+  }
+  codigo->push_back(instr(op, arg1, arg2, arg3, nodo->linea));
+}
+
+void generar_op_asgn(ast* nodo, std::list<Instruccion*>* codigo){
+  cout << "Generando asignacion: " << nodo->h1->str << endl;
+  RObject* arg;
+  if (nodo_hoja(nodo->h2)){ // no preciso variable temporal
+    arg = get_abstract_node(nodo->h2);
+  } else {
+    decidir_nodo(nodo->h2, codigo);
+    arg = codigo->back()->arg1;
+  }
+  codigo->push_back(instr(ASGN, new RString(nodo->h1->str), arg, nodo->linea));
+}
+
+RObject* get_numeric_node(ast* hoja){
+  RObject* arg=NULL;
   switch(hoja->tipo){
     case f_entero:{
       arg = new RInteger(hoja->entero);
@@ -211,6 +282,9 @@ RNumeric* get_numeric_node(ast* hoja){
     case f_decimal:{
       arg = new RDecimal(hoja->decimal);
       break;}
+    case t_identif :
+      arg = new RVariable(hoja->str);
+      break;
     default:
       cout << "Error de tipo, el operando no es numerico!" << endl;
       break;
@@ -233,6 +307,9 @@ RObject* get_abstract_node(ast* hoja){
     case f_bool :
       arg = new RBool(hoja->booleano);
       break;
+    case t_identif :
+      arg = new RVariable(hoja->str);
+      break;
     default:
       cout << "Error de tipo, el operando no es correcto!" << endl;
       break;
@@ -249,10 +326,10 @@ void generar_elsif(ast* nodo, std::list<Instruccion*> *codigo){
    * */
   if (nodo == NULL)
     return;
-  codigo->push_back(instr(ELSIFCOND));
+  codigo->push_back(instr(ELSIFCOND, nodo->linea));
   decidir_nodo(nodo->h1, codigo);
   RObject* cond = codigo->back()->arg1;
-  codigo->push_back(instr(ELSIF, cond));
+  codigo->push_back(instr(ELSIF, cond, nodo->linea));
   generar_compstmt(nodo->h2->stmt_list, codigo);
   generar_elsif(nodo->h3, codigo);
 }
@@ -269,11 +346,11 @@ void generar_while(ast* nodo, std::list<Instruccion*> *codigo){
   /* endwhile */
   decidir_nodo(nodo->h1, codigo);
   RObject* cond = codigo->back()->arg1;
-  codigo->push_back(instr(WHILE, cond));
+  codigo->push_back(instr(WHILE, cond, nodo->linea));
   generar_compstmt(nodo->h2->stmt_list, codigo);
   decidir_nodo(nodo->h1, codigo);
   RObject* cond2 = codigo->back()->arg1;
-  codigo->push_back(instr(WHILEEND, cond2)); //END o WHILEEND
+  codigo->push_back(instr(WHILEEND, cond2, nodo->linea)); //END o WHILEEND
 }
 
 void generar_string(ast* nodo, std::list<Instruccion*> *codigo){}
@@ -296,6 +373,9 @@ void generar_puts(ast* nodo, std::list<Instruccion*> *codigo){
         break;
       case f_bool:
         arg1 = (new RBool(hoja->booleano))->to_s();
+        break;
+      case t_identif:
+        arg1 = new RVariable(hoja->str);
         break;
     }
   } else {
@@ -326,39 +406,40 @@ void generar_op_booleana(enum code_ops op, ast* nodo, list<Instruccion*>* codigo
     }
   }
 
-  codigo->push_back(instr(op, new RBool(), arg2, arg3));
+  codigo->push_back(instr(op, new RBool(), arg2, arg3, nodo->linea));
 }
 
 bool nodo_hoja(ast* nodo){
-  return (nodo->tipo == f_string || nodo->tipo == f_entero || nodo->tipo == f_decimal || nodo->tipo == f_bool);
+  return (nodo->tipo == f_string || nodo->tipo == f_entero || nodo->tipo == f_decimal || nodo->tipo == f_bool || nodo->tipo == t_identif);
 }
 
-Instruccion* instr(enum code_ops op){
+Instruccion* instr(enum code_ops op, int linea){
   Instruccion* inst = new Instruccion;
   inst->op = op;
+  inst->linea = linea;
   return inst;
 }
 
-Instruccion* instr(enum code_ops op, RObject* arg1){
-  Instruccion* inst = instr(op);
+Instruccion* instr(enum code_ops op, RObject* arg1, int linea){
+  Instruccion* inst = instr(op, linea);
   inst->arg1=arg1;
   return inst;
 }
 
-Instruccion* instr(enum code_ops op, RObject* arg1, RObject* arg2){
-  Instruccion* inst = instr(op, arg1);
+Instruccion* instr(enum code_ops op, RObject* arg1, RObject* arg2, int linea){
+  Instruccion* inst = instr(op, arg1, linea);
   inst->arg2=arg2;
   return inst;
 }
 
-Instruccion* instr(enum code_ops op, RObject* arg1, RObject* arg2, RObject* arg3){
-  Instruccion* inst = instr(op, arg1, arg2);
+Instruccion* instr(enum code_ops op, RObject* arg1, RObject* arg2, RObject* arg3, int linea){
+  Instruccion* inst = instr(op, arg1, arg2, linea);
   inst->arg3=arg3;
   return inst;
 }
 
-void generar_gets(list<Instruccion*>* codigo){
-  codigo->push_back(instr(GETS, new RString()));
+void generar_gets(list<Instruccion*>* codigo, int linea){
+  codigo->push_back(instr(GETS, new RString(), linea));
 }
 
 void freeList(list<ast*> *stmt_list){
@@ -401,12 +482,17 @@ void freeTree(ast* tree){
       freeTree(tree->h2);
       delete tree;
       break;
+    case op_asgn :
+      freeTree(tree->h1);
+      freeTree(tree->h2);
+      delete tree;
+      break;
     case c_elsif :
       break;
     case c_while :
       break;
     case f_string :
-      delete tree->str;
+      free(tree->str);
       delete tree;
       break;
     case f_entero :
@@ -426,11 +512,11 @@ void freeTree(ast* tree){
       delete tree;
       break;
     case t_method_call:
-      delete tree->str;
+      free(tree->str);
       delete tree;
       break;
     case t_command:
-      delete tree->str;
+      free(tree->str);
       delete tree;
       break;
     case t_nil:
@@ -442,6 +528,10 @@ void freeTree(ast* tree){
     case t_add_string :
       freeTree(tree->h1);
       freeTree(tree->h2);
+      break;
+    case t_identif :
+      free(tree->str);
+      delete tree;
       break;
     case b_and:
       freeTree(tree->h1);

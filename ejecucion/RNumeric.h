@@ -13,6 +13,7 @@ class RNumeric : public RObject {
     RString* get_class();
     virtual RString* to_s();
     virtual double getDecimalValue();
+    long int getIntValue();
     bool es_int();
     bool es_dec();
     double mod(RNumeric *param1);

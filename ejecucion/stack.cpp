@@ -13,14 +13,15 @@
 #include "RNumeric.h"
 #include "RString.h"
 #include "RBool.h"
-class RString;
+#include "RVariable.h"
+
 using namespace std;
 
 set<string> tsimbolos;
 unordered_map<string, list<Instruccion*> *> functions;
 //unordered_map<string, RObject*> vTemporales;
 
-unordered_map<string, RObject*> global_variables; // las variables deben agregarse a este hash variables["nombre"] = RObject*
+unordered_map<string, RObject*> *global_variables= new unordered_map<string, RObject*>; // las variables deben agregarse a este hash variables["nombre"] = RObject*
 unordered_map<string, list<Instruccion*>*> global_methods; // los metodos globales se guardan aqui methods["nombre"] = list<Instruccion *>*
 unordered_map<string, RObject*>* current_stack;
 list<unordered_map<string, RObject*>*> scope_stack;
@@ -47,57 +48,145 @@ void clean_up(){
 void ejecutar(list<Instruccion*> *codigo) {
   list<Instruccion *>::iterator it = codigo->begin();
   Instruccion *ri;
-  cout << "Excecution started!" << endl;
+  RObject *arg1, *arg2, *arg3;
+  bool set_tmp, fin_error=false;
+  cout << "Ejecucion comenzada!" << endl;
   do {
     ri = *it++;
+    arg1 = ri->arg1; arg2 = ri->arg2; arg3 = ri->arg3;
+    if (arg1 != NULL && arg1->type == RVARIABLE)
+      arg1 = get_variable(((RVariable*)arg1)->getValue()->data());
+    if (arg2 != NULL && arg2->type == RVARIABLE)
+      arg2 = get_variable(((RVariable*)arg2)->getValue()->data());
+    if (arg3 != NULL && arg3->type == RVARIABLE)
+      arg3 = get_variable(((RVariable*)arg3)->getValue()->data());
+    set_tmp = (arg1 != NULL && arg1->type == RNIL);
+    if (set_tmp && operacion_es_booleana(ri->op))
+      arg1 = new RBool();
     switch (ri->op) {
       case FIN   : cout << "Fin ejecución" << endl; break;
-      case PUTS  : puts(ri->arg1->to_s());
+      case PUTS  : puts(arg1->to_s());
         break;
       case GETS  : gets((RString *)ri->arg1); break;
-      case ADD   : 
-        if (((RNumeric*)ri->arg1)->es_int()){
-          ((RInteger*)ri->arg1)->setValue(((RInteger*)ri->arg2)->getValue() + ((RInteger*)ri->arg3)->getValue());
-        }else
-          ((RDecimal*)ri->arg1)->setValue(((RNumeric*)ri->arg2)->getDecimalValue() + ((RNumeric*)ri->arg3)->getDecimalValue());
+      case ADD   :
+        if (arg2->is_numeric() && arg3->is_numeric()){
+          if (!set_tmp && arg1->is_int() || arg2->is_int() && arg3->is_int()){
+            if (set_tmp)
+              arg1 = new RInteger();
+            ((RInteger*)arg1)->setValue(((RInteger*)arg2)->getValue() + ((RInteger*)arg3)->getValue());
+          }else{
+            if (set_tmp)
+              arg1 = new RDecimal();
+            ((RDecimal*)arg1)->setValue(((RNumeric*)arg2)->getDecimalValue() + ((RNumeric*)arg3)->getDecimalValue());
+          }
+        }else{
+          if (arg2->is_string() && arg3->is_string()){
+            if (set_tmp)
+              arg1 = new RString();
+            ((RString*)arg1)->setValue(*((RString*)arg2)->getValue() + *((RString*)arg3)->getValue());
+          }else{
+            cout << "Error de tipos en linea " << ri->linea << " , no se puede sumar " << *arg2->get_class()->getValue() << " con " << *arg3->get_class()->getValue() << endl;
+            fin_error = true;
+          }
+        }
         break;
-      case OBJID : if (ri->arg1 != NULL) *((RInteger*)ri->arg1) = getDir(ri->arg2); break;
+      case OBJID : if (arg1 != NULL) *((RInteger*)arg1) = getDir(arg2); break;
       case MULT : 
-        if (((RNumeric*)ri->arg1)->es_int())
-          ((RInteger*)ri->arg1)->setValue(((RInteger*)ri->arg2)->getValue() * ((RInteger*)ri->arg3)->getValue());
-        else
-          ((RDecimal*)ri->arg1)->setValue(((RNumeric*)ri->arg2)->getDecimalValue() * ((RNumeric*)ri->arg3)->getDecimalValue());
+        if (arg2->is_numeric() && arg3->is_numeric()){
+          if (!set_tmp && arg1->is_int() || arg2->is_int() && arg3->is_int()){
+            if (set_tmp)
+              arg1 = new RInteger();
+            ((RInteger*)arg1)->setValue(((RInteger*)arg2)->getValue() * ((RInteger*)arg3)->getValue());
+          }else{
+            if (set_tmp)
+              arg1 = new RDecimal();
+            ((RDecimal*)arg1)->setValue(((RNumeric*)arg2)->getDecimalValue() * ((RNumeric*)arg3)->getDecimalValue());
+          }
+        }else{
+          if (arg2->is_string() && arg3->is_int()) {
+            if (set_tmp)
+              arg1 = new RString();
+            string* multiplicado = new string("");
+            string* sumando = ((RString*)arg2)->getValue();
+            for (int i=0; i<((RInteger*)arg3)->getValue(); i++)
+              *multiplicado += *sumando;
+            ((RString*)arg1)->setValue(multiplicado);
+          }else{
+            cout << "Error de tipos en linea " << ri->linea << " , no se puede multiplicar " << *arg2->get_class()->getValue() << " con " << *arg3->get_class()->getValue() << endl;
+            fin_error = true;
+          }
+        }
         break;
       case SUB :
-        if (((RNumeric*)ri->arg1)->es_int())
-          ((RInteger*)ri->arg1)->setValue(((RInteger*)ri->arg2)->getValue() - ((RInteger*)ri->arg3)->getValue());
-        else
-          ((RDecimal*)ri->arg1)->setValue(((RNumeric*)ri->arg2)->getDecimalValue() - ((RNumeric*)ri->arg3)->getDecimalValue());
+        if (arg2->is_numeric() && arg3->is_numeric()){
+          if (!set_tmp && arg1->is_int() || arg2->is_int() && arg3->is_int()){
+            if (set_tmp)
+              arg1 = new RInteger();
+            ((RInteger*)arg1)->setValue(((RInteger*)arg2)->getValue() - ((RInteger*)arg3)->getValue());
+          }else{
+            if (set_tmp)
+              arg1 = new RDecimal();
+            ((RDecimal*)arg1)->setValue(((RNumeric*)arg2)->getDecimalValue() - ((RNumeric*)arg3)->getDecimalValue());
+          }
+        }else{
+          cout << "Error de tipos en linea " << ri->linea << " , no se puede restar " << *arg2->get_class()->getValue() << " con " << *arg3->get_class()->getValue() << endl;
+            fin_error = true;
+        }
         break;
       case DIV :
-        if (((RNumeric*)ri->arg1)->es_int())
-          ((RInteger*)ri->arg1)->setValue(((RInteger*)ri->arg2)->getValue() - ((RInteger*)ri->arg3)->getValue());
-        else
-          ((RDecimal*)ri->arg1)->setValue(((RNumeric*)ri->arg2)->getDecimalValue() - ((RNumeric*)ri->arg3)->getDecimalValue());
+        if (arg2->is_numeric() && arg3->is_numeric()){
+          if (!set_tmp && arg1->is_int() || arg2->is_int() && arg3->is_int()){
+            if (set_tmp)
+              arg1 = new RInteger();
+            ((RInteger*)arg1)->setValue(((RInteger*)arg2)->getValue() / ((RInteger*)arg3)->getValue());
+          }else{
+            if (set_tmp)
+              arg1 = new RDecimal();
+            ((RDecimal*)arg1)->setValue(((RNumeric*)arg2)->getDecimalValue() / ((RNumeric*)arg3)->getDecimalValue());
+          }
+        }else{
+          cout << "Error de tipos en linea " << ri->linea << " , no se puede dividir " << *arg2->get_class()->getValue() << " con " << *arg3->get_class()->getValue() << endl;
+            fin_error = true;
+        }
         break;
       case POW :
-        if (((RNumeric*)ri->arg1)->es_int())
-          ((RInteger*)ri->arg1)->setValue(pow(((RInteger*)ri->arg2)->getValue(), ((RInteger*)ri->arg3)->getValue()));
-        else
-          ((RDecimal*)ri->arg1)->setValue(pow(((RNumeric*)ri->arg2)->getDecimalValue(), ((RNumeric*)ri->arg3)->getDecimalValue()));
+        if (arg2->is_numeric() && arg3->is_numeric()){
+          if (!set_tmp && arg1->is_int() || arg2->is_int() && arg3->is_int()){
+            if (set_tmp)
+              arg1 = new RInteger();
+            ((RInteger*)arg1)->setValue(pow(((RInteger*)arg2)->getValue(), ((RInteger*)arg3)->getValue()));
+          }else{
+            if (set_tmp)
+              arg1 = new RDecimal();
+          ((RDecimal*)arg1)->setValue(pow(((RNumeric*)arg2)->getDecimalValue(), ((RNumeric*)arg3)->getDecimalValue()));
+          }
+        }else{
+          cout << "Error de tipos en linea " << ri->linea << " , no se puede multiplicar " << *arg2->get_class()->getValue() << " con " << *arg3->get_class()->getValue() << endl;
+            fin_error = true;
+        }
         break;
       case MOD :
-        if (((RNumeric*)ri->arg1)->es_int())
-          ((RInteger*)ri->arg1)->setValue(((RInteger*)ri->arg2)->getValue() % ((RInteger*)ri->arg3)->getValue());
-        else
-          ((RDecimal*)ri->arg1)->setValue(((RNumeric*)ri->arg2)->mod((RNumeric*)ri->arg3));
+        if (arg2->is_numeric() && arg3->is_numeric()){
+          if (!set_tmp && arg1->is_int() || arg2->is_int() && arg3->is_int()){
+            if (set_tmp)
+              arg1 = new RInteger();
+            ((RInteger*)arg1)->setValue(((RInteger*)arg2)->getValue() % ((RInteger*)arg3)->getValue());
+          }else{
+            if (set_tmp)
+              arg1 = new RDecimal();
+            ((RDecimal*)arg1)->setValue(((RNumeric*)arg2)->mod((RNumeric*)arg3));
+          }
+        }else{
+          cout << "Error de tipos en linea " << ri->linea << " , no se puede multiplicar " << *arg2->get_class()->getValue() << " con " << *arg3->get_class()->getValue() << endl;
+            fin_error = true;
+        }
         break;
       case IF : 
-        if (!((RBool*)ri->arg1)->getValue())
+        if (!((RBool*)arg1)->getValue())
           it = descartar_if(it);
-        cond_stack.push(((RBool*)ri->arg1)->getValue());
+        cond_stack.push(((RBool*)arg1)->getValue());
         break;
-      case ELSIF : if (!((RBool*)ri->arg1)->getValue()) it = descartar_if(it); else { cond_stack.pop(); cond_stack.push(((RBool*)ri->arg1)->getValue());} break;
+      case ELSIF : if (!((RBool*)arg1)->getValue()) it = descartar_if(it); else { cond_stack.pop(); cond_stack.push(((RBool*)arg1)->getValue());} break;
       case ELSIFCOND : if (cond_stack.top()) it = descartar_hasta_end(it); break;
       case ELSE : if (cond_stack.top()) it = descartar_hasta_end(it); break;
       case END : cond_stack.pop(); break;
@@ -106,70 +195,96 @@ void ejecutar(list<Instruccion*> *codigo) {
           while_stack.push(it);
         else
           it=descartar_whileend(it);
-        cout << "WHILE excecuted " << (((RBool*)ri->arg1)->getValue() ? "true" : "false")  << endl;
         break;
       case WHILEEND :
         if (((RBool*)ri->arg1)->getValue())
           it = while_stack.top();
         else
           while_stack.pop();
-        cout << "WHILEEND excecuted " << (((RBool*)ri->arg1)->getValue() ? "true" : "false") << endl;
         break;
       case AND :
-        ((RBool*)ri->arg1)->setValue(((RBool*)ri->arg2)->getValue() && ((RBool*)ri->arg3)->getValue());
+        ((RBool*)arg1)->setValue(((RBool*)arg2)->getValue() && ((RBool*)arg3)->getValue());
         break;
       case OR :
-        ((RBool*)ri->arg1)->setValue(((RBool*)ri->arg2)->getValue() || ((RBool*)ri->arg3)->getValue());
+        ((RBool*)arg1)->setValue(((RBool*)arg2)->getValue() || ((RBool*)arg3)->getValue());
         break;
       case NOT :
-        ((RBool*)ri->arg1)->setValue(!((RBool*)ri->arg2)->getValue());
+        ((RBool*)arg1)->setValue(!((RBool*)arg2)->getValue());
         break;
       case G :
-        ((RBool*)ri->arg1)->setValue(mayor(ri->arg2, ri->arg3)->getValue());
+        ((RBool*)arg1)->setValue(mayor(arg2, arg3)->getValue());
         break;
       case GE :
-        ((RBool*)ri->arg1)->setValue(mayor_igual(ri->arg2, ri->arg3)->getValue());
+        ((RBool*)arg1)->setValue(mayor_igual(arg2, arg3)->getValue());
         break;
       case L  :
-        ((RBool*)ri->arg1)->setValue(menor(ri->arg2, ri->arg3)->getValue());
+        ((RBool*)arg1)->setValue(menor(arg2, arg3)->getValue());
         break;
       case LE :
-        ((RBool*)ri->arg1)->setValue(menor_igual(ri->arg2, ri->arg3)->getValue());
+        ((RBool*)arg1)->setValue(menor_igual(arg2, arg3)->getValue());
         break;
       case EQ :
-        ((RBool*)ri->arg1)->setValue(igual(ri->arg2, ri->arg3)->getValue());
+        ((RBool*)arg1)->setValue(igual(arg2, arg3)->getValue());
         break;
       case NEQ :
-        ((RBool*)ri->arg1)->setValue(!igual(ri->arg2, ri->arg3)->getValue());
+        ((RBool*)arg1)->setValue(!igual(arg2, arg3)->getValue());
         break;
       case TOBOOL :
-        ((RBool*)ri->arg1)->setValue(extraer_bool(ri->arg2));
+        ((RBool*)arg1)->setValue(extraer_bool(arg2));
+        break;
+      case GETV : // Evaluar variable o metodo?
+        //ri->arg1 = get_variable((RString*)arg2);
+        break;
+      case PUTV :
+        set_variable((RString*)arg1, arg2);
+        break;
+      case ASGN:
+        set_variable((RString*)arg1, arg2);
         break;
     }
-  } while (ri->op != FIN);
+    if (set_tmp)
+      set_global_variable(((RVariable*)ri->arg1)->getValue(), arg1);
+  } while (!fin_error && ri->op != FIN);
 
+  clean_up();
   for (it=codigo->begin(); it != codigo->end(); it++)
     delete *it;
-  clean_up();
 }
 
 void add_symbol(char *name) {
   tsimbolos.insert(name);
 }
 
-RObject *get_variable(char *name){ //aca hay q considerar el tema del scope?
+RObject *get_variable(const char *name){ //aca hay q considerar el tema del scope?
   list<unordered_map<string, RObject*>*>::reverse_iterator rit;
   //unordered_map<string, Instruccion*>* stack;
   rit = scope_stack.rbegin();
   RObject *object;
   do {
     object = (**rit)[name];
-  } while (rit != scope_stack.rend());
-  return global_variables[name];
+    rit++;
+  } while (object == NULL && rit != scope_stack.rend());
+  if (object == NULL)
+    object = (*global_variables)[name];
+  if (object == NULL)
+    cout << "Warning, variable is null!" << endl;
+  return object;
 }
 
-void set_variable(char *name, RObject* var){ //aca hay q considerar el tema del scope?
-  global_variables[name]= var;
+RObject* get_variable(RString* str){
+  return get_variable(str->getValue()->data());
+}
+
+void set_variable(const char *name, RObject* var){ //aca hay q considerar el tema del scope?
+  (*current_stack)[name] = var;
+}
+
+void set_global_variable(string *name, RObject* var){ //aca hay q considerar el tema del scope?
+  (*global_variables)[name->data()] = var;
+}
+
+void set_variable(RString* str, RObject* var){ //aca hay q considerar el tema del scope?
+  set_variable(str->getValue()->data(), var);
 }
 
 void add_global_function(char* name, list<Instruccion*>* codigo){
@@ -208,10 +323,8 @@ list<Instruccion*>::iterator descartar_hasta_end(list<Instruccion*>::iterator it
 
 std::list<Instruccion*>::iterator descartar_whileend(std::list<Instruccion*>::iterator it){
   Instruccion *ri = *it;
-std::cout <<"entre a descartar "<< std::endl;
   while (ri->op != WHILEEND) {
     ri = *(++it);
-	std::cout <<"descarte: "<< std::endl;
   }
   return ++it;
 }
@@ -230,4 +343,8 @@ void decimal_add(RDecimal* arg1, RNumeric* arg2, RNumeric* arg3){
     arg1->setValue(((RInteger*)arg2)->getValue() + ((RDecimal*)arg3)->getValue());
   else
     arg1->setValue(((RDecimal*)arg2)->getValue() + ((RInteger*)arg3)->getValue());
+}
+
+bool operacion_es_booleana(enum code_ops op){
+  return (op == AND || op == OR || op == NOT || op == G || op == GE || op == L || op == LE || op == EQ || op == NEQ || op == TOBOOL);
 }

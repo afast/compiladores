@@ -1,14 +1,24 @@
-puts 1+(2+3)
-puts 2+3+4*5
-puts 'hola'
-puts 3*3+3.3*3.0
-puts 2.1*2.4+2+3.2
-puts 2**2
-puts 4%3
-puts 4%3.1
-puts 4.3%3.1
+a=10
+puts a
+puts a + 2
+puts 5.0*5*5
+a='hola'
+puts a
+b=' caro'
+puts a+b
+puts 'as'
+c=4
+c=10
+
+while c>0
+  puts c
+  c= c-1
+end
 
 if true
+  puts 4*c
+elsif 1>=1
+  puts b
   puts 'true'
 end
 if 2>1
@@ -32,10 +42,6 @@ end
 
 while false
   puts 10
-end
-while true
-  puts 10
-  puts 11
 end
 
 =begin
@@ -62,7 +68,7 @@ if 4>2 && 4<9
 elsif 4<2
   puts 'jamo'
 else
-  puts 5
+  puts 'beee'
 end
-puts false
 =end
+

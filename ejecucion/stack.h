@@ -11,7 +11,7 @@ class RDecimal;
 class RNumeric;
 class RString;
 
-enum code_ops { FIN, PUTS, GETS, OBJID, ADD, ASSIGN_TMP, MULT, SUB, DIV, POW, MOD, IF, ELSIF, ELSIFCOND, WHILEEND, WHILE, ELSE, END, AND, OR, NOT, G, GE, L, LE, EQ, NEQ, TOBOOL, DO, GETV, PUTV, ASGN };
+enum code_ops { FIN, PUTS, GETS, OBJID, ADD, ASSIGN_TMP, MULT, SUB, DIV, POW, MOD, IF, ELSIF, ELSIFCOND, WHILEEND, WHILE, CASE, CASEREC, CASERECCOND, ELSE, END, AND, OR, NOT, G, GE, L, LE, EQ, NEQ, TOBOOL, DO, GETV, PUTV, ASGN };
 /*
  * G  - mayor
  * GE - mayor igual
@@ -45,6 +45,8 @@ void ejecutar(std::list<Instruccion*> *codigo);
 Instruccion *nuevaInst(enum code_ops op, RObject* arg1, RObject* arg2, RObject* arg3);
 std::list<Instruccion*>::iterator descartar_hasta_end(std::list<Instruccion*>::iterator it);
 std::list<Instruccion*>::iterator descartar_if(std::list<Instruccion*>::iterator it);
+std::list<Instruccion*>::iterator descartar_case_hasta_end(std::list<Instruccion*>::iterator it);
+std::list<Instruccion*>::iterator descartar_case(std::list<Instruccion*>::iterator it);
 std::list<Instruccion*>::iterator descartar_whileend(std::list<Instruccion*>::iterator it);
 void add_global_function(char* name, std::list<Instruccion*>* codigo);
 void set_variable(const char *name, RObject* var);

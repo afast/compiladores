@@ -66,7 +66,7 @@ void printCodigo();
 %token T_ATRIBUTO T_VAR_PESOS_CERO T_VAR_PESOS T_VAR_PESOS_PESOS T_INTEGER_ABS T_ATRIBUTO_ACCESOR
 %token T_FLOAT_ABS T_STRING_1 T_STRING_2 T_STRING_IZQ T_STRING_DER T_COMMAND T_ESPACIOS T_ERROR
 
-%type <a> expr_numeric compstmt stmt texpr value output number variable string expr_string expr_bool if recursive_elsif opt_else while
+%type <a> expr_numeric compstmt stmt texpr value output number variable string expr_string expr_bool if recursive_elsif opt_else while rec_when_then case
 /*=========================================================================
                           OPERATOR PRECEDENCE
 =========================================================================*/
@@ -183,14 +183,12 @@ recursive_elsif : /* Vacio */ { $$ = NULL; }
                 | recursive_elsif T_ELSIF expr_bool T_FIN_INSTRUCCION compstmt { $$ = new_elsif($3, $5, $1, yylineno); };
 opt_else : /* Vacio */ { $$ = NULL; }
          | T_ELSE T_FIN_INSTRUCCION compstmt { $$ = $3; };
-while : T_WHILE expr_bool T_FIN_INSTRUCCION compstmt T_END { $$ = new_while($2, $4, yylineno); };
-case : T_CASE rec_when_then T_END
-	| T_CASE T_FIN_INSTRUCCION rec_when_then T_END;
+case : T_CASE T_WHEN expr_bool T_THEN value T_FIN_INSTRUCCION rec_when_then T_END { $$ = new_case($3, $5, $7); }
+	| T_CASE T_FIN_INSTRUCCION T_WHEN expr_bool T_THEN value T_FIN_INSTRUCCION rec_when_then T_END { $$ = new_case($4, $6, $8); }; 
+rec_when_then : /* Vacio */ { $$ = NULL; }
+                | rec_when_then T_WHEN expr_bool T_THEN value T_FIN_INSTRUCCION { $$ = new_when_rec($3, $5, $1); };
 
-rec_when_then : T_WHEN expr_bool T_THEN value T_FIN_INSTRUCCION
-              | rec_when_then T_WHEN expr_bool T_THEN value T_FIN_INSTRUCCION
-	            | T_WHEN expr_bool T_THEN value
-              | rec_when_then T_WHEN expr_bool T_THEN value;
+while : T_WHILE expr_bool T_FIN_INSTRUCCION compstmt T_END { $$ = new_while($2, $4, yylineno); };
 def :	T_DEF T_IDENTIF	argdecl compstmt T_END
 	| T_DEF T_IDENTIF compstmt T_END;
 argdecl : T_PAR_IZQ arglist T_PAR_DER T_FIN_INSTRUCCION
@@ -266,6 +264,9 @@ void printCodigo() {
       case ELSIF   : std::cout << "ELSIF "  << std::endl; break;
       case ELSIFCOND   : std::cout << "ELSIFCOND "  << std::endl; break;
       case END   : std::cout << "END "  << std::endl; break;
+      case CASE   : std::cout << "CASE "  << std::endl; break;
+      case CASEREC   : std::cout << "CASEREC "  << std::endl; break;
+      case CASERECCOND   : std::cout << "CASERECCOND "  << std::endl; break;
       case WHILE : std::cout << "WHILE "  << std::endl; break;
       case WHILEEND : std::cout << "WHILEEND "  << std::endl; break;
       case NOT : std::cout << "NOT " << *ri->arg2->to_s()->getValue()  << std::endl; break;

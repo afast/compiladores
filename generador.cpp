@@ -104,9 +104,9 @@ void decidir_nodo(ast* nodo, list<Instruccion*> *codigo){
     case c_case :
       generar_case(nodo, codigo);
       break;
-    case c_case_rec :
-      generar_case_rec(nodo, codigo);
-      break;    
+  /*  case c_case_rec :
+      generar_case_rec(nodo, codigo, var);
+      break;*/    
     case f_string :
       generar_string(nodo, codigo);
       break;
@@ -296,8 +296,11 @@ RObject* get_numeric_node(ast* hoja){
                      arg = new RDecimal(hoja->decimal);
                      break;}
     case t_identif :
-                   arg = new RVariable(hoja->str);
-                   break;
+      arg = new RVariable(hoja->str);
+      break;
+    case f_string :
+      arg = new RString(hoja->str);
+      break;
     default:
                    cout << "Error de tipo, el operando no es numerico!" << endl;
                    break;
@@ -377,16 +380,25 @@ void generar_case(ast* nodo, std::list<Instruccion*> *codigo){
   /* valor */
   /* generar case_rec */
   /* endif */
+  RObject* arg;
+  string tmp = get_tmp_var();
+  RVariable* var = new RVariable(&tmp);
+  set_global_variable(var->getValue(), new RObject());
   decidir_nodo(nodo->h1, codigo);
   RObject* cond = codigo->back()->arg1;
   codigo->push_back(instr(CASE, cond, 0));
-  //generar_compstmt(nodo->h2->stmt_list, codigo);
-  //aca habria que asignar el valor
-  generar_case_rec(nodo->h3, codigo);
-  codigo->push_back(instr(END, 0));
+  if (nodo_hoja(nodo->h2)){ // no preciso variable temporal
+    arg = get_abstract_node(nodo->h2);
+  } else {
+    decidir_nodo(nodo->h2, codigo);
+    arg = codigo->back()->arg1;
+  }
+  codigo->push_back(instr(ASGN, new RString(var->getValue()), arg, nodo->linea));
+  generar_case_rec(nodo->h3, codigo, var);
+  codigo->push_back(instr(END, var, 0));
 }
 
-void generar_case_rec(ast* nodo, std::list<Instruccion*> *codigo){
+void generar_case_rec(ast* nodo, std::list<Instruccion*> *codigo, RVariable* var){
   /*
    * h1 - cond
    * h2 - valor
@@ -395,13 +407,20 @@ void generar_case_rec(ast* nodo, std::list<Instruccion*> *codigo){
    * */
   if (nodo == NULL)
     return;
+  generar_case_rec(nodo->h3, codigo, var);
+  RObject* arg;
   codigo->push_back(instr(CASERECCOND, 0));
   decidir_nodo(nodo->h1, codigo);
   RObject* cond = codigo->back()->arg1;
   codigo->push_back(instr(CASEREC, cond, 0));
-  //generar_compstmt(nodo->h2->stmt_list, codigo);
-  //aca habria que asignar el valor
-  generar_case_rec(nodo->h3, codigo);
+  if (nodo_hoja(nodo->h2)){ // no preciso variable temporal
+    arg = get_abstract_node(nodo->h2);
+  } else {
+    decidir_nodo(nodo->h2, codigo);
+    arg = codigo->back()->arg1;
+  }
+  codigo->push_back(instr(ASGN, new RString(var->getValue()), arg, nodo->linea));
+
 }
 
 void generar_string(ast* nodo, std::list<Instruccion*> *codigo){}
@@ -461,6 +480,8 @@ void generar_op_booleana(enum code_ops op, ast* nodo, list<Instruccion*>* codigo
 }
 
 bool nodo_hoja(ast* nodo){
+std:: cout << "aca llego: " << std::endl;
+std:: cout << nodo->tipo << std::endl;
   return (nodo->tipo == f_string || nodo->tipo == f_entero || nodo->tipo == f_decimal || nodo->tipo == f_bool || nodo->tipo == t_identif);
 }
 

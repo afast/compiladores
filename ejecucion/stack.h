@@ -25,6 +25,7 @@ enum tipo_dir { CONSTANTE, TEMPORAL, VARIABLE, ETIQUETA };
 struct RInstruccion {
   enum code_ops op;
   RObject *arg1, *arg2, *arg3;
+  int linea;
 };
 
 typedef RInstruccion Instruccion;

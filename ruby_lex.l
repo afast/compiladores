@@ -20,8 +20,8 @@ COMMAND_CON_SALTO ([^(`\n)]*(\\\n)*)*
 COMMAND_SIN_SALTO [^(`\n)]*
 VARIABLE [_a-z][_a-zA-Z0-9]*|[_a-z][_a-zA-Z0-9]*\[([1-9][0-9]*|0)\]
 %%
-#.*\n {;};
-^=begin(.*\n)*=end {};
+#.*\n {};
+^=begin(.*\n)*=end(" ")*\n* {};
 then      {return(T_THEN);};
 nil      {return(T_NIL);};
 puts   {return(T_PUTS);};
@@ -105,6 +105,7 @@ not|!  {return(T_NOT);};
 \}{STRING_DOBLE_CON_SALTO}\"|\}{STRING_DOBLE_SIN_SALTO}\" {return(T_STRING_DER);};
 `{COMMAND_CON_SALTO}`|`{COMMAND_SIN_SALTO}` {yylval.text = strdup(yytext); return(T_COMMAND);};
 (\n|;)* {return T_FIN_INSTRUCCION;};
-\\(\t|\r|" ")*\n|\t|\r|" " {};
+\t|\r|" " {}
+\\(\t|\r|" ")*\n {};
 . {};
 

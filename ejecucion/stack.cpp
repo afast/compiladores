@@ -49,7 +49,7 @@ void ejecutar(list<Instruccion*> *codigo) {
   list<Instruccion *>::iterator it = codigo->begin();
   Instruccion *ri;
   RObject *arg1, *arg2, *arg3;
-  bool set_tmp;
+  bool set_tmp, fin_error=false;
   cout << "Ejecucion comenzada!" << endl;
   do {
     ri = *it++;
@@ -84,8 +84,10 @@ void ejecutar(list<Instruccion*> *codigo) {
             if (set_tmp)
               arg1 = new RString();
             ((RString*)arg1)->setValue(*((RString*)arg2)->getValue() + *((RString*)arg3)->getValue());
-          }else
-            cout << "Error de tipos, no se puede sumar " << *arg2->get_class()->getValue() << " con " << *arg3->get_class()->getValue() << endl;
+          }else{
+            cout << "Error de tipos en linea " << ri->linea << " , no se puede sumar " << *arg2->get_class()->getValue() << " con " << *arg3->get_class()->getValue() << endl;
+            fin_error = true;
+          }
         }
         break;
       case OBJID : if (arg1 != NULL) *((RInteger*)arg1) = getDir(arg2); break;
@@ -101,7 +103,18 @@ void ejecutar(list<Instruccion*> *codigo) {
             ((RDecimal*)arg1)->setValue(((RNumeric*)arg2)->getDecimalValue() * ((RNumeric*)arg3)->getDecimalValue());
           }
         }else{
-          cout << "Error de tipos, no se puede multiplicar " << *arg2->get_class()->getValue() << " con " << *arg3->get_class()->getValue() << endl;
+          if (arg2->is_string() && arg3->is_int()) {
+            if (set_tmp)
+              arg1 = new RString();
+            string* multiplicado = new string("");
+            string* sumando = ((RString*)arg2)->getValue();
+            for (int i=0; i<((RInteger*)arg3)->getValue(); i++)
+              *multiplicado += *sumando;
+            ((RString*)arg1)->setValue(multiplicado);
+          }else{
+            cout << "Error de tipos en linea " << ri->linea << " , no se puede multiplicar " << *arg2->get_class()->getValue() << " con " << *arg3->get_class()->getValue() << endl;
+            fin_error = true;
+          }
         }
         break;
       case SUB :
@@ -116,7 +129,8 @@ void ejecutar(list<Instruccion*> *codigo) {
             ((RDecimal*)arg1)->setValue(((RNumeric*)arg2)->getDecimalValue() - ((RNumeric*)arg3)->getDecimalValue());
           }
         }else{
-          cout << "Error de tipos, no se puede restar " << *arg2->get_class()->getValue() << " con " << *arg3->get_class()->getValue() << endl;
+          cout << "Error de tipos en linea " << ri->linea << " , no se puede restar " << *arg2->get_class()->getValue() << " con " << *arg3->get_class()->getValue() << endl;
+            fin_error = true;
         }
         break;
       case DIV :
@@ -131,7 +145,8 @@ void ejecutar(list<Instruccion*> *codigo) {
             ((RDecimal*)arg1)->setValue(((RNumeric*)arg2)->getDecimalValue() / ((RNumeric*)arg3)->getDecimalValue());
           }
         }else{
-          cout << "Error de tipos, no se puede multiplicar " << *arg2->get_class()->getValue() << " con " << *arg3->get_class()->getValue() << endl;
+          cout << "Error de tipos en linea " << ri->linea << " , no se puede dividir " << *arg2->get_class()->getValue() << " con " << *arg3->get_class()->getValue() << endl;
+            fin_error = true;
         }
         break;
       case POW :
@@ -146,7 +161,8 @@ void ejecutar(list<Instruccion*> *codigo) {
           ((RDecimal*)arg1)->setValue(pow(((RNumeric*)arg2)->getDecimalValue(), ((RNumeric*)arg3)->getDecimalValue()));
           }
         }else{
-          cout << "Error de tipos, no se puede multiplicar " << *arg2->get_class()->getValue() << " con " << *arg3->get_class()->getValue() << endl;
+          cout << "Error de tipos en linea " << ri->linea << " , no se puede multiplicar " << *arg2->get_class()->getValue() << " con " << *arg3->get_class()->getValue() << endl;
+            fin_error = true;
         }
         break;
       case MOD :
@@ -161,7 +177,8 @@ void ejecutar(list<Instruccion*> *codigo) {
             ((RDecimal*)arg1)->setValue(((RNumeric*)arg2)->mod((RNumeric*)arg3));
           }
         }else{
-          cout << "Error de tipos, no se puede multiplicar " << *arg2->get_class()->getValue() << " con " << *arg3->get_class()->getValue() << endl;
+          cout << "Error de tipos en linea " << ri->linea << " , no se puede multiplicar " << *arg2->get_class()->getValue() << " con " << *arg3->get_class()->getValue() << endl;
+            fin_error = true;
         }
         break;
       case IF : 
@@ -227,7 +244,7 @@ void ejecutar(list<Instruccion*> *codigo) {
     }
     if (set_tmp)
       set_global_variable(((RVariable*)ri->arg1)->getValue(), arg1);
-  } while (ri->op != FIN);
+  } while (!fin_error && ri->op != FIN);
 
   clean_up();
   for (it=codigo->begin(); it != codigo->end(); it++)

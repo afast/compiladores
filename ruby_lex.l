@@ -11,6 +11,7 @@ extern "C" {
 #define MAX_INCLUDE_DEPTH 40
 int include_stack_ptr = 0;
 std::set<std::string> *archivos_cargados = new std::set<std::string>();
+char* replaceContinuacionLinea(char* textIn);
 YY_BUFFER_STATE include_stack[MAX_INCLUDE_DEPTH];
 void cargarArchivo(char* textIn, int largo, bool isLoad);
 %}
@@ -113,12 +114,12 @@ not|!  {return(T_NOT);};
 (([1-9][0-9]*)\.[0-9]+)|(((\+|\-)?0)\.[0-9]+) {yylval.real = atof(yytext); return(T_FLOAT_ABS);};
 #.*\n {;};
 ^=begin(.*\n)*=end {};
-\'{STRING_SIMPLE_CON_SALTO}\'|\'{STRING_SIMPLE_SIN_SALTO}\' {yylval.text = strdup(yytext); return(T_STRING_1);};
-\"{STRING_DOBLE_CON_SALTO}\"|\"{STRING_DOBLE_SIN_SALTO}\" {yylval.text = strdup(yytext); return(T_STRING_2);};
-\"{STRING_DOBLE_CON_SALTO}#\{|\"{STRING_DOBLE_SIN_SALTO}#\{ {return(T_STRING_IZQ);};
-\}{STRING_DOBLE_CON_SALTO}#\{|\}{STRING_DOBLE_SIN_SALTO}#\{ {return(T_STRING_CENTER);};
-\}{STRING_DOBLE_CON_SALTO}\"|\}{STRING_DOBLE_SIN_SALTO}\" {return(T_STRING_DER);};
-`{COMMAND_CON_SALTO}`|`{COMMAND_SIN_SALTO}` {yylval.text = strdup(yytext); return(T_COMMAND);};
+\'{STRING_SIMPLE_CON_SALTO}\'|\'{STRING_SIMPLE_SIN_SALTO}\' {yylval.text = strdup(replaceContinuacionLinea(yytext)); return(T_STRING_1);};
+\"{STRING_DOBLE_CON_SALTO}\"|\"{STRING_DOBLE_SIN_SALTO}\"   {yylval.text = strdup(replaceContinuacionLinea(yytext)); return(T_STRING_2);};
+\"{STRING_DOBLE_CON_SALTO}#\{|\"{STRING_DOBLE_SIN_SALTO}#\  {yylval.text = strdup(replaceContinuacionLinea(yytext)); return(T_STRING_IZQ);};
+\}{STRING_DOBLE_CON_SALTO}#\{|\}{STRING_DOBLE_SIN_SALTO}#\  {yylval.text = strdup(replaceContinuacionLinea(yytext)); return(T_STRING_CENTER);};
+\}{STRING_DOBLE_CON_SALTO}\"|\}{STRING_DOBLE_SIN_SALTO}\"   {yylval.text = strdup(replaceContinuacionLinea(yytext)); return(T_STRING_DER);};
+`{COMMAND_CON_SALTO}`|`{COMMAND_SIN_SALTO}` {yylval.text = strdup(replaceContinuacionLinea(yytext)); return(T_COMMAND);};
 (\n|;)* {return T_FIN_INSTRUCCION;};
 \\(\t|\r|" ")*\n|\t|\r|" " {};
 . {};
@@ -156,4 +157,24 @@ if((isLoad) || ((archivos_cargados->count(*nombre) == 0) && (archivos_cargados->
 }
 yy_switch_to_buffer(yy_create_buffer( yyin, YY_BUF_SIZE ) );	
 BEGIN(INITIAL);	
+}
+
+char* replaceContinuacionLinea(char* textIn){
+	std::string *tmp = new std::string(textIn);
+
+
+	int n = tmp->find("\\\n");
+
+    tmp->replace(n,  // start position in str
+            2,      // how character(s)
+            1,      // how many copies of character
+            ' ');   // character for replasment
+    std::cout << "-----------       str is: " << *tmp << std::endl;
+
+
+
+	char * result = new char[tmp->size() + 1];
+	std::copy(tmp->begin(), tmp->end(), result);
+	result[tmp->size()] = '\0';
+	return result;
 }

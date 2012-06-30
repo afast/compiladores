@@ -14,6 +14,11 @@ while c>0
   puts c
   c= c-1
 end
+c=4
+
+y=b*c
+
+puts y
 
 if true
   puts 4*c
@@ -71,4 +76,3 @@ else
   puts 'beee'
 end
 =end
-

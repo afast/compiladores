@@ -234,3 +234,13 @@ ast* new_when_rec(ast* cond, ast* value, ast* when_rec) {
   res->h2 = when_rec;
   return res;
 }
+
+ast* new_method(char* name, ast* args, ast* comp_stmt, int linea){
+  ast* res = new ast;
+  res->tipo = a_method;
+  res->linea = linea;
+  res->h1 = args; //puede ser NULL
+  res->h2 = comp_stmt;
+  res->str = name;
+  return res;
+}

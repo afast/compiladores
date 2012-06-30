@@ -457,6 +457,15 @@ bool nodo_hoja(ast* nodo){
   return (nodo->tipo == f_string || nodo->tipo == f_entero || nodo->tipo == f_decimal || nodo->tipo == f_bool || nodo->tipo == t_identif);
 }
 
+std::list<Instruccion*>* generar_metodo(ast* nodo){
+  std::list<Instruccion*>* res = new std::list<Instruccion*>;
+  if (ast->h1 != NULL){
+    //manejar argumentos
+  }
+  generar_compstmt(nodo->h2->stmt_list, res);
+  return res;
+}
+
 Instruccion* instr(enum code_ops op, int linea){
   Instruccion* inst = new Instruccion;
   inst->op = op;

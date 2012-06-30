@@ -36,6 +36,10 @@ double RNumeric::getDecimalValue(){
     return ((RDecimal*)this)->getValue();
 }
 
+long int RNumeric::getIntValue(){
+  return floor(this->getDecimalValue());
+}
+
 double RNumeric::mod(RNumeric *param1){
   if (this->es_int() && param1->es_int())
     return ((RInteger*)this)->getValue() % ((RInteger*)param1)->getValue();

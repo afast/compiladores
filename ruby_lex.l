@@ -1,6 +1,6 @@
 %{
 #include <iostream>
-#include <list>
+#include <set>
 
 extern "C" {
       int yylex(void);
@@ -8,10 +8,15 @@ extern "C" {
 #include "ejecucion/stack.h"
 #include "ast.h"
 #include "y.tab.h"
-
+#define MAX_INCLUDE_DEPTH 40
+int include_stack_ptr = 0;
+std::set<std::string> *archivos_cargados = new std::set<std::string>();
+YY_BUFFER_STATE include_stack[MAX_INCLUDE_DEPTH];
+void cargarArchivo(char* textIn, int largo, bool isLoad);
 %}
 %option yylineno
-
+%x load
+%x require
 STRING_DOBLE_CON_SALTO ([^(\"(#{)\n)]*(\\\n)*)*|(([^(\"(#{)\n)]*(\\\")*)*(\\\n)*)*
 STRING_DOBLE_SIN_SALTO [^(\"(#{)\n)]*|([^(\"(#{)\n)]*(\\\")*)*
 STRING_SIMPLE_CON_SALTO ([^(\'\n)]*(\\\n)*)*
@@ -20,6 +25,10 @@ COMMAND_CON_SALTO ([^(`\n)]*(\\\n)*)*
 COMMAND_SIN_SALTO [^(`\n)]*
 VARIABLE [_a-z][_a-zA-Z0-9]*|[_a-z][_a-zA-Z0-9]*\[([1-9][0-9]*|0)\]
 %%
+require(\t|" ")*\' {BEGIN(require);};
+load(\t|" ")*\' {BEGIN(load);};
+#.*\n {};
+^=begin(.*\n)*=end(" ")*\n* {};
 then      {return(T_THEN);};
 nil      {return(T_NIL);};
 puts   {return(T_PUTS);};
@@ -38,8 +47,16 @@ class   {return(T_CLASS);};
 attr_reader {return(T_ATTR_READER);};
 attr_writer {return(T_ATTR_WRITER);};
 attr_accessor {return(T_ACCESSOR);};
-load {return(T_LOAD);};
-require {return(T_REQUIRE);};
+<load>[^\t|^\n]+\' { cargarArchivo(yytext, yyleng-1, true);};
+<<EOF>> { 	if ( --include_stack_ptr < 0 ){
+			yyterminate();
+		}
+		else {
+			yy_delete_buffer( YY_CURRENT_BUFFER );
+			yy_switch_to_buffer(include_stack[include_stack_ptr] );
+		}
+	};
+<require>[^\t|^\n]+\' { cargarArchivo(yytext, yyleng-1, false);};
 true {yylval.entero = 1;return(T_BOOL);};
 false {yylval.entero = 0;return(T_BOOL);};
 = 	 {return(T_IGUAL);};
@@ -86,7 +103,7 @@ not|!  {return(T_NOT);};
 {VARIABLE}\.each {yylval.text = strdup(yytext); return(T_EACH);};
 [_a-z][_a-zA-Z0-9]*\.[_a-z][_a-zA-Z0-9]* {return(T_INVOCACION_METODO);};
 [A-Z][_a-zA-Z0-9]*	 {return(T_NOM_CONST);};
-[_a-z][_a-zA-Z0-9]*	 {return(T_IDENTIF);};
+[_a-z][_a-zA-Z0-9]*	 {yylval.text = strdup(yytext); return(T_IDENTIF);};
 \$[_a-z][_a-zA-Z0-9]* {return(T_IDENTIF_GLOBAL);};
 @[_a-z][_a-zA-Z0-9]* {return(T_ATRIBUTO);};
 :[_a-z][_a-zA-Z0-9]* {return(T_ATRIBUTO_ACCESOR);};
@@ -96,8 +113,6 @@ not|!  {return(T_NOT);};
 \|           {return(T_PIPE);};
 ([1-9][0-9]*)|0 {yylval.entero = atoi(yytext); return(T_INTEGER_ABS);};
 (([1-9][0-9]*)\.[0-9]+)|(((\+|\-)?0)\.[0-9]+) {yylval.real = atof(yytext); return(T_FLOAT_ABS);};
-#.*\n {;};
-^=begin(.*\n)*=end {};
 \'{STRING_SIMPLE_CON_SALTO}\'|\'{STRING_SIMPLE_SIN_SALTO}\' {yylval.text = strdup(yytext); return(T_STRING_1);};
 \"{STRING_DOBLE_CON_SALTO}\"|\"{STRING_DOBLE_SIN_SALTO}\" {yylval.text = strdup(yytext); return(T_STRING_2);};
 \"{STRING_DOBLE_CON_SALTO}#\{|\"{STRING_DOBLE_SIN_SALTO}#\{ {return(T_STRING_IZQ);};
@@ -105,6 +120,41 @@ not|!  {return(T_NOT);};
 \}{STRING_DOBLE_CON_SALTO}\"|\}{STRING_DOBLE_SIN_SALTO}\" {return(T_STRING_DER);};
 `{COMMAND_CON_SALTO}`|`{COMMAND_SIN_SALTO}` {yylval.text = strdup(yytext); return(T_COMMAND);};
 (\n|;)* {return T_FIN_INSTRUCCION;};
-\\(\t|\r|" ")*\n|\t|\r|" " {};
+\t|\r|" " {}
+\\(\t|\r|" ")*\n {};
 . {};
-
+%%
+void cargarArchivo(char* textIn, int largo, bool isLoad){
+// obtiene el nombre de fichero a incluir
+char* text = strndup(textIn, largo);
+text = strcat(text, ".rb");
+std::string *nombre = new std::string(text);
+char* text2 = strndup(textIn, largo);
+std::string *nombre2 = new std::string(text2);
+if ( include_stack_ptr >= MAX_INCLUDE_DEPTH )
+{
+	fprintf( stderr, "Demasiados load(require) anidados" );
+	exit( 1 );
+}
+include_stack[include_stack_ptr++] = YY_CURRENT_BUFFER;
+if((isLoad) || ((archivos_cargados->count(*nombre) == 0) && (archivos_cargados->count(*nombre2) == 0))){
+	yyin = fopen( text, "r" );
+	if (!yyin){
+		yyin = fopen( text2, "r" );
+		if(!yyin) {
+			fprintf( stderr, "No se encontraron los archivos %s o %s\n", text, text2);
+			exit( 1 );
+		} else {
+			if(!isLoad){
+				archivos_cargados->insert(*nombre2);
+			}
+		}
+	} else {
+		if(!isLoad){
+			archivos_cargados->insert(*nombre);
+		}
+	}
+}
+yy_switch_to_buffer(yy_create_buffer( yyin, YY_BUF_SIZE ) );	
+BEGIN(INITIAL);	
+}

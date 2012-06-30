@@ -372,11 +372,11 @@ void generar_case(ast* nodo, std::list<Instruccion*> *codigo){
   /* endif */
   decidir_nodo(nodo->h1, codigo);
   RObject* cond = codigo->back()->arg1;
-  codigo->push_back(instr(CASE, cond));
+  codigo->push_back(instr(CASE, cond, 0));
   //generar_compstmt(nodo->h2->stmt_list, codigo);
   //aca habria que asignar el valor
   generar_case_rec(nodo->h3, codigo);
-  codigo->push_back(instr(END));
+  codigo->push_back(instr(END, 0));
 }
 
 void generar_case_rec(ast* nodo, std::list<Instruccion*> *codigo){
@@ -388,10 +388,10 @@ void generar_case_rec(ast* nodo, std::list<Instruccion*> *codigo){
    * */
   if (nodo == NULL)
     return;
-  codigo->push_back(instr(CASERECCOND));
+  codigo->push_back(instr(CASERECCOND, 0));
   decidir_nodo(nodo->h1, codigo);
   RObject* cond = codigo->back()->arg1;
-  codigo->push_back(instr(CASEREC, cond));
+  codigo->push_back(instr(CASEREC, cond, 0));
   //generar_compstmt(nodo->h2->stmt_list, codigo);
   //aca habria que asignar el valor
   generar_case_rec(nodo->h3, codigo);
@@ -459,7 +459,7 @@ bool nodo_hoja(ast* nodo){
 
 std::list<Instruccion*>* generar_metodo(ast* nodo){
   std::list<Instruccion*>* res = new std::list<Instruccion*>;
-  if (ast->h1 != NULL){
+  if (nodo->h1 != NULL){
     //manejar argumentos
   }
   generar_compstmt(nodo->h2->stmt_list, res);

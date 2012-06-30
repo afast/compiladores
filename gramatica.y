@@ -66,7 +66,7 @@ void printCodigo();
 %token T_ATRIBUTO T_VAR_PESOS_CERO T_VAR_PESOS T_VAR_PESOS_PESOS T_INTEGER_ABS T_ATRIBUTO_ACCESOR
 %token T_FLOAT_ABS T_STRING_1 T_STRING_2 T_STRING_IZQ T_STRING_DER T_COMMAND T_ESPACIOS T_ERROR
 
-%type <a> expr_numeric compstmt stmt texpr value output number variable string expr_string expr_bool if recursive_elsif opt_else while rec_when_then case
+%type <a> expr_numeric compstmt stmt texpr value output number variable string expr_string expr_bool if recursive_elsif opt_else while rec_when_then case argdecl def
 /*=========================================================================
                           OPERATOR PRECEDENCE
 =========================================================================*/
@@ -189,8 +189,8 @@ rec_when_then : /* Vacio */ { $$ = NULL; }
                 | rec_when_then T_WHEN expr_bool T_THEN value T_FIN_INSTRUCCION { $$ = new_when_rec($3, $5, $1); };
 
 while : T_WHILE expr_bool T_FIN_INSTRUCCION compstmt T_END { $$ = new_while($2, $4, yylineno); };
-def :	T_DEF T_IDENTIF	argdecl compstmt T_END { $$ = new_method($<text>2, $3, $4, yylineno);}
-	| T_DEF T_IDENTIF compstmt T_END { $$ = new_method($<text>2, NULL, $4, yylineno);};
+def :	T_DEF T_IDENTIF	argdecl compstmt T_END { $$ = new_method($<text>2, $3, $4,yylineno);}
+	| T_DEF T_IDENTIF compstmt T_END { $$ = new_method($<text>2, NULL, $3, yylineno);};
 argdecl : T_PAR_IZQ arglist T_PAR_DER T_FIN_INSTRUCCION
 	| T_PAR_IZQ T_PAR_DER T_FIN_INSTRUCCION /*para representar pej: funcion()*/
 	| arglist T_FIN_INSTRUCCION;

@@ -100,7 +100,7 @@ void ejecutar(list<Instruccion*> *codigo) {
       case ELSIF : if (!((RBool*)ri->arg1)->getValue()) it = descartar_if(it); else { cond_stack.pop(); cond_stack.push(((RBool*)ri->arg1)->getValue());} break;
       case ELSIFCOND : if (cond_stack.top()) it = descartar_hasta_end(it); break;
       case ELSE : if (cond_stack.top()) it = descartar_hasta_end(it); break;
-      case END : cond_stack.pop(); break;
+      case END : cout << "antes end " <<  endl; cond_stack.pop(); cout << "despues end " <<  endl; break;
       case WHILE : 
         if (((RBool*)ri->arg1)->getValue())
           while_stack.push(it);
@@ -115,6 +115,16 @@ void ejecutar(list<Instruccion*> *codigo) {
           while_stack.pop();
         cout << "WHILEEND excecuted " << (((RBool*)ri->arg1)->getValue() ? "true" : "false") << endl;
         break;
+
+      case CASE : cout << "case excecuted " <<  endl;
+        if (!((RBool*)ri->arg1)->getValue())
+          it = descartar_case(it);
+        cond_stack.push(((RBool*)ri->arg1)->getValue());
+        break;
+      case CASEREC : cout << "caserec excecuted " <<  endl; if (!((RBool*)ri->arg1)->getValue()){cout << "antes descartar case " <<  endl; it = descartar_case(it); cout << "despues descartar case " <<  endl;} else { cond_stack.pop(); cond_stack.push(((RBool*)ri->arg1)->getValue());} break;
+      case CASERECCOND : cout << "caserec_COND excecuted " <<  endl; if (cond_stack.top()) it = descartar_case_hasta_end(it); break;
+
+
       case AND :
         ((RBool*)ri->arg1)->setValue(((RBool*)ri->arg2)->getValue() && ((RBool*)ri->arg3)->getValue());
         break;
@@ -144,6 +154,8 @@ void ejecutar(list<Instruccion*> *codigo) {
         break;
       case TOBOOL :
         ((RBool*)ri->arg1)->setValue(extraer_bool(ri->arg2));
+        break;
+      default: cout << "hay una op no reconocida" <<  endl;
         break;
     }
   } while (ri->op != FIN);
@@ -196,6 +208,17 @@ list<Instruccion*>::iterator descartar_if(list<Instruccion*>::iterator it) { // 
   return it;
 }
 
+list<Instruccion*>::iterator descartar_case(list<Instruccion*>::iterator it) { // caso case false
+  Instruccion *ri = *it;
+  while (ri->op != CASEREC && ri->op != CASERECCOND && ri->op != END) {
+    if (ri->op == CASE)
+      it = descartar_case_hasta_end(++it);
+    ri = *(++it);
+  }
+  return it;
+}
+
+
 list<Instruccion*>::iterator descartar_hasta_end(list<Instruccion*>::iterator it){
   Instruccion *ri = *it;
   while (ri->op != END) {
@@ -206,12 +229,20 @@ list<Instruccion*>::iterator descartar_hasta_end(list<Instruccion*>::iterator it
   return it;
 }
 
+list<Instruccion*>::iterator descartar_case_hasta_end(list<Instruccion*>::iterator it){
+  Instruccion *ri = *it;
+  while (ri->op != END) {
+    if (ri->op == CASE)
+      it = descartar_case_hasta_end(++it);
+    ri = *(++it);
+  }
+  return it;
+}
+
 std::list<Instruccion*>::iterator descartar_whileend(std::list<Instruccion*>::iterator it){
   Instruccion *ri = *it;
-std::cout <<"entre a descartar "<< std::endl;
   while (ri->op != WHILEEND) {
     ri = *(++it);
-	std::cout <<"descarte: "<< std::endl;
   }
   return ++it;
 }

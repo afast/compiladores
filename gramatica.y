@@ -28,7 +28,7 @@ extern int yylineno;
 void yyerror(const char *s)
 {
         //fprintf(stderr, "Error: %s\n", s);
-  	printf("Error (FALTA TIPO DE ERROR) en linea %d - cerca de \"%s\"\n", yylineno, yytext);
+  	printf("Error de sintaxis en linea %d - cerca de \"%s\"\n", yylineno, yytext);
 
 }
 
@@ -66,7 +66,7 @@ void printCodigo();
 %token T_ATRIBUTO T_VAR_PESOS_CERO T_VAR_PESOS T_VAR_PESOS_PESOS T_INTEGER_ABS T_ATRIBUTO_ACCESOR
 %token T_FLOAT_ABS T_STRING_1 T_STRING_2 T_STRING_IZQ T_STRING_DER T_COMMAND T_ESPACIOS T_ERROR
 
-%type <a> expr_numeric compstmt stmt texpr value output number variable string expr_string expr_bool if recursive_elsif opt_else while
+%type <a> expr_numeric compstmt stmt texpr value output number variable string expr_string expr_bool if recursive_elsif opt_else while rec_when_then case
 /*=========================================================================
                           OPERATOR PRECEDENCE
 =========================================================================*/
@@ -79,7 +79,7 @@ void printCodigo();
 %left T_NOT
 %right T_EXPO
 %%
-program : compstmt { printTree($1); generar($1, codigoGlobal); freeTree($1);};
+program : compstmt  { printTree($1); generar($1, codigoGlobal); freeTree($1);};
 compstmt : stmt { $$ = new_compstmt($1);}
          | stmt T_FIN_INSTRUCCION {$$ = new_compstmt($1);}
          | stmt texpr {$$ = add_front_stmt_compstmt($1, $2);}
@@ -102,9 +102,9 @@ stmt : /* Vacio */ { $$ = NULL; }
 	| T_INVOCACION_METODO
 	| load
 	| require
-	| bloque;
+	/*| bloque;
 bloque: T_LLAVE_IZQ compstmt T_LLAVE_DER
-	| T_DO compstmt T_END;
+	| T_DO compstmt T_END*/;
 value : T_GETS { $$ = new_gets(); }
 	| T_INSTANCE_CLASS
 	| T_NEW T_PAR_IZQ args_new T_PAR_DER
@@ -165,13 +165,15 @@ recursive_elsif : /* Vacio */ { $$ = NULL; }
 opt_else : /* Vacio */ { $$ = NULL; }
          | T_ELSE compstmt { $$ = $2; };
 while : T_WHILE expr_bool compstmt T_END { $$ = new_while($2, $3); };
-case : T_CASE rec_when_then T_END
-	| T_CASE T_FIN_INSTRUCCION rec_when_then T_END;
+case : T_CASE T_WHEN expr_bool T_THEN value T_FIN_INSTRUCCION rec_when_then T_END { $$ = new_case($3, $5, $7); }
+	| T_CASE T_FIN_INSTRUCCION T_WHEN expr_bool T_THEN value T_FIN_INSTRUCCION rec_when_then T_END { $$ = new_case($4, $6, $8); }; 
+rec_when_then : /* Vacio */ { $$ = NULL; }
+                | T_WHEN expr_bool T_THEN value T_FIN_INSTRUCCION rec_when_then { $$ = new_when_rec($2, $4, $6); };
 
-rec_when_then : T_WHEN expr_bool T_THEN value T_FIN_INSTRUCCION
-              | rec_when_then T_WHEN expr_bool T_THEN value T_FIN_INSTRUCCION
-	      | T_WHEN expr_bool T_THEN value
-              | rec_when_then T_WHEN expr_bool T_THEN value;
+/*rec_when_then : T_WHEN expr_bool T_THEN value T_FIN_INSTRUCCION { $$ = new_when($2, $4); }
+              | rec_when_then T_WHEN expr_bool T_THEN value T_FIN_INSTRUCCION { $$ = new_when_rec($1, $3, $5); }
+	      | T_WHEN expr_bool T_THEN value { $$ = new_when($2, $4); }
+              | rec_when_then T_WHEN expr_bool T_THEN value { $$ = new_when_rec($1, $3, $5); };*/
 def :	T_DEF T_IDENTIF	argdecl compstmt T_END
 	| T_DEF T_IDENTIF compstmt T_END;
 argdecl : T_PAR_IZQ arglist T_PAR_DER T_FIN_INSTRUCCION
@@ -251,6 +253,9 @@ void printCodigo() {
       case ELSIF   : std::cout << "ELSIF "  << std::endl; break;
       case ELSIFCOND   : std::cout << "ELSIFCOND "  << std::endl; break;
       case END   : std::cout << "END "  << std::endl; break;
+      case CASE   : std::cout << "CASE "  << std::endl; break;
+      case CASEREC   : std::cout << "CASEREC "  << std::endl; break;
+      case CASERECCOND   : std::cout << "CASERECCOND "  << std::endl; break;
       case WHILE : std::cout << "WHILE "  << std::endl; break;
       case WHILEEND : std::cout << "WHILEEND "  << std::endl; break;
       case NOT : std::cout << "NOT "  << std::endl; break;

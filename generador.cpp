@@ -75,6 +75,12 @@ void decidir_nodo(ast* nodo, list<Instruccion*> *codigo){
     case c_while :
       generar_while(nodo, codigo);
       break;
+    case c_case :
+      generar_case(nodo, codigo);
+      break;
+    case c_case_rec :
+      generar_case_rec(nodo, codigo);
+      break;    
     case f_string :
       generar_string(nodo, codigo);
       break;
@@ -274,6 +280,44 @@ void generar_while(ast* nodo, std::list<Instruccion*> *codigo){
   decidir_nodo(nodo->h1, codigo);
   RObject* cond2 = codigo->back()->arg1;
   codigo->push_back(instr(WHILEEND, cond2)); //END o WHILEEND
+}
+
+void generar_case(ast* nodo, std::list<Instruccion*> *codigo){
+  /*
+   * h1 - condition
+   * h2 - value
+   * h3 - case_rec - optional
+   * */
+  /* evaluar condicion */
+  /* case cond */
+  /* valor */
+  /* generar case_rec */
+  /* endif */
+  decidir_nodo(nodo->h1, codigo);
+  RObject* cond = codigo->back()->arg1;
+  codigo->push_back(instr(CASE, cond));
+  //generar_compstmt(nodo->h2->stmt_list, codigo);
+  //aca habria que asignar el valor
+  generar_case_rec(nodo->h3, codigo);
+  codigo->push_back(instr(END));
+}
+
+void generar_case_rec(ast* nodo, std::list<Instruccion*> *codigo){
+  /*
+   * h1 - cond
+   * h2 - valor
+   * h3 - case_rec -optional
+   *
+   * */
+  if (nodo == NULL)
+    return;
+  codigo->push_back(instr(CASERECCOND));
+  decidir_nodo(nodo->h1, codigo);
+  RObject* cond = codigo->back()->arg1;
+  codigo->push_back(instr(CASEREC, cond));
+  //generar_compstmt(nodo->h2->stmt_list, codigo);
+  //aca habria que asignar el valor
+  generar_case_rec(nodo->h3, codigo);
 }
 
 void generar_string(ast* nodo, std::list<Instruccion*> *codigo){}
@@ -505,6 +549,18 @@ void printTree(ast* tree){
       printTree(tree->h2);
       printTree(tree->h3);
       printTree(tree->h4);
+      break;
+    case c_case :
+      cout << "case stmt" << endl;
+      printTree(tree->h1);
+      printTree(tree->h2);
+      //printTree(tree->h3);
+      break;
+    case c_case_rec :
+      cout << "case_rec stmt" << endl;
+      printTree(tree->h1);
+      printTree(tree->h2);
+      //printTree(tree->h3);
       break;
     case op_mul :
       cout << "mul stmt" << endl;

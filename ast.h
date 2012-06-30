@@ -10,7 +10,7 @@ enum ast_node_t {
   t_identif, t_atributo, t_arr_place, t_gets, t_command, t_method_call,
   t_nil, t_mul_string, t_add_string, t_method_with_args, t_args,
   b_and, b_or, b_not, b_mayor, b_mayor_igual, b_menor, b_menor_igual,
-  b_doble_igual, b_not_igual, b_is_bool
+  b_doble_igual, b_not_igual, b_is_bool, c_case, c_case_rec
 };
 
 struct ast_node {
@@ -50,5 +50,7 @@ ast* new_bool(int b);
 ast* new_if(ast* cond, ast* compstmt, ast* opt_rec_elsif, ast* opt_else);
 ast* new_elsif(ast* cond, ast* compstmt, ast* opt_rec_elsif);
 ast* new_while(ast* cond, ast* compstmt);
+ast* new_case(ast* cond, ast* value, ast* when_rec);
+ast* new_when_rec(ast* cond, ast* value, ast* when_rec);
 
 #endif

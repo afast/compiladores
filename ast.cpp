@@ -187,3 +187,21 @@ ast* new_while(ast* cond, ast* compstmt){
   return res;
 }
 
+ast* new_case(ast* cond, ast* value, ast* when_rec) {
+  ast* res = new ast;
+  res->tipo = c_case;
+  res->h1 = cond;
+  res->h2 = value;
+  res->h3 = when_rec;
+  return res;
+}
+
+ast* new_when_rec(ast* cond, ast* value, ast* when_rec) {
+  ast* res = new ast;
+  res->tipo = c_case_rec;
+  res->h1 = cond;
+  res->h2 = value;
+  res->h2 = when_rec;
+  return res;
+}
+

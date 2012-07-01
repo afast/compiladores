@@ -10,6 +10,7 @@ class RObject;
 class RDecimal;
 class RNumeric;
 class RString;
+class RClass;
 
 enum code_ops { FIN, PUTS, GETS, CALL, OBJID, ADD, ASSIGN_TMP, MULT, SUB, DIV, POW, MOD, IF, ELSIF, ELSIFCOND, WHILEEND, WHILE, CASE, CASEREC, CASERECCOND, ELSE, END, AND, OR, NOT, G, GE, L, LE, EQ, NEQ, TOBOOL, DO, GETV, PUTV, ASGN, GETV_ARR, PUSH_ARG, ENDFUNC, RETURN, POP_ARG };
 /*
@@ -60,4 +61,5 @@ bool operacion_es_booleana(enum code_ops op);
 std::list<Instruccion*>::iterator get_function_iterator(RString* name);
 void new_scope();
 void drop_scope();
+void add_class(RClass* clase);
 #endif

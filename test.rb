@@ -1,10 +1,16 @@
-a=10
+puts 10
+puts 11.0
+puts false
+puts 'algo'
+
+puts 11
 
 def say_hello a, b
   puts a
   puts b
   puts 'hola martin'
 end
+
 say_hello 'jellou', 3+4+5
 say_hello 'hola', 'martin'
 puts a

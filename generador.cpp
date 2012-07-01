@@ -14,6 +14,7 @@
 #include "ejecucion/RVariable.h"
 #include "ejecucion/RBool.h"
 #include "ejecucion/RArray.h"
+#include "ejecucion/RClass.h"
 #include "ejecucion/stack.h"
 #include "ejecucion/base.h"
 
@@ -21,8 +22,11 @@ using namespace std;
 unsigned long int tmp_var_count=0;
 string tmp_var_prefix = string("+tmp_");
 
+bool generando_clase;
+string nombre_clase;
+RClass *current_class;
+
 string get_tmp_var(){
-  cout << "getting tmp...";
   stringstream s;
   string tmp;
   if (tmp_var_count == ULONG_MAX){
@@ -33,9 +37,9 @@ string get_tmp_var(){
   s << tmp_var_prefix;
   s << tmp_var_count++;
   s >> tmp;
-  cout << "OK" << endl;
   return tmp;
 }
+
 void generar(ast* arbol, std::list<Instruccion*> *codigo){
   cout << "Comenzando Generacion..." << endl;
   if (arbol->tipo != t_compstmt)
@@ -178,9 +182,17 @@ void decidir_nodo(ast* nodo, list<Instruccion*> *codigo){
     case call_method:
       generar_method_call(nodo, codigo);
       break;
+    case t_class:
+      generando_clase = true;
+      nombre_clase.assign(nodo->str);
+      add_class(generar_clase(nodo, codigo));
+      generando_clase = false;
     case a_method:{
       list<Instruccion*> *funcion = generar_metodo(nodo);
-      add_global_function(nodo->str, funcion);
+      if (generando_clase)
+        current_class->add_method(new RString(nodo->str), funcion);
+      else
+        add_global_function(nodo->str, funcion);
       break;}
     case t_arr_place :
       // std::cout << ".....................................sssss        " << get_variable(nodo->str) << std::endl;
@@ -207,22 +219,6 @@ void generar_arr_pos(ast* nodo, std::list<Instruccion*> *codigo){
   codigo->push_back(instr(GETV_ARR, var, new RVariable(nodo->str), new RInteger(nodo->entero), nodo->linea));
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 void generar_if(ast* nodo, std::list<Instruccion*> *codigo){
   /*
@@ -467,13 +463,13 @@ void generar_puts(ast* nodo, std::list<Instruccion*> *codigo){
         arg1= new RString(hoja->str, true);
         break;
       case f_entero:
-        arg1= (new RInteger(hoja->entero))->to_s();
+        arg1= new RInteger(hoja->entero);
         break;
       case f_decimal:
-        arg1 = (new RDecimal(hoja->decimal))->to_s();
+        arg1 = new RDecimal(hoja->decimal);
         break;
       case f_bool:
-        arg1 = (new RBool(hoja->booleano))->to_s();
+        arg1 = new RBool(hoja->booleano);
         break;
       case t_identif:
         arg1 = new RVariable(hoja->str);
@@ -557,6 +553,13 @@ void generar_method_call(ast* nodo, std::list<Instruccion*>* codigo){
   RVariable* var = new RVariable(&tmp);
   set_global_variable(var->getValue(), new RObject());
   codigo->push_back(instr(CALL, var, new RString(nodo->str), nodo->linea));
+}
+
+RClass* generar_clase(ast* nodo, std::list<Instruccion*> *codigo){
+  RClass* res = new RClass(nodo->str);
+  current_class = res;
+  generar_compstmt(nodo->h1->stmt_list, codigo);
+  return res;
 }
 
 Instruccion* instr(enum code_ops op, int linea){

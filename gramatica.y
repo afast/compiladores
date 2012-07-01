@@ -67,7 +67,7 @@ void printCodigo();
 %token T_ATRIBUTO T_VAR_PESOS_CERO T_VAR_PESOS T_VAR_ARGV T_VAR_PESOS_PESOS T_INTEGER_ABS T_ATRIBUTO_ACCESOR
 %token T_FLOAT_ABS T_STRING_1 T_STRING_2 T_STRING_IZQ T_STRING_DER T_COMMAND T_ESPACIOS T_ERROR
 
-%type <a> expr_numeric compstmt stmt texpr value output number variable string expr_string expr_bool if recursive_elsif opt_else while rec_when_then case argdecl def arglist list_values
+%type <a> expr_numeric compstmt stmt texpr value output number variable string expr_string expr_bool if recursive_elsif opt_else while rec_when_then case argdecl def arglist list_values class
 /*=========================================================================
                           OPERATOR PRECEDENCE
 =========================================================================*/
@@ -100,7 +100,8 @@ stmt : output
 	| T_ATTR_READER args_accesores
 	| T_ATTR_WRITER args_accesores
 	| T_ACCESSOR args_accesores
-	| T_INVOCACION_METODO
+	| T_INVOCACION_METODO { $$ = new_class_method_call($<text>1, NULL, yylineno); }
+	| T_INVOCACION_METODO list_values { $$ = new_class_method_call($<text>1, $2, yylineno); }
   | T_IDENTIF { $$ = new_method_call($<text>1, NULL, yylineno); }
   | T_IDENTIF list_values { $$ = new_method_call($<text>1, $2, yylineno); }
 	| bloque;
@@ -209,7 +210,7 @@ array :	T_CORCHETE_IZQ list_values T_CORCHETE_DER
 	| T_CORCHETE_IZQ T_CORCHETE_DER;
 list_values: value { $$ = new_params($1, yylineno);}
 	| list_values T_COMA value { $$ = add_param($1, $3, yylineno);};
-class :	T_CLASS T_NOM_CONST compstmt T_END;
+class :	T_CLASS T_NOM_CONST compstmt T_END { $$ = new_class($<text>2, $3, yylineno);};
 args_accesores : T_ATRIBUTO_ACCESOR args_accesores_recur;
 args_accesores_recur :	/*vacio*/
 	| args_accesores_recur T_COMA T_ATRIBUTO_ACCESOR;

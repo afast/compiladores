@@ -11,6 +11,7 @@
 #include "RInteger.h"
 #include "RDecimal.h"
 #include "RNumeric.h"
+#include "RClass.h"
 #include "RString.h"
 #include "RBool.h"
 #include "RArray.h"
@@ -22,7 +23,8 @@ set<string> tsimbolos;
 unordered_map<string, list<Instruccion*> *> functions;
 //unordered_map<string, RObject*> vTemporales;
 
-unordered_map<string, RObject*> *global_variables= new unordered_map<string, RObject*>; // las variables deben agregarse a este hash variables["nombre"] = RObject*
+unordered_map<string, RObject*> *global_variables = new unordered_map<string, RObject*>; // las variables deben agregarse a este hash variables["nombre"] = RObject*
+unordered_map<string, RClass*> clases; // clases
 unordered_map<string, list<Instruccion*>*> global_methods; // los metodos globales se guardan aqui methods["nombre"] = list<Instruccion *>*
 unordered_map<string, RObject*>* current_stack;
 list<unordered_map<string, RObject*>*> scope_stack;
@@ -249,10 +251,10 @@ void ejecutar(list<Instruccion*> *codigo) {
         break;
       case GETV_ARR : // Evaluar variable o metodo?
           cout << "Error de tipos en li------------------------";
-        arg1 = (*((RArray *)arg2))[((RInteger *)arg3)->getValue()];
-cout << "Error de tipos en l!"<< arg1;
-	puts(arg1->to_s());
-      break;
+          arg1 = (*((RArray *)arg2))[((RInteger *)arg3)->getValue()];
+  cout << "Error de tipos en l!"<< arg1;
+    puts(arg1->to_s());
+        break;
       case PUTV :
         set_variable((RString*)arg1, arg2);
         break;
@@ -338,6 +340,10 @@ void add_global_function(char* name, list<Instruccion*>* codigo){
   cout << "adding global function - " << name << " ...";
   global_methods[name] = codigo;
   cout << "[OK]" << endl;
+}
+
+void add_class(RClass* clase){
+  clases[*clase->get_class()->getValue()] = clase;
 }
 
 void new_scope(){

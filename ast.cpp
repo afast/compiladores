@@ -279,3 +279,30 @@ ast* add_param(ast* args, ast* arg, int linea){
   args->stmt_list->push_back(arg);
   return args;
 }
+
+ast* new_class(char* name, ast* compstmt, int linea){
+  ast* res = new ast;
+  res->tipo = t_class;
+  res->linea = linea;
+  res->str = name;
+  res->h1 = compstmt;
+  return res;
+}
+
+ast* new_class_method_call(char* name, ast* params, int linea){
+  ast* res = new ast;
+  std::string* aux = new std::string(name);
+  int pos = aux->find('.');
+  res->tipo = instance_method_call;
+  res->linea = linea;
+  char* method = new char[aux->size()-pos-1];
+  res->str = new char[pos];
+  aux->copy(method, aux->size(), pos+1);
+  aux->copy(res->str, pos, 0);
+  std::cout << res->str << std::endl;
+  std::cout << method << std::endl;
+  res->h1 = new_object_call(method, linea);
+  res->h2 = params;
+  delete aux;
+  return res;
+}

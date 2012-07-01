@@ -15,25 +15,7 @@ RClass::RClass(RString* param){
   init(param);
 }
 
-RClass::~RClass(){
-  delete name;
-  std::list<RString*>::iterator it;
-  std::list<Instruccion*> *codigo;
-  std::list<Instruccion*> *nuevo_codigo;
-  std::list<Instruccion*>::iterator cod_it;
-  for(it=method_names.begin(); it != method_names.end(); it++){
-    codigo = methods[*(*it)->getValue()];
-    if (codigo != NULL){
-      for (cod_it = codigo->begin(); cod_it != codigo->end(); cod_it++){
-        if (*cod_it != NULL)
-          delete *cod_it;
-        *cod_it = NULL;
-      }
-      delete codigo;
-      codigo = NULL;
-    }
-  }
-}
+RClass::~RClass(){}
 
 void RClass::init(RString* param){
   this->name = param;
@@ -59,12 +41,12 @@ bool RClass::respond_to(RString *method){
   return res;
 }
 
-void RClass::add_method(std::string* method, std::list<Instruccion*> *codigo){
+void RClass::add_method(std::string* method, function_info* codigo){
   method_names.push_back(new RString(method));
   methods[*method] = codigo;
 }
 
-void RClass::add_method(RString* method, std::list<Instruccion*> *codigo){
+void RClass::add_method(RString* method, function_info* codigo){
   add_method(method->getValue(), codigo);
 }
 
@@ -88,4 +70,38 @@ void RClass::add_instance_variable(RString* variable){
 
 void RClass::add_instance_variable(std::string* variable){
   instance_variables[*variable] = new RObject();
+}
+
+function_info* RClass::get_function_info(RString* method){
+  return methods[*method->getValue()];
+}
+
+void RClass::set_instance_variable(const char* variable, RObject* value){
+  instance_variables[variable] = value;
+}
+
+void RClass::set_instance_variable(RString* variable, RObject* value){
+  instance_variables[*variable->getValue()] = value;
+}
+
+RObject* RClass::get_instance_variable(const char* variable){
+  RObject* res=NULL;
+  if (instance_variables.find(variable) != instance_variables.end())
+    res = instance_variables[variable];
+  else {
+    res = new RObject();
+    instance_variables[variable] = res;
+  }
+  return res;
+}
+
+RObject* RClass::get_instance_variable(RString* variable){
+  RObject* res=NULL;
+  if (instance_variables.find(*variable->getValue()) != instance_variables.end())
+    res = instance_variables[*variable->getValue()];
+  else {
+    res = new RObject();
+    instance_variables[*variable->getValue()] = res;
+  }
+  return res;
 }

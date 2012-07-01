@@ -11,7 +11,7 @@ enum ast_node_t {
   t_nil, t_mul_string, t_add_string, t_method_with_args, t_args,
   b_and, b_or, b_not, b_mayor, b_mayor_igual, b_menor, b_menor_igual,
   b_doble_igual, b_not_igual, b_is_bool, c_case, c_case_rec, a_method, a_method_with_args,
-  call_method, t_params, t_class, instance_method_call
+  call_method, t_params, t_class, instance_method_call, method_call_new
 };
 
 struct ast_node {
@@ -62,4 +62,5 @@ ast* new_params(ast* param, int linea);
 ast* add_param(ast* args, ast* arg, int linea);
 ast* new_class(char* name, ast* compstmt, int linea);
 ast* new_class_method_call(char* name, ast* params, int linea);
+ast* new_class_new(char* class_name, ast* params, int linea);
 #endif

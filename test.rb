@@ -13,8 +13,23 @@ end
 
 say_hello 'jellou', 3+4+5
 say_hello 'hola', 'martin'
-puts a
-puts a + 2
+
+class Hola
+  def say a
+    puts a
+    puts @hi
+  end
+  def set b
+    @hi = b
+  end
+end
+
+al = Hola.new
+al.say 'hola andreas'
+al.set 'seteando un attr'
+al.say 'hi'
+puts '============================================================'
+a=2
 puts 5.0*5*5
 a='hola'
 puts a

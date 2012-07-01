@@ -58,7 +58,6 @@ ast* add_front_stmt_compstmt(ast* stmt, ast* compstmt){
 }
 
 ast* new_identificador(char* name, int linea){
-  std::cout << "nuevo identificador - " << name << std::endl;
   ast* res = new ast;
   res->tipo = t_identif;
   res->linea = linea;
@@ -73,7 +72,6 @@ ast* new_identificador_global(char* name, int linea){
   res->str = name;
   return res;
 }
-
 
 ast* new_atributo(char* name, int linea){
   ast* res = new ast;
@@ -303,6 +301,20 @@ ast* new_class_method_call(char* name, ast* params, int linea){
   std::cout << method << std::endl;
   res->h1 = new_object_call(method, linea);
   res->h2 = params;
+  delete aux;
+  return res;
+}
+
+ast* new_class_new(char* class_name, ast* params, int linea){
+  ast* res = new ast;
+  std::string* aux = new std::string(class_name);
+  int pos = aux->find('.');
+  res->tipo = method_call_new;
+  res->linea = linea;
+  res->str = new char[pos];
+  aux->copy(res->str, pos, 0);
+  std::cout << "callging " << res->str << ".new" << std::endl;
+  res->h1 = params;
   delete aux;
   return res;
 }

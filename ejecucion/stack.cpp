@@ -315,8 +315,10 @@ RObject *get_variable(const char *name){ //aca hay q considerar el tema del scop
   } while (object == NULL && rit != scope_stack.rend());
   if (object == NULL)
     object = (*global_variables)[name];
-  if (object == NULL)
+  if (object == NULL){
     cout << "Warning, variable is null!" << endl;
+    object = new RObject();
+  }
   return object;
 }
 

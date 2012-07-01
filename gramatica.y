@@ -186,7 +186,7 @@ variable : T_IDENTIF { $$ = new_identificador($<text>1, yylineno);}
 	| T_VAR_ARGV { $$ = new_identificador_global($<text>1, yylineno);}
 	| T_IDENTIF_GLOBAL { $$ = new_identificador_global($<text>1, yylineno);}
 	| T_IDENTIF T_CORCHETE_IZQ T_INTEGER_ABS T_CORCHETE_DER { $$ = new_array_pos($<text>1, $<entero>3, yylineno);}
-	| T_VAR_ARGV T_CORCHETE_IZQ T_INTEGER_ABS T_CORCHETE_DER { std::cout << "--------FFFF-------" << std::endl; $$ = new_array_pos($<text>1, $<entero>3, yylineno);};
+	| T_VAR_ARGV T_CORCHETE_IZQ T_INTEGER_ABS T_CORCHETE_DER { $$ = new_array_pos($<text>1, $<entero>3, yylineno);};
 
 if : T_IF expr_bool T_FIN_INSTRUCCION compstmt recursive_elsif opt_else T_END { $$ = new_if($2, $4, $5, $6, yylineno); std::cout << "gramatica if " << std::endl; };
 recursive_elsif : /* Vacio */ { $$ = NULL; }

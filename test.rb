@@ -2,9 +2,7 @@ puts 10
 puts 11.0
 puts false
 puts 'algo'
-=begin
-a.def
-puts a
+
 puts 11
 
 def say_hello a, b
@@ -13,8 +11,6 @@ def say_hello a, b
   puts 'hola martin'
 end
 
-#d=Hola.new
-d.algos
 say_hello 'jellou', 3+4+5
 say_hello 'hola', 'martin'
 puts a
@@ -67,7 +63,6 @@ while false
   puts 10
 end
 
-=end
 =begin
 puts gets
 puts `hello`

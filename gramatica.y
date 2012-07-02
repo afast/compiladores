@@ -26,11 +26,13 @@ extern "C"
 extern char* yytext;
 extern int yylineno;
 
+bool error_sintaxis=false;
+
 void yyerror(const char *s)
 {
         //fprintf(stderr, "Error: %s\n", s);
-  	printf("Error de sintaxis en linea %d - cerca de \"%s\"\n", yylineno, yytext);
-
+  	fprintf(stderr, "Error de sintaxis en linea %d - cerca de \"%s\"\n", yylineno, yytext);
+    error_sintaxis=true;
 }
 
 
@@ -67,7 +69,7 @@ void printCodigo();
 %token T_ATRIBUTO T_VAR_PESOS_CERO T_VAR_PESOS T_VAR_ARGV T_VAR_PESOS_PESOS T_INTEGER_ABS T_ATRIBUTO_ACCESOR
 %token T_FLOAT_ABS T_STRING_1 T_STRING_2 T_STRING_IZQ T_STRING_DER T_COMMAND T_ESPACIOS T_ERROR
 
-%type <a> expr_numeric compstmt stmt texpr value output number variable string expr_string expr_bool if recursive_elsif opt_else while rec_when_then case argdecl def arglist list_values class
+%type <a> expr_numeric compstmt stmt texpr value output integer float variable string expr_string expr_bool if recursive_elsif opt_else while rec_when_then case argdecl def arglist list_values class args_accesores
 /*=========================================================================
                           OPERATOR PRECEDENCE
 =========================================================================*/
@@ -80,27 +82,28 @@ void printCodigo();
 %left T_NOT
 %right T_EXPO
 %%
-program : compstmt { printTree($1); generar($1, codigoGlobal); freeTree($1);};
-compstmt : /* Vacio */ { $$ = NULL; std::cout << "NULL DETECTED!" << std::endl; }
-         | stmt { $$ = new_compstmt($1); std::cout << "new compstmt" << std::endl;}
-         | stmt T_FIN_INSTRUCCION {$$ = new_compstmt($1); std::cout << "new compstmt1" << std::endl;}
-         | stmt texpr {$$ = add_front_stmt_compstmt($1, $2); std::cout << "new compstmt2" << std::endl;}
-         | stmt texpr T_FIN_INSTRUCCION {$$ = add_front_stmt_compstmt($1, $2); std::cout << "new compstmt3" << std::endl;};
+program : compstmt { /*printTree($1);*/ if (!error_sintaxis) generar($1, codigoGlobal); freeTree($1);};
+compstmt : /* Vacio */ { $$ = NULL;}
+         | stmt { $$ = new_compstmt($1);}
+         | stmt T_FIN_INSTRUCCION {$$ = new_compstmt($1); }
+         | stmt texpr {$$ = add_front_stmt_compstmt($1, $2); }
+         | stmt texpr T_FIN_INSTRUCCION {$$ = add_front_stmt_compstmt($1, $2); };
 texpr : T_FIN_INSTRUCCION stmt { $$ = new_compstmt($2);}
       | texpr T_FIN_INSTRUCCION stmt { $$ = add_stmt_compstmt($3, $1);};
 stmt : output
 	| if
 	| while
 	| each
-	| variable T_IGUAL value { $$ = new_asgn($1, $3, yylineno); std::cout << "detectada asignacion" << std::endl;}
-	| variable T_MAS_IGUAL value { $$ = new_asgn($1, new_numeric_op(op_plus, $1, $3, yylineno), yylineno); std::cout << "detectada suma asignacion" << std::endl;}
-	| variable T_MENOS_IGUAL value { $$ = new_asgn($1, new_numeric_op(op_sub, $1, $3, yylineno), yylineno); std::cout << "detectada resta asignacion" << std::endl;}
+	| variable T_IGUAL value { $$ = new_asgn($1, $3, yylineno); }
+	| variable T_MAS_IGUAL value { $$ = new_asgn($1, new_numeric_op(op_plus, $1, $3, yylineno), yylineno); }
+	| variable T_MENOS_IGUAL value { $$ = new_asgn($1, new_numeric_op(op_sub, $1, $3, yylineno), yylineno); }
 	| def
-	| class
-	| T_ATTR_READER args_accesores
-	| T_ATTR_WRITER args_accesores
-	| T_ACCESSOR args_accesores
+	| class {std::cout << "nueva clase\n";}
+	| T_ATTR_READER args_accesores { $$ = new_accesor_list(t_readers, $2, yylineno);}
+	| T_ATTR_WRITER args_accesores { $$ = new_accesor_list(t_writers, $2, yylineno);}
+	| T_ACCESSOR args_accesores { $$ = new_accesor_list(t_wr, $2, yylineno);}
 	| T_INVOCACION_METODO { $$ = new_class_method_call($<text>1, NULL, yylineno); }
+	| T_INVOCACION_METODO T_IGUAL value { $$ = new_class_attr_assign($<text>1, $3, yylineno); }
 	| T_INVOCACION_METODO list_values { $$ = new_class_method_call($<text>1, $2, yylineno); }
   | T_IDENTIF { $$ = new_method_call($<text>1, NULL, yylineno); }
   | T_IDENTIF list_values { $$ = new_method_call($<text>1, $2, yylineno); }
@@ -109,7 +112,8 @@ bloque: T_LLAVE_IZQ compstmt T_LLAVE_DER
 	| T_DO compstmt T_END;
 value : T_GETS { $$ = new_gets(yylineno); }
 	| T_INSTANCE_CLASS
-	| T_NEW T_PAR_IZQ args_new T_PAR_DER
+	| T_NEW T_PAR_IZQ list_values T_PAR_DER { $$ = new_class_new($<text>1, $3, yylineno); }
+	| T_NEW { $$ = new_class_new($<text>1, NULL, yylineno);}
 	| expr_numeric { $$ = $1; }
 	| expr_string { $$ = $1; }
 	| expr_bool { $$ = $1; }
@@ -117,14 +121,17 @@ value : T_GETS { $$ = new_gets(yylineno); }
 	| case
 	| expr_string_interpolado
 	| array;
-output : T_PUTS value { $$ = new_puts($2, yylineno); std::cout << "gramatica puts" << std::endl; };
-number : T_INTEGER_ABS {$$ = new_number($<entero>1, yylineno);}
+output : T_PUTS value { $$ = new_puts($2, yylineno);  }
+       | T_PUTS T_INVOCACION_METODO { $$ = new_puts(new_class_method_call($<text>2, NULL, yylineno), yylineno); }
+       ;
+integer : T_INTEGER_ABS {$$ = new_number($<entero>1, yylineno);}
 	| T_MENOS T_INTEGER_ABS { $$ = new_number((-1)*$<entero>2, yylineno); }
-	| T_MAS T_INTEGER_ABS { $$ = new_number($<entero>2, yylineno); }
-	| T_FLOAT_ABS { $$ = new_number($<real>1, yylineno); }
+	| T_MAS T_INTEGER_ABS { $$ = new_number($<entero>2, yylineno); };
+float: T_FLOAT_ABS { $$ = new_number($<real>1, yylineno); }
 	| T_MENOS T_FLOAT_ABS { $$ = new_number((-1)*$<real>2, yylineno); }
 	| T_MAS T_FLOAT_ABS { $$ = new_number($<real>2, yylineno); };
-expr_numeric : number { $$ = $1; }
+expr_numeric : integer
+  	| float
 	| T_OBJECT_ID { $$ = new_object_call($<text>1, yylineno); }
 	| T_SIZE { $$ = new_object_call($<text>1, yylineno); }
 	| T_LENGTH { $$ = new_object_call($<text>1, yylineno); }
@@ -171,7 +178,7 @@ expr_bool : T_BOOL {$$ = new_boolean_op(b_is_bool, new_bool($<entero>1, yylineno
 	| T_NOT value { $$ = new_boolean_op(b_not, $2, NULL, yylineno);}
 	| value  T_MAYOR value { $$ = new_boolean_op(b_mayor, $1, $3, yylineno);}
 	| value  T_MAYOR_IGUAL value { $$ = new_boolean_op(b_mayor_igual, $1, $3, yylineno);}
-	| value  T_MENOR value { $$ = new_boolean_op(b_menor, $1, $3, yylineno); std::cout << "menor" << std::endl;}
+	| value  T_MENOR value { $$ = new_boolean_op(b_menor, $1, $3, yylineno); }
 	| value  T_MENOR_IGUAL value { $$ = new_boolean_op(b_menor_igual, $1, $3, yylineno);}
 	| value  T_DOBLE_IGUAL value { $$ = new_boolean_op(b_doble_igual, $1, $3, yylineno);}
 	| value  T_NOT_IGUAL value { $$ = new_boolean_op(b_not_igual, $1, $3, yylineno);}
@@ -185,10 +192,10 @@ variable : T_IDENTIF { $$ = new_identificador($<text>1, yylineno);}
 	| T_VAR_PESOS_PESOS { $$ = new_identificador_global($<text>1, yylineno);}
 	| T_VAR_ARGV { $$ = new_identificador_global($<text>1, yylineno);}
 	| T_IDENTIF_GLOBAL { $$ = new_identificador_global($<text>1, yylineno);}
-	| T_IDENTIF T_CORCHETE_IZQ T_INTEGER_ABS T_CORCHETE_DER { $$ = new_array_pos($<text>1, $<entero>3, yylineno);}
-	| T_VAR_ARGV T_CORCHETE_IZQ T_INTEGER_ABS T_CORCHETE_DER { std::cout << "--------FFFF-------" << std::endl; $$ = new_array_pos($<text>1, $<entero>3, yylineno);};
+	| T_IDENTIF T_CORCHETE_IZQ value T_CORCHETE_DER { $$ = new_array_pos($<text>1, $3, yylineno);}
+	| T_VAR_ARGV T_CORCHETE_IZQ value T_CORCHETE_DER {  $$ = new_array_pos($<text>1, $3, yylineno);};
 
-if : T_IF expr_bool T_FIN_INSTRUCCION compstmt recursive_elsif opt_else T_END { $$ = new_if($2, $4, $5, $6, yylineno); std::cout << "gramatica if " << std::endl; };
+if : T_IF expr_bool T_FIN_INSTRUCCION compstmt recursive_elsif opt_else T_END { $$ = new_if($2, $4, $5, $6, yylineno);  };
 recursive_elsif : /* Vacio */ { $$ = NULL; }
                 | recursive_elsif T_ELSIF expr_bool T_FIN_INSTRUCCION compstmt { $$ = new_elsif($3, $5, $1, yylineno); };
 opt_else : /* Vacio */ { $$ = NULL; }
@@ -206,17 +213,14 @@ argdecl : T_PAR_IZQ arglist T_PAR_DER
 	| arglist;
 arglist :	T_IDENTIF { $$ = new_arguments(new_identificador($<text>1, yylineno), yylineno);}
 	| arglist T_COMA T_IDENTIF { $$ = add_argument(new_identificador($<text>3, yylineno), $1, yylineno);};
-array :	T_CORCHETE_IZQ list_values T_CORCHETE_DER
+array :	T_CORCHETE_IZQ value T_COMA list_values T_CORCHETE_DER
+  | T_CORCHETE_IZQ value T_CORCHETE_DER
 	| T_CORCHETE_IZQ T_CORCHETE_DER;
 list_values: value { $$ = new_params($1, yylineno);}
 	| list_values T_COMA value { $$ = add_param($1, $3, yylineno);};
-class :	T_CLASS T_NOM_CONST compstmt T_END { $$ = new_class($<text>2, $3, yylineno);};
-args_accesores : T_ATRIBUTO_ACCESOR args_accesores_recur;
-args_accesores_recur :	/*vacio*/
-	| args_accesores_recur T_COMA T_ATRIBUTO_ACCESOR;
-args_new : value args_new_recur;
-args_new_recur :	/*vacio*/
-	| args_new_recur T_COMA	value;
+class :	T_CLASS T_NOM_CONST T_FIN_INSTRUCCION compstmt T_END { $$ = new_class($<text>2, $4, yylineno);};
+args_accesores : T_ATRIBUTO_ACCESOR { $$ = new_accesores($<text>1, yylineno);}
+               | args_accesores T_COMA T_ATRIBUTO_ACCESOR { $$ = new_accesores($<text>2, $1, yylineno);};
 each : T_EACH T_DO T_PIPE T_IDENTIF T_PIPE compstmt T_END;
 expr_string_interpolado : T_STRING_IZQ expr_string_interpolado_recur T_STRING_DER;
 expr_string_interpolado_recur : /*vacio*/
@@ -241,7 +245,6 @@ main( int argc, char *argv[] )
 		int i = 1;
 		RArray *myArgv = new RArray();
 		while(i < argc){
-			std::cout << "argv[" << i << "] = " << argv[i] << std::endl;
 			myArgv->setValue(i - 1, new RString(argv[i])); 
 			i++;
 		}
@@ -249,11 +252,13 @@ main( int argc, char *argv[] )
 		codigoGlobal = new std::list<Instruccion*>();
 		initializer();
 		yyparse();
-		Instruccion *fin = new Instruccion;
-		fin->op = FIN;
-		codigoGlobal->push_back(fin);
-    printCodigo();
-		ejecutar(codigoGlobal);
+    if (!error_sintaxis){
+      Instruccion *fin = new Instruccion;
+      fin->op = FIN;
+      codigoGlobal->push_back(fin);
+//      printCodigo();
+      ejecutar(codigoGlobal);
+    }
 	} else {
 		std::cout << "No se indica archivo para ejecutar. La ejecucion debe usar el formato:" << std::endl;
 		std::cout << "       myruby archivo.rb arg1 arg2 arg3 ... argN" << std::endl;
@@ -294,7 +299,19 @@ void printCodigo() {
       case TOBOOL : std::cout << "TOBOOL " << *ri->arg2->to_s()->getValue()  << std::endl; break;
       case AND : std::cout << "AND " << *ri->arg2->to_s()->getValue() << *ri->arg3->to_s()->getValue()  << std::endl; break;
       case OR : std::cout << "OR " << *ri->arg2->to_s()->getValue() << *ri->arg3->to_s()->getValue()  << std::endl; break;
-      default: break;
+      case PUT_INST_V : std::cout << "PUT_INST_V" << std::endl; break;
+      case GET_INST_V : std::cout << "GET_INST_V" << std::endl; break;
+      case PUTV : std::cout << "PUTV" << std::endl; break;
+      case PUSH_ARG: std::cout << "PUSH_ARG" << std::endl; break;
+      case POP_ARG: std::cout << "POP_ARG" << std::endl; break;
+      case CALL: std::cout << "CALL" << std::endl; break;
+      case CLASS_INST_CALL: std::cout << "CLASS_INST_CALL" << std::endl; break;
+      case NEW: std::cout << "NEW" << std::endl; break;
+      case ENDFUNC: std::cout << "ENDFUNC" << std::endl; break;
+      case RETURN: std::cout << "RETURN" << std::endl; break;
+      case ASGN: std::cout << "ASGN" << std::endl; break;
+      default: std::cout << "hay una op no reconocida" <<  std::endl;
+        break;
     }
   } while (ri->op != FIN);
   std::cout << "=========================================" << std::endl; 

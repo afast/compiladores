@@ -1,4 +1,5 @@
 puts 10
+puts ARGV[0]
 puts 11.0
 puts false
 puts 'algo'
@@ -13,8 +14,38 @@ end
 
 say_hello 'jellou', 3+4+5
 say_hello 'hola', 'martin'
-puts a
-puts a + 2
+
+class Hola
+  attr_accessor :hi
+  attr_reader :some
+  attr_writer :thing
+  def say a
+    puts a
+  end
+  def set b
+    @some = b
+  end
+  def thingy
+    puts @thing
+  end
+end
+
+al = Hola.new
+al.say 'hola andreas'
+al.set 'seteando un attr'
+al.say 'hi'
+al.hi = 'yummy'
+puts al.hi
+al.say '----'
+al.thing = 333
+al.thingy
+al.thing = 334
+al.thingy
+puts al.some
+puts '============================================================'
+puts b
+puts '====='
+a=2
 puts 5.0*5*5
 a='hola'
 puts a

@@ -83,7 +83,7 @@ void printCodigo();
 %right T_EXPO
 %%
 program : compstmt { /*printTree($1);*/ if (!error_sintaxis) generar($1, codigoGlobal); freeTree($1);};
-compstmt : /* Vacio */ { $$ = NULL; std::cout << "NULL DETECTED!" << std::endl; }
+compstmt : /* Vacio */ { $$ = NULL;}
          | stmt { $$ = new_compstmt($1);}
          | stmt T_FIN_INSTRUCCION {$$ = new_compstmt($1); }
          | stmt texpr {$$ = add_front_stmt_compstmt($1, $2); }
@@ -243,7 +243,6 @@ main( int argc, char *argv[] )
 		int i = 1;
 		RArray *myArgv = new RArray();
 		while(i < argc){
-			std::cout << "argv[" << i << "] = " << argv[i] << std::endl;
 			myArgv->setValue(i - 1, new RString(argv[i])); 
 			i++;
 		}
@@ -255,7 +254,7 @@ main( int argc, char *argv[] )
       Instruccion *fin = new Instruccion;
       fin->op = FIN;
       codigoGlobal->push_back(fin);
-      printCodigo();
+//      printCodigo();
       ejecutar(codigoGlobal);
     }
 	} else {

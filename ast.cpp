@@ -10,8 +10,6 @@ ast* new_numeric_op(enum ast_node_t op, ast* left, ast* right, int linea){
 }
 
 ast* new_number(long int number, int linea){
-
-std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX             " << number << std::endl; 
   ast* res = new ast;
   res->tipo = f_entero;
   res->linea = linea;
@@ -118,6 +116,7 @@ ast* new_command(char* texto, int linea){
 }
 
 ast* new_object_call(char* llamada, int linea){
+ std::cout << "===============           " << llamada << std::endl;
   ast* res = new ast;
   res->tipo = t_method_call;
   res->linea = linea;

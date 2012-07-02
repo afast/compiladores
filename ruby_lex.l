@@ -107,7 +107,7 @@ not|!  {return(T_NOT);};
 [_a-z][_a-zA-Z0-9]*	 {yylval.text = strdup(yytext); return(T_IDENTIF);};
 \$[_a-z][_a-zA-Z0-9]* {yylval.text = strdup(yytext); return(T_IDENTIF_GLOBAL);};
 @[_a-z][_a-zA-Z0-9]* {yylval.text = strdup(yytext); return(T_ATRIBUTO);};
-:[_a-z][_a-zA-Z0-9]* {return(T_ATRIBUTO_ACCESOR);};
+:[_a-z][_a-zA-Z0-9]* {yylval.text = strdup(yytext); return(T_ATRIBUTO_ACCESOR);};
 \$0	 {yylval.text = strdup(yytext); return(T_VAR_PESOS_CERO);};
 \$:        {yylval.text = strdup(yytext); return(T_VAR_PESOS);};
 \$\$       {yylval.text = strdup(yytext); return(T_VAR_PESOS_PESOS);};

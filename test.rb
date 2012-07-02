@@ -1,4 +1,5 @@
 puts 10
+puts ARGV[0]
 puts 11.0
 puts false
 puts 'algo'
@@ -21,6 +22,7 @@ class Hola
   end
   def set b
     @hi = b
+    b=10;
   end
 end
 
@@ -29,6 +31,8 @@ al.say 'hola andreas'
 al.set 'seteando un attr'
 al.say 'hi'
 puts '============================================================'
+puts b
+puts '====='
 a=2
 puts 5.0*5*5
 a='hola'

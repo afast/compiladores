@@ -112,7 +112,7 @@ bloque: T_LLAVE_IZQ compstmt T_LLAVE_DER
 value : T_GETS { $$ = new_gets(yylineno); }
 	| T_INSTANCE_CLASS
 	| T_NEW T_PAR_IZQ list_values T_PAR_DER { $$ = new_class_new($<text>1, $3, yylineno); }
-  | T_NEW { $$ = new_class_new($<text>1, NULL, yylineno);}
+	| T_NEW { $$ = new_class_new($<text>1, NULL, yylineno);}
 	| expr_numeric { $$ = $1; }
 	| expr_string { $$ = $1; }
 	| expr_bool { $$ = $1; }
@@ -128,7 +128,7 @@ float: T_FLOAT_ABS { $$ = new_number($<real>1, yylineno); }
 	| T_MENOS T_FLOAT_ABS { $$ = new_number((-1)*$<real>2, yylineno); }
 	| T_MAS T_FLOAT_ABS { $$ = new_number($<real>2, yylineno); };
 expr_numeric : integer
-  | float
+  	| float
 	| T_OBJECT_ID { $$ = new_object_call($<text>1, yylineno); }
 	| T_SIZE { $$ = new_object_call($<text>1, yylineno); }
 	| T_LENGTH { $$ = new_object_call($<text>1, yylineno); }

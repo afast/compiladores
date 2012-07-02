@@ -20,6 +20,7 @@ RInteger::RInteger(long int integer){
 }
 
 long int RInteger::getValue(){
+std::cout << "IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII   " << this->value << std::endl; 
   return this->value;
 }
 

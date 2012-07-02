@@ -69,7 +69,7 @@ void printCodigo();
 %token T_ATRIBUTO T_VAR_PESOS_CERO T_VAR_PESOS T_VAR_ARGV T_VAR_PESOS_PESOS T_INTEGER_ABS T_ATRIBUTO_ACCESOR
 %token T_FLOAT_ABS T_STRING_1 T_STRING_2 T_STRING_IZQ T_STRING_DER T_COMMAND T_ESPACIOS T_ERROR
 
-%type <a> expr_numeric compstmt stmt texpr value output integer float variable string expr_string expr_bool if recursive_elsif opt_else while rec_when_then case argdecl def arglist list_values class
+%type <a> expr_numeric compstmt stmt texpr value output integer float variable string expr_string expr_bool if recursive_elsif opt_else while rec_when_then case argdecl def arglist list_values class args_accesores
 /*=========================================================================
                           OPERATOR PRECEDENCE
 =========================================================================*/
@@ -99,10 +99,11 @@ stmt : output
 	| variable T_MENOS_IGUAL value { $$ = new_asgn($1, new_numeric_op(op_sub, $1, $3, yylineno), yylineno); }
 	| def
 	| class {std::cout << "nueva clase\n";}
-	| T_ATTR_READER args_accesores
-	| T_ATTR_WRITER args_accesores
-	| T_ACCESSOR args_accesores
+	| T_ATTR_READER args_accesores { $$ = new_accesor_list(t_readers, $2, yylineno);}
+	| T_ATTR_WRITER args_accesores { $$ = new_accesor_list(t_writers, $2, yylineno);}
+	| T_ACCESSOR args_accesores { $$ = new_accesor_list(t_wr, $2, yylineno);}
 	| T_INVOCACION_METODO { $$ = new_class_method_call($<text>1, NULL, yylineno); }
+	| T_INVOCACION_METODO T_IGUAL value { $$ = new_class_attr_assign($<text>1, $3, yylineno); }
 	| T_INVOCACION_METODO list_values { $$ = new_class_method_call($<text>1, $2, yylineno); }
   | T_IDENTIF { $$ = new_method_call($<text>1, NULL, yylineno); }
   | T_IDENTIF list_values { $$ = new_method_call($<text>1, $2, yylineno); }
@@ -189,8 +190,8 @@ variable : T_IDENTIF { $$ = new_identificador($<text>1, yylineno);}
 	| T_VAR_PESOS_PESOS { $$ = new_identificador_global($<text>1, yylineno);}
 	| T_VAR_ARGV { $$ = new_identificador_global($<text>1, yylineno);}
 	| T_IDENTIF_GLOBAL { $$ = new_identificador_global($<text>1, yylineno);}
-	| T_IDENTIF T_CORCHETE_IZQ value T_CORCHETE_DER { $$ = new_array_pos($<text>1, $<entero>3, yylineno);}
-	| T_VAR_ARGV T_CORCHETE_IZQ value T_CORCHETE_DER {  $$ = new_array_pos($<text>1, $<entero>3, yylineno);};
+	| T_IDENTIF T_CORCHETE_IZQ value T_CORCHETE_DER { $$ = new_array_pos($<text>1, $3, yylineno);}
+	| T_VAR_ARGV T_CORCHETE_IZQ value T_CORCHETE_DER {  $$ = new_array_pos($<text>1, $3, yylineno);};
 
 if : T_IF expr_bool T_FIN_INSTRUCCION compstmt recursive_elsif opt_else T_END { $$ = new_if($2, $4, $5, $6, yylineno);  };
 recursive_elsif : /* Vacio */ { $$ = NULL; }
@@ -216,9 +217,8 @@ array :	T_CORCHETE_IZQ value T_COMA list_values T_CORCHETE_DER
 list_values: value { $$ = new_params($1, yylineno);}
 	| list_values T_COMA value { $$ = add_param($1, $3, yylineno);};
 class :	T_CLASS T_NOM_CONST T_FIN_INSTRUCCION compstmt T_END { $$ = new_class($<text>2, $4, yylineno);};
-args_accesores : T_ATRIBUTO_ACCESOR args_accesores_recur;
-args_accesores_recur :	/*vacio*/
-	| args_accesores_recur T_COMA T_ATRIBUTO_ACCESOR;
+args_accesores : T_ATRIBUTO_ACCESOR { $$ = new_accesores($<text>1, yylineno);}
+               | args_accesores T_COMA T_ATRIBUTO_ACCESOR { $$ = new_accesores($<text>2, $1, yylineno);};
 each : T_EACH T_DO T_PIPE T_IDENTIF T_PIPE compstmt T_END;
 expr_string_interpolado : T_STRING_IZQ expr_string_interpolado_recur T_STRING_DER;
 expr_string_interpolado_recur : /*vacio*/

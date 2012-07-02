@@ -86,17 +86,11 @@ bool RArray::operator== (RArray param){
 }
 
 RObject* RArray::operator[] (int n){
-  if (arrayLength < n)
   	return value[n];
-  else
-	return new RObject();
 }
 
 RObject* RArray::operator[] (RInteger param){
-  if (arrayLength < param.getValue())
 	return value[param.getValue()];
-  else
-	return new RObject();
 }
 
 RObject* RArray::operator[] (RInteger *param){

@@ -162,17 +162,31 @@ BEGIN(INITIAL);
 
 char* replaceContinuacionLinea(char* textIn){
 	std::string *tmp = new std::string(textIn);
-
-
 	int n = tmp->find("\\\n");
-  while (n>0){
-    tmp->erase(n, 2);
-    n = tmp->find("\\\n");
-  }
-
+	while (n>0){
+    		tmp->erase(n, 2);
+    		n = tmp->find("\\\n");
+  	}
 	char * result = new char[tmp->size() + 1];
 	std::copy(tmp->begin(), tmp->end(), result);
 	result[tmp->size()] = '\0';
-  delete tmp;
+	delete tmp;
 	return result;
 }
+/*
+char* scapeSecuence(char* textIn){
+	std::string *tmp = new std::string(textIn);
+	int n = tmp->find("\\\n");
+	while (n>0){
+    		tmp->erase(n, 2);
+    		n = tmp->find("\\\n");
+  	}
+	char * result = new char[tmp->size() + 1];
+	std::copy(tmp->begin(), tmp->end(), result);
+	result[tmp->size()] = '\0';
+	delete tmp;
+	return result;
+}
+*/
+
+

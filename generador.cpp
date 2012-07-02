@@ -246,6 +246,9 @@ void generar_arr_pos(ast* nodo, std::list<Instruccion*> *codigo){
 void generar_array(ast* n, std::list<Instruccion*> *codigo){
   RObject* arg;
   int pos = 0;
+  string tmp = get_tmp_var();
+  RVariable* var = new RVariable(&tmp);
+  set_global_variable(var->getValue(), new RArray());
   if (n!=NULL){
     list<ast*>::iterator it;
     for (it=n->stmt_list->begin(); it != n->stmt_list->end(); it++){
@@ -257,7 +260,7 @@ void generar_array(ast* n, std::list<Instruccion*> *codigo){
         arg = codigo->back()->arg1;
       }
       
-      codigo->push_back(instr(SET_ARR_POS, arg,new RInteger(pos), n->linea));
+      codigo->push_back(instr(SET_ARR_POS, var, arg, new RInteger(pos), n->linea));
       pos++;
     }
   }

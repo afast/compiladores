@@ -52,6 +52,7 @@ bool RArray::respond_to(RString *method){
 }
 
 void RArray::setValue(int pos, RObject *val){
+std::cout << "entre aca, pos: " << pos << " val: "<< ((RInteger *)val)->getValue() << "largo: " << arrayLength << std::endl;
   if (pos > arrayLength){
     RObject** nuevo = new RObject*[((pos+1)/10+1)*10];
     for (int i=0; i< arrayLength; i++)
@@ -60,6 +61,9 @@ void RArray::setValue(int pos, RObject *val){
       nuevo[i] = new RObject();
     nuevo[pos] = val;
     arrayLength=pos+1;
+  }
+  if (pos == arrayLength){
+   arrayLength=pos+1;
   }
   value[pos] = val;
 }

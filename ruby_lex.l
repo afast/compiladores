@@ -26,6 +26,7 @@ COMMAND_CON_SALTO ([^(`\n)]*(\\\n)*)*
 COMMAND_SIN_SALTO [^(`\n)]*
 VARIABLE [_a-z][_a-zA-Z0-9]*|[_a-z][_a-zA-Z0-9]*\[([1-9][0-9]*|0)\]
 %%
+^[ \t]*\n {} /* Discard empty lines*/
 require(\t|" ")*\' {BEGIN(require);};
 load(\t|" ")*\' {BEGIN(load);};
 #.*\n? {};

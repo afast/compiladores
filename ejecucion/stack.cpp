@@ -194,7 +194,7 @@ void ejecutar(list<Instruccion*> *codigo) {
       case ELSIF : if (!((RBool*)arg1)->getValue()) it = descartar_if(it); else { cond_stack.pop(); cond_stack.push(((RBool*)arg1)->getValue());} break;
       case ELSIFCOND : if (cond_stack.top()) it = descartar_hasta_end(it); break;
       case ELSE : if (cond_stack.top()) it = descartar_hasta_end(it); break;
-      case END : cout << "antes end " <<  endl; cond_stack.pop(); cout << "despues end " <<  endl; break;
+      case END : cond_stack.pop(); break;
       case WHILE : 
         if (((RBool*)ri->arg1)->getValue())
           while_stack.push(it);
@@ -207,13 +207,13 @@ void ejecutar(list<Instruccion*> *codigo) {
         else
           while_stack.pop();
         break;
-      case CASE : cout << "case excecuted " <<  endl;
+      case CASE : 
         if (!((RBool*)ri->arg1)->getValue())
           it = descartar_case(it);
         cond_stack.push(((RBool*)ri->arg1)->getValue());
         break;
-      case CASEREC : cout << "caserec excecuted " <<  endl; if (!((RBool*)ri->arg1)->getValue()){cout << "antes descartar case " <<  endl; it = descartar_case(it); cout << "despues descartar case " <<  endl;} else { cond_stack.pop(); cond_stack.push(((RBool*)ri->arg1)->getValue());} break;
-      case CASERECCOND : cout << "caserec_COND excecuted " <<  endl; if (cond_stack.top()) it = descartar_case_hasta_end(it); break;
+      case CASEREC : if (!((RBool*)ri->arg1)->getValue()) it = descartar_case(it); else { cond_stack.pop(); cond_stack.push(((RBool*)ri->arg1)->getValue());} break;
+      case CASERECCOND : if (cond_stack.top()) it = descartar_case_hasta_end(it); break;
       case AND :
         ((RBool*)arg1)->setValue(((RBool*)arg2)->getValue() && ((RBool*)arg3)->getValue());
         break;
@@ -248,11 +248,8 @@ void ejecutar(list<Instruccion*> *codigo) {
         //ri->arg1 = get_variable((RString*)arg2);
         break;
       case GETV_ARR : // Evaluar variable o metodo?
-          cout << "Error de tipos en li------------------------";
         arg1 = (*((RArray *)arg2))[((RInteger *)arg3)->getValue()];
-cout << "Error de tipos en l!"<< arg1;
-	puts(arg1->to_s());
-      break;
+	break;
       case PUTV :
         set_variable((RString*)arg1, arg2);
         break;

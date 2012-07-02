@@ -10,8 +10,13 @@ class RObject;
 class RDecimal;
 class RNumeric;
 class RString;
+class RClass;
 
-enum code_ops { FIN, PUTS, GETS, CALL, OBJID, ADD, ASSIGN_TMP, MULT, SUB, DIV, POW, MOD, IF, ELSIF, ELSIFCOND, WHILEEND, WHILE, CASE, CASEREC, CASERECCOND, ELSE, END, AND, OR, NOT, G, GE, L, LE, EQ, NEQ, TOBOOL, DO, GETV, PUTV, ASGN, GETV_ARR, PUSH_ARG, ENDFUNC, RETURN, POP_ARG };
+enum code_ops { FIN, PUTS, GETS, CALL, OBJID, ADD, ASSIGN_TMP, MULT, SUB, DIV, POW, MOD, IF, ELSIF, ELSIFCOND,
+  WHILEEND, WHILE, CASE, CASEREC, CASERECCOND, ELSE, END, AND, OR, NOT, G, GE, L, LE, EQ, NEQ, TOBOOL, DO,
+  GETV, PUTV, ASGN, GETV_ARR, PUSH_ARG, ENDFUNC, RETURN, POP_ARG, CLASS_INST_CALL, PUT_INST_V, GET_INST_V, NEW,
+  WRITE_ATTR
+};
 /*
  * G  - mayor
  * GE - mayor igual
@@ -39,6 +44,14 @@ struct s_node_tac {
 
 typedef s_node_tac node_tac;
 
+struct function_info_t {
+  int param_count;
+  RString* name;
+  std::list<Instruccion*> *codigo;
+};
+
+typedef function_info_t function_info;
+
 void initializer();
 //RObject *getValue(std::string* key);
 void ejecutar(std::list<Instruccion*> *codigo);
@@ -48,7 +61,7 @@ std::list<Instruccion*>::iterator descartar_if(std::list<Instruccion*>::iterator
 std::list<Instruccion*>::iterator descartar_case_hasta_end(std::list<Instruccion*>::iterator it);
 std::list<Instruccion*>::iterator descartar_case(std::list<Instruccion*>::iterator it);
 std::list<Instruccion*>::iterator descartar_whileend(std::list<Instruccion*>::iterator it);
-void add_global_function(char* name, std::list<Instruccion*>* codigo);
+void add_global_function(char* name, function_info* funcion);
 void set_variable(const char *name, RObject* var);
 void set_variable(RString* str, RObject* var);
 void set_global_variable(std::string *name, RObject* var);
@@ -60,4 +73,5 @@ bool operacion_es_booleana(enum code_ops op);
 std::list<Instruccion*>::iterator get_function_iterator(RString* name);
 void new_scope();
 void drop_scope();
+void add_class(RClass* clase);
 #endif

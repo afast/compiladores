@@ -11,6 +11,7 @@
 #include "RInteger.h"
 #include "RDecimal.h"
 #include "RNumeric.h"
+#include "RClass.h"
 #include "RString.h"
 #include "RBool.h"
 #include "RArray.h"
@@ -22,8 +23,9 @@ set<string> tsimbolos;
 unordered_map<string, list<Instruccion*> *> functions;
 //unordered_map<string, RObject*> vTemporales;
 
-unordered_map<string, RObject*> *global_variables= new unordered_map<string, RObject*>; // las variables deben agregarse a este hash variables["nombre"] = RObject*
-unordered_map<string, list<Instruccion*>*> global_methods; // los metodos globales se guardan aqui methods["nombre"] = list<Instruccion *>*
+unordered_map<string, RObject*> *global_variables = new unordered_map<string, RObject*>; // las variables deben agregarse a este hash variables["nombre"] = RObject*
+unordered_map<string, RClass*> clases; // clases
+unordered_map<string, function_info*> global_methods; // los metodos globales se guardan aqui methods["nombre"] = list<Instruccion *>*
 unordered_map<string, RObject*>* current_stack;
 list<unordered_map<string, RObject*>*> scope_stack;
 stack<bool> cond_stack;
@@ -31,6 +33,7 @@ stack<list<Instruccion *>::iterator> while_stack;
 stack<list<Instruccion *>::iterator> call_stack;
 stack<RObject*> argument_stack;
 stack<RObject*> return_stack;
+RClass *excecuting_current_class=NULL;
 
 
 //RObject *getValue(string* key){
@@ -212,8 +215,8 @@ void ejecutar(list<Instruccion*> *codigo) {
           it = descartar_case(it);
         cond_stack.push(((RBool*)ri->arg1)->getValue());
         break;
-      case CASEREC : if (!((RBool*)ri->arg1)->getValue()) it = descartar_case(it); else { cond_stack.pop(); cond_stack.push(((RBool*)ri->arg1)->getValue());} break;
-      case CASERECCOND : if (cond_stack.top()) it = descartar_case_hasta_end(it); break;
+      case CASEREC :  if (!((RBool*)ri->arg1)->getValue()){ it = descartar_case(it); } else { cond_stack.pop(); cond_stack.push(((RBool*)ri->arg1)->getValue());} break;
+      case CASERECCOND :  if (cond_stack.top()) it = descartar_case_hasta_end(it); break;
       case AND :
         ((RBool*)arg1)->setValue(((RBool*)arg2)->getValue() && ((RBool*)arg3)->getValue());
         break;
@@ -248,8 +251,26 @@ void ejecutar(list<Instruccion*> *codigo) {
         //ri->arg1 = get_variable((RString*)arg2);
         break;
       case GETV_ARR : // Evaluar variable o metodo?
-        arg1 = (*((RArray *)arg2))[((RInteger *)arg3)->getValue()];
-	break;
+          if (arg3->is_int()){
+            arg1 = (*((RArray *)arg2))[((RInteger *)arg3)->getValue()];
+	  }
+          else{
+            cout << "Error de tipos en linea " << ri->linea << " , no se puede sumar " << *arg2->get_class()->getValue() << " con " << *arg3->get_class()->getValue() << endl;
+            fin_error = true;
+          }
+        break;
+      case PUT_INST_V :
+        if (excecuting_current_class != NULL)
+          excecuting_current_class->set_instance_variable((RString*)arg1, arg2);
+        else
+          set_global_variable(((RString*)arg1)->getValue(), arg2);
+        break;
+      case GET_INST_V :
+        if (excecuting_current_class != NULL)
+          arg1 = excecuting_current_class->get_instance_variable((RString*)arg2);
+        else
+          arg1 = get_variable(((RString*)arg2)->getValue()->data());
+        break;
       case PUTV :
         set_variable((RString*)arg1, arg2);
         break;
@@ -264,22 +285,52 @@ void ejecutar(list<Instruccion*> *codigo) {
         call_stack.push(it);
         new_scope();
         it = get_function_iterator((RString*)arg2);
-        return_stack.push(arg1);
+        return_stack.push(ri->arg1);
         break;
+      case CLASS_INST_CALL:
+        {
+        call_stack.push(it);
+        new_scope();
+        excecuting_current_class = (RClass*)arg2;
+        function_info* funcion = excecuting_current_class->get_function_info((RString*)arg3);
+        if (funcion->param_count == argument_stack.size()){
+          it = funcion->codigo->begin();
+          return_stack.push(ri->arg1);
+        }else{
+          cout << "Error: cantidad erronea de argumentos, se esperaban " << funcion->param_count << " pero se encontraron " << argument_stack.size() << endl;
+          fin_error = true;
+        }
+        break;
+        }
+      case NEW:
+        {
+        RClass* clase = clases[*((RString*)arg2)->getValue()];
+        if (clase != NULL){
+          arg1 = clases[*((RString*)arg2)->getValue()]->get_instance();
+        }else{
+          cout << "Error: Clase no definida" << endl;
+          fin_error=true;
+        }
+        break;
+        }
       case ENDFUNC:
         it=call_stack.top();
         call_stack.pop();
         drop_scope();
+        return_stack.pop();
         break;
       case RETURN:{
         it=call_stack.top();
         call_stack.pop();
-        //drop_scope();
-        RString* variable = (RString*)return_stack.top();
+        RVariable* variable = (RVariable*)return_stack.top();
         return_stack.pop();
         set_global_variable(variable->getValue(), arg1);
         drop_scope();
+        excecuting_current_class = NULL;
         break;}
+      case WRITE_ATTR:
+        ((RClass*)arg1)->set_instance_variable((RString*)arg2, arg3);
+        break;
       case ASGN:
         set_variable((RString*)arg1, arg2);
         break;
@@ -293,6 +344,8 @@ void ejecutar(list<Instruccion*> *codigo) {
   clean_up();
   for (it=codigo->begin(); it != codigo->end(); it++)
     delete *it;
+  if (fin_error)
+    exit(1);
 }
 
 void add_symbol(char *name) {
@@ -303,15 +356,20 @@ RObject *get_variable(const char *name){ //aca hay q considerar el tema del scop
   list<unordered_map<string, RObject*>*>::reverse_iterator rit;
   //unordered_map<string, Instruccion*>* stack;
   rit = scope_stack.rbegin();
-  RObject *object;
+  RObject *object=NULL;
   do {
-    object = (**rit)[name];
+    if ((*rit)->find(name) != (*rit)->end())
+      object = (**rit)[name];
     rit++;
   } while (object == NULL && rit != scope_stack.rend());
-  if (object == NULL)
+  if (name[0] == '@' && object == NULL && excecuting_current_class != NULL)
+    object = excecuting_current_class->get_instance_variable(name);
+  if (object == NULL && global_variables->find(name) != global_variables->end())
     object = (*global_variables)[name];
-  if (object == NULL)
+  if (object == NULL){
     cout << "Warning, variable is null!" << endl;
+    object = new RObject();
+  }
   return object;
 }
 
@@ -320,7 +378,10 @@ RObject* get_variable(RString* str){
 }
 
 void set_variable(const char *name, RObject* var){ //aca hay q considerar el tema del scope?
-  (*current_stack)[name] = var;
+  if (name[0] == '@' && excecuting_current_class != NULL){
+    excecuting_current_class->set_instance_variable(name, var);
+  }else
+    (*current_stack)[name] = var;
 }
 
 void set_global_variable(string *name, RObject* var){ //aca hay q considerar el tema del scope?
@@ -331,10 +392,12 @@ void set_variable(RString* str, RObject* var){ //aca hay q considerar el tema de
   set_variable(str->getValue()->data(), var);
 }
 
-void add_global_function(char* name, list<Instruccion*>* codigo){
-  cout << "adding global function - " << name << " ...";
-  global_methods[name] = codigo;
-  cout << "[OK]" << endl;
+void add_global_function(char* name, function_info* funcion){
+  global_methods[name] = funcion;
+}
+
+void add_class(RClass* clase){
+  clases[*clase->get_class()->getValue()] = clase;
 }
 
 void new_scope(){
@@ -417,5 +480,5 @@ bool operacion_es_booleana(enum code_ops op){
 }
 
 std::list<Instruccion*>::iterator get_function_iterator(RString* name){
-  return global_methods[name->getValue()->data()]->begin();
+  return global_methods[name->getValue()->data()]->codigo->begin();
 }

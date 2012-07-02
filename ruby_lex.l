@@ -26,10 +26,11 @@ COMMAND_CON_SALTO ([^(`\n)]*(\\\n)*)*
 COMMAND_SIN_SALTO [^(`\n)]*
 VARIABLE [_a-z][_a-zA-Z0-9]*|[_a-z][_a-zA-Z0-9]*\[([1-9][0-9]*|0)\]
 %%
+^[ \t]*\n {} /* Discard empty lines*/
 require(\t|" ")*\' {BEGIN(require);};
 load(\t|" ")*\' {BEGIN(load);};
 #.*\n? {};
-^=begin(.*\n)*=end(" ")*\n* {};
+^=begin(.*\n)*=end(" ")*\n* {;};
 then      {return(T_THEN);};
 nil      {return(T_NIL);};
 puts   {return(T_PUTS);};
@@ -58,12 +59,11 @@ attr_accessor {return(T_ACCESSOR);};
 		}
 	};
 <require>[^\t|^\n]+\' { cargarArchivo(yytext, yyleng-1, false);};
-true {yylval.entero = 1;return(T_BOOL);};
-false {yylval.entero = 0;return(T_BOOL);};
+true {yylval.entero = 1; return(T_BOOL);};
+false {yylval.entero = 0; return(T_BOOL);};
 ARGV {yylval.text = strdup(yytext); return(T_VAR_ARGV);};
 = 	 {return(T_IGUAL);};
 ,        {return(T_COMA);};
-#      {return(T_NUMERAL);};
 \+       {return(T_MAS);};
 \-        {return(T_MENOS);};
 \*      {return(T_ASTER);};
@@ -103,26 +103,24 @@ not|!  {return(T_NOT);};
 {VARIABLE}\.length {yylval.text = strdup(yytext); return(T_LENGTH);};
 {VARIABLE}\.size {yylval.text = strdup(yytext); return(T_SIZE);};
 {VARIABLE}\.each {yylval.text = strdup(yytext); return(T_EACH);};
-[_a-z][_a-zA-Z0-9]*\.[_a-z][_a-zA-Z0-9]* {return(T_INVOCACION_METODO);};
-[A-Z][_a-zA-Z0-9]*	 {return(T_NOM_CONST);};
+{VARIABLE}\.[_a-z][_a-zA-Z0-9]* {yylval.text = strdup(yytext); return(T_INVOCACION_METODO);};
+[A-Z][_a-zA-Z0-9]*	 {yylval.text = strdup(yytext); return(T_NOM_CONST);};
 [_a-z][_a-zA-Z0-9]*	 {yylval.text = strdup(yytext); return(T_IDENTIF);};
 \$[_a-z][_a-zA-Z0-9]* {yylval.text = strdup(yytext); return(T_IDENTIF_GLOBAL);};
-@[_a-z][_a-zA-Z0-9]* {return(T_ATRIBUTO);};
-:[_a-z][_a-zA-Z0-9]* {return(T_ATRIBUTO_ACCESOR);};
+@[_a-z][_a-zA-Z0-9]* {yylval.text = strdup(yytext); return(T_ATRIBUTO);};
+:[_a-z][_a-zA-Z0-9]* {yylval.text = strdup(yytext); return(T_ATRIBUTO_ACCESOR);};
 \$0	 {yylval.text = strdup(yytext); return(T_VAR_PESOS_CERO);};
 \$:        {yylval.text = strdup(yytext); return(T_VAR_PESOS);};
 \$\$       {yylval.text = strdup(yytext); return(T_VAR_PESOS_PESOS);};
 \|           {return(T_PIPE);};
 ([1-9][0-9]*)|0 {yylval.entero = atoi(yytext); return(T_INTEGER_ABS);};
 (([1-9][0-9]*)\.[0-9]+)|(((\+|\-)?0)\.[0-9]+) {yylval.real = atof(yytext); return(T_FLOAT_ABS);};
-#.*\n {;};
-^=begin(.*\n)*=end {};
-\'{STRING_SIMPLE_CON_SALTO}\'|\'{STRING_SIMPLE_SIN_SALTO}\' {yylval.text = strdup(replaceContinuacionLinea(yytext)); return(T_STRING_1);};
-\"{STRING_DOBLE_CON_SALTO}\"|\"{STRING_DOBLE_SIN_SALTO}\"   {yylval.text = strdup(replaceContinuacionLinea(yytext)); return(T_STRING_2);};
-\"{STRING_DOBLE_CON_SALTO}#\{|\"{STRING_DOBLE_SIN_SALTO}#\{ {yylval.text = strdup(replaceContinuacionLinea(yytext)); return(T_STRING_IZQ);};
-\}{STRING_DOBLE_CON_SALTO}#\{|\}{STRING_DOBLE_SIN_SALTO}#\{ {yylval.text = strdup(replaceContinuacionLinea(yytext)); return(T_STRING_CENTER);};
-\}{STRING_DOBLE_CON_SALTO}\"|\}{STRING_DOBLE_SIN_SALTO}\"   {yylval.text = strdup(replaceContinuacionLinea(yytext)); return(T_STRING_DER);};
-`{COMMAND_CON_SALTO}`|`{COMMAND_SIN_SALTO}` {yylval.text = strdup(replaceContinuacionLinea(yytext)); return(T_COMMAND);};
+\'{STRING_SIMPLE_CON_SALTO}\'|\'{STRING_SIMPLE_SIN_SALTO}\' {yylval.text = replaceContinuacionLinea(yytext); return(T_STRING_1);};
+\"{STRING_DOBLE_CON_SALTO}\"|\"{STRING_DOBLE_SIN_SALTO}\"   {yylval.text = replaceContinuacionLinea(yytext); return(T_STRING_2);};
+\"{STRING_DOBLE_CON_SALTO}#\{|\"{STRING_DOBLE_SIN_SALTO}#\{ {yylval.text = replaceContinuacionLinea(yytext); return(T_STRING_IZQ);};
+\}{STRING_DOBLE_CON_SALTO}#\{|\}{STRING_DOBLE_SIN_SALTO}#\{ {yylval.text = replaceContinuacionLinea(yytext); return(T_STRING_CENTER);};
+\}{STRING_DOBLE_CON_SALTO}\"|\}{STRING_DOBLE_SIN_SALTO}\"   {yylval.text = replaceContinuacionLinea(yytext); return(T_STRING_DER);};
+`{COMMAND_CON_SALTO}`|`{COMMAND_SIN_SALTO}` {yylval.text = replaceContinuacionLinea(yytext); return(T_COMMAND);};
 (\n|;)* {return T_FIN_INSTRUCCION;};
 \t|\r|" " {}
 \\(\t|\r|" ")*\n {};
@@ -168,18 +166,14 @@ char* replaceContinuacionLinea(char* textIn){
 
 
 	int n = tmp->find("\\\n");
-
-  if (n>0)
-    tmp->replace(n,  // start position in str
-            2,      // how character(s)
-            1,      // how many copies of character
-            ' ');   // character for replasment
-  std::cout << "-----------       str is: " << *tmp << std::endl;
-
-
+  while (n>0){
+    tmp->erase(n, 2);
+    n = tmp->find("\\\n");
+  }
 
 	char * result = new char[tmp->size() + 1];
 	std::copy(tmp->begin(), tmp->end(), result);
 	result[tmp->size()] = '\0';
+  delete tmp;
 	return result;
 }

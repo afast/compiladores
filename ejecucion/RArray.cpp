@@ -24,7 +24,7 @@ RArray::RArray(RArray *arg){
 }
 
 RArray::~RArray(){
-  delete this->value;
+  delete[] this->value;
 }
 
 RObject **RArray::getValue(){
@@ -52,6 +52,15 @@ bool RArray::respond_to(RString *method){
 }
 
 void RArray::setValue(int pos, RObject *val){
+  if (pos > arrayLength){
+    RObject** nuevo = new RObject*[((pos+1)/10+1)*10];
+    for (int i=0; i< arrayLength; i++)
+      nuevo[i] = value[i];
+    for (int i=arrayLength; i<pos; i++)
+      nuevo[i] = new RObject();
+    nuevo[pos] = val;
+    arrayLength=pos+1;
+  }
   value[pos] = val;
 }
 
@@ -77,11 +86,17 @@ bool RArray::operator== (RArray param){
 }
 
 RObject* RArray::operator[] (int n){
-  return value[n];
+  if (n < arrayLength)
+  	return value[n];
+  else
+	return new RObject();
 }
 
 RObject* RArray::operator[] (RInteger param){
-  return value[param.getValue()];
+  if (param.getValue() < arrayLength)
+	return value[param.getValue()];
+  else
+	return new RObject();
 }
 
 RObject* RArray::operator[] (RInteger *param){

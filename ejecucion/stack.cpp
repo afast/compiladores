@@ -335,13 +335,7 @@ void ejecutar(list<Instruccion*> *codigo) {
         set_variable((RString*)arg1, arg2);
         break;
       case SET_ARR_POS: {
-        RArray  arreglo = new RArray();
-	for (int i = 0; i <=3; i++){
-		arreglo.setValue(i , new RInteger(i));
-	}
-        for (int i = 0; i <=3; i++){
-		cout << "arrpos: " << (arreglo[i]) << endl;
-	}
+        (*((RArray*)arg1)).setValue(((RInteger*)arg3)->getValue(), arg2);
         }
         break;
       default: cout << "hay una op no reconocida" <<  endl;

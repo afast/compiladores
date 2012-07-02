@@ -292,7 +292,8 @@ ast* new_array(ast * elem , int linea){
 }
 
 ast* new_array(ast * elem , ast * elems,  int linea){
-  return add_elem(elems, elem, linea);
+  elems->stmt_list->push_front(elem);
+  return elems;
 }
 
 

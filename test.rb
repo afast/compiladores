@@ -1,6 +1,13 @@
+
 puts 10
 puts ARGV[0]
 puts 11.0
+puts 11.0*1.1
+puts 2.4*0.5
+puts 1.1+1.1
+puts 2/1.5
+puts 3.2-1.9
+puts 1.9-3.2
 puts false
 puts 'algo'
 

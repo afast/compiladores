@@ -251,8 +251,9 @@ void ejecutar(list<Instruccion*> *codigo) {
         //ri->arg1 = get_variable((RString*)arg2);
         break;
       case GETV_ARR : // Evaluar variable o metodo?
-          if (arg3->is_int())
+          if (arg3->is_int()){
             arg1 = (*((RArray *)arg2))[((RInteger *)arg3)->getValue()];
+	  }
           else{
             cout << "Error de tipos en linea " << ri->linea << " , no se puede sumar " << *arg2->get_class()->getValue() << " con " << *arg3->get_class()->getValue() << endl;
             fin_error = true;

@@ -218,8 +218,6 @@ void decidir_nodo(ast* nodo, list<Instruccion*> *codigo){
       new_pointer(funcion);
       break;}
     case t_arr_place :
-      // std::cout << ".....................................sssss        " << get_variable(nodo->str) << std::endl;
-      //((RArray*)get_variable(nodo->str))[nodo->entero];
       generar_arr_pos(nodo, codigo);
       break;
   }
@@ -238,8 +236,7 @@ void generar_arr_pos(ast* nodo, std::list<Instruccion*> *codigo){
   string tmp = get_tmp_var();
   RVariable* var = new RVariable(&tmp);
   set_global_variable(var->getValue(), new RObject());
-
-  codigo->push_back(instr(GETV_ARR, var, new RVariable(nodo->str), new RInteger(nodo->entero), nodo->linea));
+  codigo->push_back(instr(GETV_ARR, var, new RVariable(nodo->str), new RInteger(nodo->h1->entero), nodo->linea));
 
 }
 

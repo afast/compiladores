@@ -116,6 +116,7 @@ ast* new_command(char* texto, int linea){
 }
 
 ast* new_object_call(char* llamada, int linea){
+ std::cout << "===============           " << llamada << std::endl;
   ast* res = new ast;
   res->tipo = t_method_call;
   res->linea = linea;

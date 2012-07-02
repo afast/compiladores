@@ -83,7 +83,7 @@ void printCodigo();
 %right T_EXPO
 %%
 program : compstmt { /*printTree($1);*/ if (!error_sintaxis) generar($1, codigoGlobal); freeTree($1);};
-compstmt : /* Vacio */ { $$ = NULL; std::cout << "NULL DETECTED!" << std::endl; }
+compstmt : /* Vacio */ { $$ = NULL;}
          | stmt { $$ = new_compstmt($1);}
          | stmt T_FIN_INSTRUCCION {$$ = new_compstmt($1); }
          | stmt texpr {$$ = add_front_stmt_compstmt($1, $2); }
@@ -113,7 +113,7 @@ bloque: T_LLAVE_IZQ compstmt T_LLAVE_DER
 value : T_GETS { $$ = new_gets(yylineno); }
 	| T_INSTANCE_CLASS
 	| T_NEW T_PAR_IZQ list_values T_PAR_DER { $$ = new_class_new($<text>1, $3, yylineno); }
-  | T_NEW { $$ = new_class_new($<text>1, NULL, yylineno);}
+	| T_NEW { $$ = new_class_new($<text>1, NULL, yylineno);}
 	| expr_numeric { $$ = $1; }
 	| expr_string { $$ = $1; }
 	| expr_bool { $$ = $1; }
@@ -131,7 +131,7 @@ float: T_FLOAT_ABS { $$ = new_number($<real>1, yylineno); }
 	| T_MENOS T_FLOAT_ABS { $$ = new_number((-1)*$<real>2, yylineno); }
 	| T_MAS T_FLOAT_ABS { $$ = new_number($<real>2, yylineno); };
 expr_numeric : integer
-  | float
+  	| float
 	| T_OBJECT_ID { $$ = new_object_call($<text>1, yylineno); }
 	| T_SIZE { $$ = new_object_call($<text>1, yylineno); }
 	| T_LENGTH { $$ = new_object_call($<text>1, yylineno); }
@@ -245,7 +245,6 @@ main( int argc, char *argv[] )
 		int i = 1;
 		RArray *myArgv = new RArray();
 		while(i < argc){
-			std::cout << "argv[" << i << "] = " << argv[i] << std::endl;
 			myArgv->setValue(i - 1, new RString(argv[i])); 
 			i++;
 		}
@@ -257,7 +256,7 @@ main( int argc, char *argv[] )
       Instruccion *fin = new Instruccion;
       fin->op = FIN;
       codigoGlobal->push_back(fin);
-      printCodigo();
+//      printCodigo();
       ejecutar(codigoGlobal);
     }
 	} else {

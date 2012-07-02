@@ -1,5 +1,6 @@
 #include "RClass.h"
 #include "RString.h"
+#include "RVariable.h"
 #include "RBool.h"
 #include "memory.h"
 
@@ -104,4 +105,30 @@ RObject* RClass::get_instance_variable(RString* variable){
     instance_variables[*variable->getValue()] = res;
   }
   return res;
+}
+
+void RClass::add_accessor(RString* accesor){
+  this->add_writer(accesor);
+  this->add_reader(accesor);
+}
+
+void RClass::add_writer(RString* writer){
+  writers.insert(writer->getValue());
+}
+
+void RClass::add_reader(RString* reader){
+  std::list<Instruccion*>* codigo = new std::list<Instruccion*>;
+  function_info* nueva = new function_info;
+  nueva->param_count = 0;
+  Instruccion* inst = new Instruccion;
+  inst->op = RETURN;
+  inst->linea = 0;
+  nueva->name = new RString(reader);
+  std::cout << *reader->getValue() << std::endl;
+  reader->getValue()->insert(0,1,'@');
+  std::cout << *reader->getValue() << std::endl;
+  inst->arg1 = new RVariable(reader);
+  codigo->push_back(inst);
+  nueva->codigo = codigo;
+  this->add_method(nueva->name, nueva);
 }

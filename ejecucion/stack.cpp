@@ -251,8 +251,9 @@ void ejecutar(list<Instruccion*> *codigo) {
         //ri->arg1 = get_variable((RString*)arg2);
         break;
       case GETV_ARR : // Evaluar variable o metodo?
-          if (arg3->is_int())
+          if (arg3->is_int()){
             arg1 = (*((RArray *)arg2))[((RInteger *)arg3)->getValue()];
+	  }
           else{
             cout << "Error de tipos en linea " << ri->linea << " , no se puede sumar " << *arg2->get_class()->getValue() << " con " << *arg3->get_class()->getValue() << endl;
             fin_error = true;
@@ -316,17 +317,20 @@ void ejecutar(list<Instruccion*> *codigo) {
         it=call_stack.top();
         call_stack.pop();
         drop_scope();
+        return_stack.pop();
         break;
       case RETURN:{
         it=call_stack.top();
         call_stack.pop();
-        //drop_scope();
         RVariable* variable = (RVariable*)return_stack.top();
         return_stack.pop();
         set_global_variable(variable->getValue(), arg1);
         drop_scope();
         excecuting_current_class = NULL;
         break;}
+      case WRITE_ATTR:
+        ((RClass*)arg1)->set_instance_variable((RString*)arg2, arg3);
+        break;
       case ASGN:
         set_variable((RString*)arg1, arg2);
         break;

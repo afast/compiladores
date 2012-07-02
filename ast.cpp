@@ -81,13 +81,13 @@ ast* new_atributo(char* name, int linea){
   return res;
 }
 
-ast* new_array_pos(char* name, int place, int linea){
+ast* new_array_pos(char* name, ast* place, int linea){
   ast* res = new ast;
   res->tipo = t_arr_place;
   res->linea = linea;
   res->str = name;
 std::cout << "nombre: " << name << std::endl;
-  res->entero = place;
+  res->h1 = place;
 std::cout << "place: " << place << std::endl;
   return res;
 }
@@ -116,6 +116,7 @@ ast* new_command(char* texto, int linea){
 }
 
 ast* new_object_call(char* llamada, int linea){
+ std::cout << "===============           " << llamada << std::endl;
   ast* res = new ast;
   res->tipo = t_method_call;
   res->linea = linea;
@@ -316,5 +317,51 @@ ast* new_class_new(char* class_name, ast* params, int linea){
   std::cout << "callging " << res->str << ".new" << std::endl;
   res->h1 = params;
   delete aux;
+  return res;
+}
+
+ast* new_accesores(char* atributo, int linea){
+  ast* res = new ast;
+  res->tipo = t_accesor;
+  res->linea = linea;
+  res->str = atributo;
+  ast* lista = new ast;
+  lista->tipo = t_accesores;
+  lista->stmt_list = new std::list<ast*>;
+  lista->stmt_list->push_back(res);
+  return lista;
+}
+
+ast* new_accesores(char* atributo, ast* accesores, int linea){
+  ast* res = new ast;
+  res->tipo = t_accesor;
+  res->linea = linea;
+  res->str = atributo;
+  accesores->stmt_list->push_back(res);
+  return accesores;
+}
+
+ast* new_accesor_list(enum ast_node_t tipo, ast* lista, int linea){
+  ast* res = new ast;
+  res->tipo = tipo;
+  res->linea = linea;
+  res->h1 = lista;
+  return res;
+}
+
+ast* new_class_attr_assign(char* var_attr, ast* value, int linea){
+  ast* res = new ast;
+  std::string* aux = new std::string(var_attr);
+  int pos = aux->find('.');
+  char* method = new char[aux->size()-pos-1];
+  res->str = new char[pos];
+  aux->copy(method, aux->size(), pos+1);
+  aux->copy(res->str, pos, 0);
+  std::cout << res->str << std::endl;
+  std::cout << method << std::endl;
+  res->h1 = new_object_call(method, linea);
+  res->h2 = value;
+  res->tipo = t_attr_assign;
+  res->linea = linea;
   return res;
 }

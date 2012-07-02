@@ -121,7 +121,9 @@ value : T_GETS { $$ = new_gets(yylineno); }
 	| case
 	| expr_string_interpolado
 	| array;
-output : T_PUTS value { $$ = new_puts($2, yylineno);  };
+output : T_PUTS value { $$ = new_puts($2, yylineno);  }
+       | T_PUTS T_INVOCACION_METODO { $$ = new_puts(new_class_method_call($<text>2, NULL, yylineno), yylineno); }
+       ;
 integer : T_INTEGER_ABS {$$ = new_number($<entero>1, yylineno);}
 	| T_MENOS T_INTEGER_ABS { $$ = new_number((-1)*$<entero>2, yylineno); }
 	| T_MAS T_INTEGER_ABS { $$ = new_number($<entero>2, yylineno); };

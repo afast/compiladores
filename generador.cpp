@@ -109,9 +109,15 @@ void decidir_nodo(ast* nodo, list<Instruccion*> *codigo){
     case c_case :
       generar_case(nodo, codigo);
       break;
-  /*  case c_case_rec :
-      generar_case_rec(nodo, codigo, var);
-      break;*/    
+    case t_writers:
+      generar_writers(nodo);
+      break;
+    case t_readers:
+      generar_readers(nodo);
+      break;
+    case t_wr:
+      generar_accesores(nodo);
+      break;
     case f_string :
       generar_string(nodo, codigo);
       break;
@@ -160,6 +166,9 @@ void decidir_nodo(ast* nodo, list<Instruccion*> *codigo){
       break;
     case b_mayor_igual:
       generar_op_booleana(GE, nodo, codigo);
+      break;
+    case t_attr_assign:
+      generar_attr_writer(nodo, codigo);
       break;
     case b_menor:
       generar_op_booleana(L, nodo, codigo);
@@ -604,6 +613,55 @@ void generar_new(ast* nodo, std::list<Instruccion*> *codigo){
     push_args(nodo->h2, codigo, nodo->linea);
     codigo->push_back(instr(CLASS_INST_CALL, var1, var, new RString("initialize"), nodo->linea));
   }
+}
+
+void generar_accesores(ast* nodo){
+  list<ast*>::iterator it;
+  if (generando_clase){
+    for (it=nodo->h1->stmt_list->begin(); it!=nodo->h1->stmt_list->end(); it++){
+      string* acc = new string((*it)->str);
+      acc->erase(0,1);
+      current_class->add_accessor(new RString(acc));
+      delete acc;
+    }
+  }
+}
+
+void generar_readers(ast* nodo){
+  list<ast*>::iterator it;
+  if (generando_clase){
+    for (it=nodo->h1->stmt_list->begin(); it!=nodo->h1->stmt_list->end(); it++){
+      string* reader = new string((*it)->str);
+      reader->erase(0,1);
+      current_class->add_reader(new RString(reader));
+      delete reader;
+    }
+  }
+}
+
+void generar_writers(ast* nodo){
+  list<ast*>::iterator it;
+  if (generando_clase){
+    for (it=nodo->h1->stmt_list->begin(); it!=nodo->h1->stmt_list->end(); it++){
+      string* writer = new string((*it)->str);
+      writer->erase(0,1);
+      current_class->add_writer(new RString(writer));
+      delete writer;
+    }
+  }
+}
+
+void generar_attr_writer(ast* nodo, std::list<Instruccion*> *codigo){
+  RObject *arg3;
+  if (nodo_hoja(nodo->h2)){ // no preciso variable temporal
+    arg3 = get_abstract_node(nodo->h2);
+  } else {
+    decidir_nodo(nodo->h2, codigo); //ultima operacion debe ser numerica y guardar el resultado en arg1
+    arg3 = codigo->back()->arg1;
+  }
+  RString* attr = new RString(nodo->h1->str);
+  attr->getValue()->insert(0,1,'@');
+  codigo->push_back(instr(WRITE_ATTR, new RVariable(nodo->str), attr, arg3, nodo->linea));
 }
 
 RClass* generar_clase(ast* nodo, std::list<Instruccion*> *codigo){

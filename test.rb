@@ -16,6 +16,7 @@ say_hello 'jellou', 3+4+5
 say_hello 'hola', 'martin'
 
 class Hola
+  attr_accessor :hi
   def say a
     puts a
     puts @hi
@@ -30,6 +31,9 @@ al = Hola.new
 al.say 'hola andreas'
 al.set 'seteando un attr'
 al.say 'hi'
+puts al.hi
+al.hi = 'yummy'
+al.say '----'
 puts '============================================================'
 puts b
 puts '====='

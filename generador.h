@@ -50,4 +50,8 @@ void generar_arr_pos(ast* nodo, std::list<Instruccion*> *codigo);
 RClass* generar_clase(ast* nodo, std::list<Instruccion*> *codigo);
 void generar_instance_method_call(ast* nodo, std::list<Instruccion*> *codigo);
 void generar_new(ast* nodo, std::list<Instruccion*> *codigo);
+void generar_attr_writer(ast* nodo, std::list<Instruccion*> *codigo);
+void generar_writers(ast* nodo);
+void generar_accesores(ast* nodo);
+void generar_readers(ast* nodo);
 #endif

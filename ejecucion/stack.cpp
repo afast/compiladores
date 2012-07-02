@@ -73,7 +73,7 @@ void ejecutar(list<Instruccion*> *codigo) {
       arg1 = new RBool();
     switch (ri->op) {
       case FIN   : cout << "Fin ejecución" << endl; break;
-      case PUTS  : puts(ri->arg1->to_s()); puts(arg1->to_s());
+      case PUTS  : puts(arg1->to_s());
         break;
       case GETS  : gets((RString *)ri->arg1); break;
       case ADD   :
@@ -317,17 +317,20 @@ void ejecutar(list<Instruccion*> *codigo) {
         it=call_stack.top();
         call_stack.pop();
         drop_scope();
+        return_stack.pop();
         break;
       case RETURN:{
         it=call_stack.top();
         call_stack.pop();
-        //drop_scope();
         RVariable* variable = (RVariable*)return_stack.top();
         return_stack.pop();
         set_global_variable(variable->getValue(), arg1);
         drop_scope();
         excecuting_current_class = NULL;
         break;}
+      case WRITE_ATTR:
+        ((RClass*)arg1)->set_instance_variable((RString*)arg2, arg3);
+        break;
       case ASGN:
         set_variable((RString*)arg1, arg2);
         break;

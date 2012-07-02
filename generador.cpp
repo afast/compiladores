@@ -250,20 +250,34 @@ void generar_array(ast* n, std::list<Instruccion*> *codigo){
   RVariable* var = new RVariable(&tmp);
   set_global_variable(var->getValue(), new RArray());
   if (n!=NULL){
-    list<ast*>::iterator it;
-    for (it=n->stmt_list->begin(); it != n->stmt_list->end(); it++){
-      ast* nodo = *it;
-      if (nodo_hoja(nodo)){ // no preciso variable temporal
-        arg = get_abstract_node(nodo);
-      } else {
-        decidir_nodo(nodo, codigo);
-        arg = codigo->back()->arg1;
+    cout << "aca1"<<n->stmt_list<< endl;
+    if (n->stmt_list!=NULL){
+      cout << "no es nulo"<< endl;
+      cout << "es nulo"<< endl;
+      cout << "aca333"<< endl;
+      list<ast*>::iterator it;
+      for (it=n->stmt_list->begin(); it != n->stmt_list->end(); it++){
+        cout << "aca2"<< endl;
+        ast* nodo = *it;
+        if (nodo_hoja(nodo)){ // no preciso variable temporal
+          arg = get_abstract_node(nodo);
+        } else {
+          decidir_nodo(nodo, codigo);
+          arg = codigo->back()->arg1;
+        }
+        cout << "aca4444"<< endl;
+        codigo->push_back(instr(SET_ARR_POS, var, arg, new RInteger(pos), n->linea));
+        pos++;
       }
-      
-      codigo->push_back(instr(SET_ARR_POS, var, arg, new RInteger(pos), n->linea));
-      pos++;
+      cout << "aca3"<< endl;
+    } else {
+        cout << "entro a crear vacio"<< endl;
+	arg = new RArray();
+        codigo->back()->arg1;
     }
+    cout << "aca3213124352"<< endl;
   }
+  cout << "aca5555"<< endl;
 }
 
 void generar_if(ast* nodo, std::list<Instruccion*> *codigo){

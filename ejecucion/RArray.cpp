@@ -86,11 +86,18 @@ bool RArray::operator== (RArray param){
 }
 
 RObject* RArray::operator[] (int n){
+  std::cout << "JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ         " << arrayLength << std::endl; 
+  if (n < arrayLength)
   	return value[n];
+  else
+	return new RObject();
 }
 
 RObject* RArray::operator[] (RInteger param){
+  if (param.getValue() < arrayLength)
 	return value[param.getValue()];
+  else
+	return new RObject();
 }
 
 RObject* RArray::operator[] (RInteger *param){

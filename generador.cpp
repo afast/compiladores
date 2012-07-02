@@ -224,7 +224,7 @@ void generar_compstmt(list<ast*> *stmt_list, list<Instruccion*> *codigo){
 
 void generar_arr_pos(ast* nodo, std::list<Instruccion*> *codigo){
   decidir_nodo(nodo->h1, codigo);
-std::cout << "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW     " << nodo->entero << std::endl;
+std::cout << "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW     " << nodo->h1->entero << std::endl;
   RObject* arg;
   string tmp = get_tmp_var();
 std::cout << "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW     " << nodo->entero << std::endl;
@@ -232,7 +232,7 @@ std::cout << "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW     " << nodo->
 std::cout << "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW     " << nodo->entero << std::endl;
   set_global_variable(var->getValue(), new RObject());
   std::cout << "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW     " << nodo->entero << std::endl;
-  codigo->push_back(instr(GETV_ARR, var, new RVariable(nodo->str), new RInteger(nodo->entero), nodo->linea));
+  codigo->push_back(instr(GETV_ARR, var, new RVariable(nodo->str), new RInteger(nodo->h1->entero), nodo->linea));
 
 }
 

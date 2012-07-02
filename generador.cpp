@@ -272,8 +272,8 @@ void generar_array(ast* n, std::list<Instruccion*> *codigo){
       cout << "aca3"<< endl;
     } else {
         cout << "entro a crear vacio"<< endl;
-	arg = new RArray();
-        codigo->back()->arg1;
+	codigo->push_back(instr(ASGN, new RString("esto"/*var->getValue()*/), var, n->linea));
+        //var = codigo->back()->arg1;
     }
     cout << "aca3213124352"<< endl;
   }
@@ -363,13 +363,25 @@ void generar_op_numerica(enum code_ops op, ast* nodo, std::list<Instruccion*>* c
 
 void generar_op_asgn(ast* nodo, std::list<Instruccion*>* codigo){
   RObject* arg;
+  RObject* argu;
   if (nodo_hoja(nodo->h2)){ // no preciso variable temporal
     arg = get_abstract_node(nodo->h2);
   } else {
     decidir_nodo(nodo->h2, codigo);
     arg = codigo->back()->arg1;
+  }	
+
+  if (nodo->h1->tipo == t_arr_place){
+	if (nodo_hoja(nodo->h1->h1)){ // no preciso variable temporal
+	    argu = get_abstract_node(nodo->h1->h1);
+	} else {
+	    decidir_nodo(nodo->h1->h1, codigo);
+	    argu = codigo->back()->arg1;
+	}
+        codigo->push_back(instr(SET_ARR_POS, new RVariable(nodo->h1->str), arg/*new RVariable(nodo->h1->str)*/, argu, nodo->h1->linea));
+  }else{
+    codigo->push_back(instr(ASGN, new RString(nodo->h1->str), arg, nodo->linea));
   }
-  codigo->push_back(instr(ASGN, new RString(nodo->h1->str), arg, nodo->linea));
 }
 
 RObject* get_numeric_node(ast* hoja){

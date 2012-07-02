@@ -17,13 +17,16 @@ say_hello 'hola', 'martin'
 
 class Hola
   attr_accessor :hi
+  attr_reader :some
+  attr_writer :thing
   def say a
     puts a
-    puts @hi
   end
   def set b
-    @hi = b
-    b=10;
+    @some = b
+  end
+  def thingy
+    puts @thing
   end
 end
 
@@ -31,9 +34,14 @@ al = Hola.new
 al.say 'hola andreas'
 al.set 'seteando un attr'
 al.say 'hi'
-puts al.hi
 al.hi = 'yummy'
+puts al.hi
 al.say '----'
+al.thing = 333
+al.thingy
+al.thing = 334
+al.thingy
+puts al.some
 puts '============================================================'
 puts b
 puts '====='

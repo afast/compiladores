@@ -328,12 +328,7 @@ void ejecutar(list<Instruccion*> *codigo) {
         excecuting_current_class = NULL;
         break;}
       case WRITE_ATTR:
-        cout << "WRITE ATTR" << endl;
-        puts(arg1->to_s());
-        puts(arg2->to_s());
-        puts(arg3->to_s());
         ((RClass*)arg1)->set_instance_variable((RString*)arg2, arg3);
-        cout << "WRITE ATTR end" << endl;
         break;
       case ASGN:
         set_variable((RString*)arg1, arg2);

@@ -550,10 +550,13 @@ bool nodo_hoja(ast* nodo){
 function_info* generar_metodo(ast* nodo){
   std::list<Instruccion*>* res = new std::list<Instruccion*>;
   function_info* nueva = new function_info;
-  nueva->param_count = nodo->h1->stmt_list->size();
   nueva->name = new RString(nodo->str);
   std::cout << "Generando metodo: "<< nodo->str << " args - " << nodo->h1 << "stmtlist: " << nodo->h2 << " ...";
-  pop_args(nodo->h1, res);
+  if (nodo->h1 != NULL){
+    nueva->param_count = nodo->h1->stmt_list->size();
+    pop_args(nodo->h1, res);
+  } else
+    nueva->param_count = 0;
   generar_compstmt(nodo->h2->stmt_list, res);
   res->push_back(instr(ENDFUNC, nodo->linea));
   std::cout << "[OK]" <<std::endl;

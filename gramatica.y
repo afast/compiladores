@@ -255,6 +255,9 @@ main( int argc, char *argv[] )
     if (!error_sintaxis){
       Instruccion *fin = new Instruccion;
       fin->op = FIN;
+      fin->arg1 = NULL;
+      fin->arg3 = NULL;
+      fin->arg2 = NULL;
       codigoGlobal->push_back(fin);
 //      printCodigo();
       ejecutar(codigoGlobal);

@@ -220,6 +220,9 @@ void decidir_nodo(ast* nodo, list<Instruccion*> *codigo){
     case t_arr_place :
       generar_arr_pos(nodo, codigo);
       break;
+    case t_array :
+      generar_array(nodo, codigo);
+      break;
   }
 }
 
@@ -238,6 +241,26 @@ void generar_arr_pos(ast* nodo, std::list<Instruccion*> *codigo){
   set_global_variable(var->getValue(), new RObject());
   codigo->push_back(instr(GETV_ARR, var, new RVariable(nodo->str), new RInteger(nodo->h1->entero), nodo->linea));
 
+}
+
+void generar_array(ast* n, std::list<Instruccion*> *codigo){
+  RObject* arg;
+  int pos = 0;
+  if (n!=NULL){
+    list<ast*>::iterator it;
+    for (it=n->stmt_list->begin(); it != n->stmt_list->end(); it++){
+      ast* nodo = *it;
+      if (nodo_hoja(nodo)){ // no preciso variable temporal
+        arg = get_abstract_node(nodo);
+      } else {
+        decidir_nodo(nodo, codigo);
+        arg = codigo->back()->arg1;
+      }
+      
+      codigo->push_back(instr(SET_ARR_POS, arg,new RInteger(pos), n->linea));
+      pos++;
+    }
+  }
 }
 
 void generar_if(ast* nodo, std::list<Instruccion*> *codigo){

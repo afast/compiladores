@@ -54,4 +54,6 @@ void generar_attr_writer(ast* nodo, std::list<Instruccion*> *codigo);
 void generar_writers(ast* nodo);
 void generar_accesores(ast* nodo);
 void generar_readers(ast* nodo);
+void generar_array(ast* nodo, std::list<Instruccion*> *codigo);
+
 #endif

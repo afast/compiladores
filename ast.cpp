@@ -274,6 +274,34 @@ ast* new_params(ast* param, int linea){
   return res;
 }
 
+ast* new_array( int linea){
+  ast* res = new ast;
+  res->tipo = t_array;
+  res->linea = linea;
+  res->stmt_list = NULL;
+  return res;
+}
+
+ast* new_array(ast * elem , int linea){
+  ast* res = new ast;
+  res->tipo = t_array;
+  res->linea = linea;
+  res->stmt_list = new std::list<ast*>;
+  res->stmt_list->push_back(elem);
+  return res;
+}
+
+ast* new_array(ast * elem , ast * elems,  int linea){
+  return add_elem(elems, elem, linea);
+}
+
+
+ast* add_elem(ast* elems, ast* elem, int linea){
+  elems->stmt_list->push_back(elem);
+  return elems;
+}
+
+
 ast* add_param(ast* args, ast* arg, int linea){
   args->stmt_list->push_back(arg);
   return args;

@@ -11,7 +11,7 @@ enum ast_node_t {
   t_nil, t_mul_string, t_add_string, t_method_with_args, t_args,
   b_and, b_or, b_not, b_mayor, b_mayor_igual, b_menor, b_menor_igual,
   b_doble_igual, b_not_igual, b_is_bool, c_case, c_case_rec, a_method, a_method_with_args,
-  call_method, t_params, t_class, instance_method_call, method_call_new, t_accesor, t_accesores, t_writers, t_readers, t_wr, t_attr_assign
+  call_method, t_params, t_class, instance_method_call, method_call_new, t_accesor, t_accesores, t_writers, t_readers, t_wr, t_attr_assign, t_array
 };
 
 struct ast_node {
@@ -67,4 +67,8 @@ ast* new_accesores(char* atributo, int linea);
 ast* new_accesores(char* atributo, ast* accesores, int linea);
 ast* new_accesor_list(enum ast_node_t tipo, ast* lista, int linea);
 ast* new_class_attr_assign(char* var_attr, ast* value, int linea);
+ast* new_array( int linea);
+ast* new_array(ast * elem , int linea);
+ast* new_array(ast * elem , ast * elems,  int linea);
+ast* add_elem(ast* elems, ast* elem, int linea);
 #endif

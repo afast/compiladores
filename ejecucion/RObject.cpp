@@ -5,10 +5,46 @@
 #include "RInteger.h"
 #include "RString.h"
 #include "RBool.h"
+#include "memory.h"
 
 RObject::RObject(){
   this->object_id=0;
+  this->type = RNIL;
+  new_pointer(this);
 }
+
+bool RObject::is_numeric(){
+  return type == RNUMERIC || type == RINT;
+}
+
+bool RObject::is_string(){
+  return type == RSTRING;
+}
+
+bool RObject::is_int(){
+  return type == RINT;
+
+}
+
+bool RObject::is_decimal(){
+  return type == RNUMERIC;
+
+}
+
+bool RObject::is_array(){
+  return type == RARRAY;
+
+}
+
+bool RObject::is_command(){
+  return type == RCOMMAND;
+
+}
+
+bool RObject::is_nil(){
+  return type == RNIL;
+}
+
 
 RInteger *RObject::objectId(){
   RInteger *res;
@@ -26,7 +62,11 @@ RInteger *RObject::objectId(){
 }
 
 RString *RObject::get_class(){
-  return new RString("Object");
+  return new RString("nil");
+}
+
+RString* RObject::to_s(){
+  return this->get_class();
 }
 
 bool RObject::respond_to(RString *method){

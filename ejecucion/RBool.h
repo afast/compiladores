@@ -10,10 +10,13 @@ class RBool: public RObject {
     bool value;
   public:
     bool getValue();
+    void setValue(bool val);
+    void setValue(RBool* val);
     RBool();
     RBool(bool arg);
     RBool(RBool *arg);
     RString *get_class();
+    RString *to_s();
     bool respond_to(RString *method);
     bool operator= (RBool param);
     bool operator== (RBool param);

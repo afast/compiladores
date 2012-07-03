@@ -267,8 +267,7 @@ void generar_array(ast* n, std::list<Instruccion*> *codigo){
         pos++;
       }
     } else {
-    	codigo->push_back(instr(ASGN, new RString("esto"/*var->getValue()*/), var, n->linea));
-        //var = codigo->back()->arg1;
+    	  codigo->push_back(instr(PUTV, var, new RArray(), n->linea));      
     }
   }
 }

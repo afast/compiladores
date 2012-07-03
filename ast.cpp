@@ -228,6 +228,16 @@ ast* new_while(ast* cond, ast* compstmt, int linea){
   return res;
 }
 
+ast* new_each(char* arr, char* var_temp, ast* compstmt, int linea){
+  ast* res = new ast;
+  res->tipo = c_each;
+  res->linea = linea;
+  res->str = arr;
+  res->str2 = var_temp;
+  res->h1 = compstmt;
+  return res;
+}
+
 ast* new_case(ast* cond, ast* value, ast* when_rec) {
   ast* res = new ast;
   res->tipo = c_case;

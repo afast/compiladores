@@ -272,7 +272,7 @@ void ejecutar(list<Instruccion*> *codigo) {
           arg1 = get_variable(((RString*)arg2)->getValue()->data());
         break;
       case PUTV :
-        set_variable((RString*)arg1, arg2);
+        set_variable((RVariable*)ri->arg1, arg2);
         break;
       case PUSH_ARG:
         argument_stack.push(arg1);

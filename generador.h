@@ -19,6 +19,7 @@ void generar_pow(ast* nodo, std::list<Instruccion*> *codigo);
 void generar_mod(ast* nodo, std::list<Instruccion*> *codigo);
 void generar_elsif(ast* nodo, std::list<Instruccion*> *codigo);
 void generar_while(ast* nodo, std::list<Instruccion*> *codigo);
+void generar_each(ast* nodo, std::list<Instruccion*> *codigo);
 void generar_case(ast* nodo, std::list<Instruccion*> *codigo);
 void generar_case_rec(ast* nodo, std::list<Instruccion*> *codigo, RVariable* var);
 void generar_string(ast* nodo, std::list<Instruccion*> *codigo);

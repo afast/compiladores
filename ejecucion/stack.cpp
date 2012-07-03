@@ -73,8 +73,8 @@ void ejecutar(list<Instruccion*> *codigo) {
       arg1 = new RBool();
     switch (ri->op) {
       case FIN   : cout << "Fin ejecución" << endl; break;
-      case PUTS  : puts(arg1->to_s());
-        break;
+      case PUTS  : puts(arg1->to_s());break;
+      case PUTS_COMMAND  : system(((RString*)arg1)->getValue()->data());break;
       case GETS  : gets((RString *)ri->arg1); break;
       case ADD   :
         if (arg2->is_numeric() && arg3->is_numeric()){
@@ -333,6 +333,10 @@ void ejecutar(list<Instruccion*> *codigo) {
         break;
       case ASGN:
         set_variable((RString*)arg1, arg2);
+        break;
+      case SET_ARR_POS: {
+        (*((RArray*)arg1)).setValue(((RInteger*)arg3)->getValue(), arg2);
+        }
         break;
       default: cout << "hay una op no reconocida" <<  endl;
         break;

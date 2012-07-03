@@ -17,6 +17,7 @@
 #include "ejecucion/RClass.h"
 #include "ejecucion/stack.h"
 #include "ejecucion/base.h"
+//#include "ejecucion/RCommand.h"
 
 using namespace std;
 unsigned long int tmp_var_count=0;
@@ -54,6 +55,11 @@ RObject* generar_objeto(ast* nodo){
   switch(nodo->tipo){
     case f_string :{
                      RString* s = new RString(nodo->str, true);
+                     objeto = s;
+                     break;}
+    case t_command :{
+                     //RCommand* s = new RCommand(nodo->str);
+                     RString* s = new RString(nodo->str);
                      objeto = s;
                      break;}
     case f_entero :{
@@ -139,6 +145,9 @@ void decidir_nodo(ast* nodo, list<Instruccion*> *codigo){
     case t_method_call:
       break;
     case t_command :
+      cout << "intenta generar commando" <<endl;
+      generar_commando(nodo, codigo);
+      cout << "genero commando" << endl;
       break;
     case t_nil :
       break;
@@ -220,6 +229,9 @@ void decidir_nodo(ast* nodo, list<Instruccion*> *codigo){
     case t_arr_place :
       generar_arr_pos(nodo, codigo);
       break;
+    case t_array :
+      generar_array(nodo, codigo);
+      break;
   }
 }
 
@@ -238,6 +250,43 @@ void generar_arr_pos(ast* nodo, std::list<Instruccion*> *codigo){
   set_global_variable(var->getValue(), new RObject());
   codigo->push_back(instr(GETV_ARR, var, new RVariable(nodo->str), new RInteger(nodo->h1->entero), nodo->linea));
 
+}
+
+void generar_array(ast* n, std::list<Instruccion*> *codigo){
+  RObject* arg;
+  int pos = 0;
+  string tmp = get_tmp_var();
+  RVariable* var = new RVariable(&tmp);
+  set_global_variable(var->getValue(), new RArray());
+  if (n!=NULL){
+    cout << "aca1"<<n->stmt_list<< endl;
+    if (n->stmt_list!=NULL){
+      cout << "no es nulo"<< endl;
+      cout << "es nulo"<< endl;
+      cout << "aca333"<< endl;
+      list<ast*>::iterator it;
+      for (it=n->stmt_list->begin(); it != n->stmt_list->end(); it++){
+        cout << "aca2"<< endl;
+        ast* nodo = *it;
+        if (nodo_hoja(nodo)){ // no preciso variable temporal
+          arg = get_abstract_node(nodo);
+        } else {
+          decidir_nodo(nodo, codigo);
+          arg = codigo->back()->arg1;
+        }
+        cout << "aca4444"<< endl;
+        codigo->push_back(instr(SET_ARR_POS, var, arg, new RInteger(pos), n->linea));
+        pos++;
+      }
+      cout << "aca3"<< endl;
+    } else {
+        cout << "entro a crear vacio"<< endl;
+	codigo->push_back(instr(ASGN, new RString("esto"/*var->getValue()*/), var, n->linea));
+        //var = codigo->back()->arg1;
+    }
+    cout << "aca3213124352"<< endl;
+  }
+  cout << "aca5555"<< endl;
 }
 
 void generar_if(ast* nodo, std::list<Instruccion*> *codigo){
@@ -323,13 +372,25 @@ void generar_op_numerica(enum code_ops op, ast* nodo, std::list<Instruccion*>* c
 
 void generar_op_asgn(ast* nodo, std::list<Instruccion*>* codigo){
   RObject* arg;
+  RObject* argu;
   if (nodo_hoja(nodo->h2)){ // no preciso variable temporal
     arg = get_abstract_node(nodo->h2);
   } else {
     decidir_nodo(nodo->h2, codigo);
     arg = codigo->back()->arg1;
+  }	
+
+  if (nodo->h1->tipo == t_arr_place){
+	if (nodo_hoja(nodo->h1->h1)){ // no preciso variable temporal
+	    argu = get_abstract_node(nodo->h1->h1);
+	} else {
+	    decidir_nodo(nodo->h1->h1, codigo);
+	    argu = codigo->back()->arg1;
+	}
+        codigo->push_back(instr(SET_ARR_POS, new RVariable(nodo->h1->str), arg/*new RVariable(nodo->h1->str)*/, argu, nodo->h1->linea));
+  }else{
+    codigo->push_back(instr(ASGN, new RString(nodo->h1->str), arg, nodo->linea));
   }
-  codigo->push_back(instr(ASGN, new RString(nodo->h1->str), arg, nodo->linea));
 }
 
 RObject* get_numeric_node(ast* hoja){
@@ -345,6 +406,10 @@ RObject* get_numeric_node(ast* hoja){
       arg = new RVariable(hoja->str);
       break;
     case f_string :
+      arg = new RString(hoja->str);
+      break;
+    case t_command :
+      //arg = new RCommand(hoja->str);
       arg = new RString(hoja->str);
       break;
     case t_atributo:
@@ -370,6 +435,10 @@ RObject* get_abstract_node(ast* hoja){
                      break;}
     case f_string :
                    arg = new RString(hoja->str, true);
+                   break;
+    case t_command :
+                   //arg = new RCommand(hoja->str);
+                   arg = new RString(hoja->str);
                    break;
     case f_bool :
                    arg = new RBool(hoja->booleano);
@@ -480,6 +549,7 @@ void generar_case_rec(ast* nodo, std::list<Instruccion*> *codigo, RVariable* var
 }
 
 void generar_string(ast* nodo, std::list<Instruccion*> *codigo){}
+void generar_commando(ast* nodo, std::list<Instruccion*> *codigo){}
 void generar_entero(ast* nodo, std::list<Instruccion*> *codigo){}
 void generar_decimal(ast* nodo, std::list<Instruccion*> *codigo){}
 void generar_bool(ast* nodo, std::list<Instruccion*> *codigo){}
@@ -489,6 +559,10 @@ void generar_puts(ast* nodo, std::list<Instruccion*> *codigo){
     ast* hoja = nodo->h1;
     switch(hoja->tipo){
       case f_string:
+        arg1= new RString(hoja->str, true);
+        break;
+      case t_command:
+        //arg1= new RCommand(hoja->str);
         arg1= new RString(hoja->str, true);
         break;
       case f_entero:
@@ -514,7 +588,10 @@ void generar_puts(ast* nodo, std::list<Instruccion*> *codigo){
     arg1 = codigo->back()->arg1;
   }
   Instruccion* i = new Instruccion;
-  i->op = PUTS;
+  if(nodo->h1->tipo == t_command)
+    i->op = PUTS_COMMAND;
+  else
+    i->op = PUTS;
   i->arg1 = arg1;
   codigo->push_back(i);
 }
@@ -541,7 +618,7 @@ void generar_op_booleana(enum code_ops op, ast* nodo, list<Instruccion*>* codigo
 }
 
 bool nodo_hoja(ast* nodo){
-  return (nodo->tipo == f_string || nodo->tipo == f_entero || nodo->tipo == f_decimal || nodo->tipo == f_bool || nodo->tipo == t_identif || nodo->tipo == t_atributo);
+  return (nodo->tipo == f_string || nodo->tipo == f_entero || nodo->tipo == f_decimal || nodo->tipo == f_bool || nodo->tipo == t_identif || nodo->tipo == t_atributo || nodo->tipo == t_command);
 }
 
 function_info* generar_metodo(ast* nodo){

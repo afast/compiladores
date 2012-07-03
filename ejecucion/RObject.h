@@ -1,7 +1,7 @@
 #ifndef _ROBJECT_H
 #define _ROBJECT_H
 
-enum obj_type { RBOOL, RSTRING, ROBJECT, RINT, RCLASS, RARRAY, RNIL, RNUMERIC, RVARIABLE };
+enum obj_type { RBOOL, RSTRING, ROBJECT, RINT, RCLASS, RARRAY, RNIL, RNUMERIC, RVARIABLE, RCOMMAND };
 
 class RInteger;
 class RString;
@@ -16,6 +16,7 @@ class RObject {
     RInteger *objectId();
     bool is_numeric();
     bool is_string();
+    bool is_command();
     bool is_int();
     bool is_decimal();
     bool is_array();

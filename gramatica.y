@@ -69,7 +69,7 @@ void printCodigo();
 %token T_ATRIBUTO T_VAR_PESOS_CERO T_VAR_PESOS T_VAR_ARGV T_VAR_PESOS_PESOS T_INTEGER_ABS T_ATRIBUTO_ACCESOR
 %token T_FLOAT_ABS T_STRING_1 T_STRING_2 T_STRING_IZQ T_STRING_DER T_COMMAND T_ESPACIOS T_ERROR
 
-%type <a> expr_numeric compstmt stmt texpr value output integer float variable string expr_string expr_bool if recursive_elsif opt_else while rec_when_then case argdecl def arglist list_values class args_accesores
+%type <a> expr_numeric compstmt stmt texpr value output integer float variable string expr_string expr_bool if recursive_elsif opt_else while rec_when_then case argdecl def arglist list_values class args_accesores array list_values_arr
 /*=========================================================================
                           OPERATOR PRECEDENCE
 =========================================================================*/
@@ -213,9 +213,11 @@ argdecl : T_PAR_IZQ arglist T_PAR_DER
 	| arglist;
 arglist :	T_IDENTIF { $$ = new_arguments(new_identificador($<text>1, yylineno), yylineno);}
 	| arglist T_COMA T_IDENTIF { $$ = add_argument(new_identificador($<text>3, yylineno), $1, yylineno);};
-array :	T_CORCHETE_IZQ value T_COMA list_values T_CORCHETE_DER
-  | T_CORCHETE_IZQ value T_CORCHETE_DER
-	| T_CORCHETE_IZQ T_CORCHETE_DER;
+array :	T_CORCHETE_IZQ value T_COMA list_values_arr T_CORCHETE_DER { $$ = new_array($2, $4, yylineno);}
+  | T_CORCHETE_IZQ value T_CORCHETE_DER { $$ = new_array($2, yylineno);}
+	| T_CORCHETE_IZQ T_CORCHETE_DER { $$ = new_array(yylineno);};
+list_values_arr: value { $$ = new_array($1, yylineno);} 
+	| list_values_arr T_COMA value { $$ = add_elem($1, $3, yylineno);};
 list_values: value { $$ = new_params($1, yylineno);}
 	| list_values T_COMA value { $$ = add_param($1, $3, yylineno);};
 class :	T_CLASS T_NOM_CONST T_FIN_INSTRUCCION compstmt T_END { $$ = new_class($<text>2, $4, yylineno);};
@@ -255,8 +257,11 @@ main( int argc, char *argv[] )
     if (!error_sintaxis){
       Instruccion *fin = new Instruccion;
       fin->op = FIN;
+      fin->arg1 = NULL;
+      fin->arg3 = NULL;
+      fin->arg2 = NULL;
       codigoGlobal->push_back(fin);
-//      printCodigo();
+      printCodigo();
       ejecutar(codigoGlobal);
     }
 	} else {
@@ -310,6 +315,7 @@ void printCodigo() {
       case ENDFUNC: std::cout << "ENDFUNC" << std::endl; break;
       case RETURN: std::cout << "RETURN" << std::endl; break;
       case ASGN: std::cout << "ASGN" << std::endl; break;
+      case PUTS_COMMAND: std::cout << "PUTS_COMMAND" << std::endl; break;
       default: std::cout << "hay una op no reconocida" <<  std::endl;
         break;
     }

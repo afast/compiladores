@@ -5,10 +5,13 @@
 #include <unordered_map>
 
 class RString;
+class RCommand;
 class RObject;
 class RBool;
 
+
 void puts(RString *string_arg);
+void puts(RCommand *command);
 void gets(RString *string_arg);
 void init();
 long int getDir(void* p);

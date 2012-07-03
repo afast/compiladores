@@ -5,6 +5,8 @@
 #include "RString.h"
 #include "RInteger.h"
 #include "RNumeric.h"
+#include "RDecimal.h"
+#include "RInteger.h"
 #include "RBool.h"
 #include "Util.h"
 #include "memory.h"
@@ -12,11 +14,14 @@
 std::unordered_map<std::string, RObject*> vTemporales;
 
 void puts(RString *string_arg) {
-  std::string *str = new std::string(string_arg->getValue()->data());
-  while (str->at(str->size()-1) == '\n')
-    str->erase(str->size()-1);
-  std::cout << str->data() << std::endl;
-  delete str;
+  if (string_arg->getValue()->size()>0){
+    std::string *str = new std::string(string_arg->getValue()->data());
+    while (str->at(str->size()-1) == '\n')
+      str->erase(str->size()-1);
+    std::cout << str->data() << std::endl;
+    delete str;
+  } else
+    std::cout << string_arg->getValue()->data() << std::endl;
 }
 
 void gets(RString *string_arg) {
@@ -60,6 +65,9 @@ RBool* mayor(RObject* arg1, RObject* arg2){
       case RNUMERIC:
         resultado = ((RNumeric*)arg1)->getDecimalValue() > ((RNumeric*)arg2)->getDecimalValue();
         break;
+      case RINT:
+        resultado = ((RNumeric*)arg1)->getDecimalValue() > ((RNumeric*)arg2)->getDecimalValue();
+        break;
       case RBOOL:
         resultado = ((RBool*)arg1)->getValue() > ((RBool*)arg2)->getValue();
         break;
@@ -80,7 +88,10 @@ RBool* mayor_igual(RObject* arg1, RObject* arg2){
     bool resultado;
     switch(arg1->type){
       case RNUMERIC:
-        resultado = ((RNumeric*)arg1)->getDecimalValue() >= ((RNumeric*)arg2)->getDecimalValue();
+        resultado = ((RDecimal*)arg1)->getValue() >= ((RDecimal*)arg2)->getValue();
+        break;
+      case RINT:
+        resultado = ((RInteger*)arg1)->getValue() >= ((RInteger*)arg2)->getValue();
         break;
       case RBOOL:
         resultado = ((RBool*)arg1)->getValue() >= ((RBool*)arg2)->getValue();
@@ -96,11 +107,15 @@ RBool* mayor_igual(RObject* arg1, RObject* arg2){
 }
 
 RBool* menor(RObject* arg1, RObject* arg2){
-  return mayor_igual(arg2, arg1);
+  RBool* res = mayor_igual(arg1, arg2);
+  res->setValue(!res->getValue());
+  return res;
 }
 
 RBool* menor_igual(RObject* arg1, RObject* arg2){
-  return mayor(arg2, arg1);
+  RBool* res = mayor(arg1, arg2);
+  res->setValue(!res->getValue());
+  return res;
 }
 
 RBool* igual(RObject* arg1, RObject* arg2){
@@ -113,6 +128,9 @@ RBool* igual(RObject* arg1, RObject* arg2){
     switch(arg1->type){
       case RNUMERIC:
         resultado = ((RNumeric*)arg1)->getDecimalValue() == ((RNumeric*)arg2)->getDecimalValue();
+        break;
+      case RINT:
+        resultado = ((RInteger*)arg1)->getValue() == ((RInteger*)arg2)->getValue();
         break;
       case RBOOL:
         resultado = ((RBool*)arg1)->getValue() == ((RBool*)arg2)->getValue();

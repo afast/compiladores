@@ -10,7 +10,6 @@
 RObject::RObject(){
   this->object_id=0;
   this->type = RNIL;
-  new_pointer(this);
 }
 
 bool RObject::is_numeric(){

@@ -19,7 +19,6 @@ std::list<RDecimal*> mdecimals;
 std::list<RClass*> mclasses;
 std::list<RBool*> mbooleans;
 std::list<RArray*> marrays;
-std::list<RObject*> mobjects;
 std::list<function_info*> mfunctions;
 void new_pointer(RVariable* obj){
   mvariables.push_back(obj);
@@ -49,35 +48,6 @@ void new_pointer(RArray* obj){
   marrays.push_back(obj);
 }
 
-void new_pointer(RObject* obj){
-  switch (obj->type){
-    case RNIL :
-      mobjects.push_back(obj);
-      break;
-    case RVARIABLE :
-      mvariables.push_back((RVariable*)obj);
-      break;
-    case RSTRING :
-      mstrings.push_back((RString*)obj);
-      break;
-    case RINT :
-      mintegers.push_back((RInteger*)obj);
-      break;
-    case RNUMERIC :
-      mdecimals.push_back((RDecimal*)obj);
-      break;
-    case RCLASS :
-      mclasses.push_back((RClass*)obj);
-      break;
-    case RBOOL :
-      mbooleans.push_back((RBool*)obj);
-      break;
-    case RARRAY :
-      marrays.push_back((RArray*)obj);
-      break;
-  }
-}
-
 void new_pointer(function_info_t* funcion){
   mfunctions.push_back(funcion);
 }
@@ -104,9 +74,6 @@ void free_memory(){
   std::list<RArray*>::iterator ita;
   for (ita=marrays.begin(); ita != marrays.end(); ita++)
     delete (*ita);
-  std::list<RObject*>::iterator ito;
-  for (ito=mobjects.begin(); ito != mobjects.end(); ito++)
-    delete (*ito);
   std::list<function_info*>::iterator itf;
   std::list<Instruccion*>::iterator iter;
   for (itf=mfunctions.begin(); itf != mfunctions.end(); itf++){

@@ -11,7 +11,7 @@ enum ast_node_t {
   t_nil, t_mul_string, t_add_string, t_method_with_args, t_args,
   b_and, b_or, b_not, b_mayor, b_mayor_igual, b_menor, b_menor_igual,
   b_doble_igual, b_not_igual, b_is_bool, c_case, c_case_rec, a_method, a_method_with_args,
-  call_method, t_params, t_class, instance_method_call, method_call_new, t_accesor, t_accesores, t_writers, t_readers, t_wr, t_attr_assign, t_array
+  call_method, t_params, t_class, instance_method_call, method_call_new, t_accesor, t_accesores, t_writers, t_readers, t_wr, t_attr_assign, t_array, c_each
 };
 
 struct ast_node {
@@ -19,6 +19,7 @@ struct ast_node {
   struct ast_node *h1, *h2, *h3, *h4;
   std::list<struct ast_node*> *stmt_list;
   char *str;
+  char *str2;
   long int entero;
   double decimal;
   bool booleano;
@@ -71,4 +72,5 @@ ast* new_array( int linea);
 ast* new_array(ast * elem , int linea);
 ast* new_array(ast * elem , ast * elems,  int linea);
 ast* add_elem(ast* elems, ast* elem, int linea);
+ast* new_each(char* arr, char* var_temp, ast* compstmt, int linea);
 #endif

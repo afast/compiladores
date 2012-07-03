@@ -102,7 +102,7 @@ not|!  {return(T_NOT);};
 [A-Z][_a-zA-Z0-9]*\.new   {yylval.text = strdup(yytext); return(T_NEW);};
 {VARIABLE}\.length {yylval.text = strdup(yytext); return(T_LENGTH);};
 {VARIABLE}\.size {yylval.text = strdup(yytext); return(T_SIZE);};
-{VARIABLE}\.each {yylval.text = strdup(yytext); return(T_EACH);};
+{VARIABLE}\.each {yylval.text = strdup(strtok (yytext,".")); return(T_EACH);};
 {VARIABLE}\.[_a-z][_a-zA-Z0-9]* {yylval.text = strdup(yytext); return(T_INVOCACION_METODO);};
 [A-Z][_a-zA-Z0-9]*	 {yylval.text = strdup(yytext); return(T_NOM_CONST);};
 [_a-z][_a-zA-Z0-9]*	 {yylval.text = strdup(yytext); return(T_IDENTIF);};

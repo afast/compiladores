@@ -106,6 +106,9 @@ void decidir_nodo(ast* nodo, list<Instruccion*> *codigo){
     case c_while :
       generar_while(nodo, codigo);
       break;
+    case c_each :
+      generar_each(nodo, codigo);
+      break;
     case c_case :
       generar_case(nodo, codigo);
       break;
@@ -250,14 +253,9 @@ void generar_array(ast* n, std::list<Instruccion*> *codigo){
   RVariable* var = new RVariable(&tmp);
   set_global_variable(var->getValue(), new RArray());
   if (n!=NULL){
-    cout << "aca1"<<n->stmt_list<< endl;
     if (n->stmt_list!=NULL){
-      cout << "no es nulo"<< endl;
-      cout << "es nulo"<< endl;
-      cout << "aca333"<< endl;
       list<ast*>::iterator it;
       for (it=n->stmt_list->begin(); it != n->stmt_list->end(); it++){
-        cout << "aca2"<< endl;
         ast* nodo = *it;
         if (nodo_hoja(nodo)){ // no preciso variable temporal
           arg = get_abstract_node(nodo);
@@ -265,19 +263,14 @@ void generar_array(ast* n, std::list<Instruccion*> *codigo){
           decidir_nodo(nodo, codigo);
           arg = codigo->back()->arg1;
         }
-        cout << "aca4444"<< endl;
         codigo->push_back(instr(SET_ARR_POS, var, arg, new RInteger(pos), n->linea));
         pos++;
       }
-      cout << "aca3"<< endl;
     } else {
-        cout << "entro a crear vacio"<< endl;
-	codigo->push_back(instr(ASGN, new RString("esto"/*var->getValue()*/), var, n->linea));
+    	codigo->push_back(instr(ASGN, new RString("esto"/*var->getValue()*/), var, n->linea));
         //var = codigo->back()->arg1;
     }
-    cout << "aca3213124352"<< endl;
   }
-  cout << "aca5555"<< endl;
 }
 
 void generar_if(ast* nodo, std::list<Instruccion*> *codigo){
@@ -475,6 +468,42 @@ void generar_while(ast* nodo, std::list<Instruccion*> *codigo){
   decidir_nodo(nodo->h1, codigo);
   RObject* cond2 = codigo->back()->arg1;
   codigo->push_back(instr(WHILEEND, cond2, nodo->linea)); //END o WHILEEND
+}
+
+void generar_each(ast* nodo, std::list<Instruccion*> *codigo){
+
+  /*
+   * str - nombre arreglo
+   * str2 - nombre variable temporal a utilizar
+   * h1 - el codigo a ejecutar dentro del each
+   * */
+  /* evaluar condicion */
+  /* while cond */
+  /* cuerpo while */
+  /* endwhile */
+  
+  //generar la condicion temporal < size
+  //decidir_nodo(nodo->h1, codigo);
+  //RObject* cond = codigo->back()->arg1;
+  //codigo->push_back(instr(WHILE, cond, nodo->linea));
+  //generar_compstmt(nodo->h2->stmt_list, codigo);
+  //decidir_nodo(nodo->h1, codigo);
+  //RObject* cond2 = codigo->back()->arg1;
+  //codigo->push_back(instr(WHILEEND, cond2, nodo->linea)); //END o WHILEEND
+  RVariable * var_temp = new RVariable(nodo->str2);
+  RObject* arg;
+  RObject * arg1;
+  string tmp = get_tmp_var();
+  RVariable* var = new RVariable(&tmp);
+  set_global_variable(var->getValue(), new RObject());
+  set_global_variable(var_temp->getValue(), new RObject());
+  //codigo->push_back(instr(ASGN, new RString(nodo->h1->str), arg, nodo->linea));
+  codigo->push_back(instr(GETV_ARR, var_temp, new RVariable(nodo->str), new RInteger(1), nodo->linea));
+  Instruccion* i = new Instruccion;
+  i->op = PUTS;
+  i->arg1 = var_temp;
+  codigo->push_back(i);
+  generar_compstmt(nodo->h1->stmt_list, codigo);
 }
 
 void generar_case(ast* nodo, std::list<Instruccion*> *codigo){

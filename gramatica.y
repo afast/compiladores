@@ -261,7 +261,7 @@ main( int argc, char *argv[] )
       fin->arg3 = NULL;
       fin->arg2 = NULL;
       codigoGlobal->push_back(fin);
-//      printCodigo();
+      printCodigo();
       ejecutar(codigoGlobal);
     }
 	} else {

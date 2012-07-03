@@ -36,6 +36,11 @@ bool RObject::is_array(){
 
 }
 
+bool RObject::is_command(){
+  return type == RCOMMAND;
+
+}
+
 bool RObject::is_nil(){
   return type == RNIL;
 }

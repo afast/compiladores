@@ -3,6 +3,7 @@
 
 #include "base.h"
 #include "RString.h"
+#include "RCommand.h"
 #include "RInteger.h"
 #include "RNumeric.h"
 #include "RDecimal.h"
@@ -22,6 +23,17 @@ void puts(RString *string_arg) {
     delete str;
   } else
     std::cout << string_arg->getValue()->data() << std::endl;
+}
+
+void puts(RCommand *command) {
+  if (command->getValue()->size()>0){
+    std::string *str = new std::string(command->getValue()->data());
+    while (str->at(str->size()-1) == '\n')
+      str->erase(str->size()-1);
+    std::cout << str->data() << std::endl;
+    delete str;
+  } else
+    std::cout << command->getValue()->data() << std::endl;
 }
 
 void gets(RString *string_arg) {

@@ -9,13 +9,13 @@ PROGRAM = myruby
 all: main
 
 gramatica: y.tab.c lex.yy.c generador.o ast.o
-	$(CC) -o $(PROGRAM) y.tab.c lex.yy.c $(CFLAGS) ejecucion/stack.o ejecucion/base.o ejecucion/RObject.o ejecucion/RString.o ejecucion/RInteger.o ejecucion/RBool.o ejecucion/memory.o ejecucion/RArray.o ejecucion/RClass.o generador.o ast.o ejecucion/RNumeric.o ejecucion/RDecimal.o ejecucion/RVariable.o -g -O0
+	$(CC) -o $(PROGRAM) y.tab.c lex.yy.c $(CFLAGS) ejecucion/stack.o ejecucion/base.o ejecucion/RObject.o ejecucion/RString.o ejecucion/RInteger.o ejecucion/RBool.o ejecucion/memory.o ejecucion/RArray.o ejecucion/RCommand.o ejecucion/RClass.o generador.o ast.o ejecucion/RNumeric.o ejecucion/RDecimal.o ejecucion/RVariable.o -g -O0
 
 ejecucion:
 	cd ejecucion; make all
 main: y.tab.c lex.yy.c generador.o ast.o
 	cd ejecucion; make all
-	$(CC) -o $(PROGRAM) y.tab.c lex.yy.c $(CFLAGS) ejecucion/stack.o ejecucion/base.o ejecucion/RObject.o ejecucion/RString.o ejecucion/RInteger.o ejecucion/RBool.o ejecucion/memory.o ejecucion/RArray.o ejecucion/RClass.o generador.o ast.o ejecucion/RNumeric.o ejecucion/RDecimal.o ejecucion/RVariable.o -g -O0
+	$(CC) -o $(PROGRAM) y.tab.c lex.yy.c $(CFLAGS) ejecucion/stack.o ejecucion/base.o ejecucion/RObject.o ejecucion/RString.o ejecucion/RInteger.o ejecucion/RBool.o ejecucion/memory.o ejecucion/RArray.o ejecucion/RCommand.o ejecucion/RClass.o generador.o ast.o ejecucion/RNumeric.o ejecucion/RDecimal.o ejecucion/RVariable.o -g -O0
 
 generador.o: generador.h generador.cpp
 	g++ generador.cpp -c -std=c++0x -g -O0

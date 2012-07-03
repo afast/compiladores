@@ -73,7 +73,11 @@ void ejecutar(list<Instruccion*> *codigo) {
       arg1 = new RBool();
     switch (ri->op) {
       case FIN   : cout << "Fin ejecución" << endl; break;
-      case PUTS  : puts(arg1->to_s());
+      case PUTS  : {
+		if(arg1->is_command()){
+			puts((RCommand*)arg1);
+		} else {puts(arg1->to_s());}
+	}
         break;
       case GETS  : gets((RString *)ri->arg1); break;
       case ADD   :

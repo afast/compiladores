@@ -17,6 +17,7 @@
 #include "ejecucion/RClass.h"
 #include "ejecucion/stack.h"
 #include "ejecucion/base.h"
+#include "ejecucion/RCommand.h"
 
 using namespace std;
 unsigned long int tmp_var_count=0;
@@ -54,6 +55,10 @@ RObject* generar_objeto(ast* nodo){
   switch(nodo->tipo){
     case f_string :{
                      RString* s = new RString(nodo->str, true);
+                     objeto = s;
+                     break;}
+    case t_command :{
+                     RCommand* s = new RCommand(nodo->str);
                      objeto = s;
                      break;}
     case f_entero :{
@@ -139,6 +144,7 @@ void decidir_nodo(ast* nodo, list<Instruccion*> *codigo){
     case t_method_call:
       break;
     case t_command :
+      generar_commando(nodo, codigo);
       break;
     case t_nil :
       break;
@@ -399,6 +405,9 @@ RObject* get_numeric_node(ast* hoja){
     case f_string :
       arg = new RString(hoja->str);
       break;
+    case t_command :
+      arg = new RCommand(hoja->str);
+      break;
     case t_atributo:
       arg = new RVariable(hoja->str);
       if (generando_clase)
@@ -422,6 +431,9 @@ RObject* get_abstract_node(ast* hoja){
                      break;}
     case f_string :
                    arg = new RString(hoja->str, true);
+                   break;
+    case t_command :
+                   arg = new RCommand(hoja->str);
                    break;
     case f_bool :
                    arg = new RBool(hoja->booleano);
@@ -532,6 +544,7 @@ void generar_case_rec(ast* nodo, std::list<Instruccion*> *codigo, RVariable* var
 }
 
 void generar_string(ast* nodo, std::list<Instruccion*> *codigo){}
+void generar_commando(ast* nodo, std::list<Instruccion*> *codigo){}
 void generar_entero(ast* nodo, std::list<Instruccion*> *codigo){}
 void generar_decimal(ast* nodo, std::list<Instruccion*> *codigo){}
 void generar_bool(ast* nodo, std::list<Instruccion*> *codigo){}
@@ -542,6 +555,9 @@ void generar_puts(ast* nodo, std::list<Instruccion*> *codigo){
     switch(hoja->tipo){
       case f_string:
         arg1= new RString(hoja->str, true);
+        break;
+      case t_command:
+        arg1= new RCommand(hoja->str);
         break;
       case f_entero:
         arg1= new RInteger(hoja->entero);

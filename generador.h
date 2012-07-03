@@ -22,6 +22,7 @@ void generar_while(ast* nodo, std::list<Instruccion*> *codigo);
 void generar_case(ast* nodo, std::list<Instruccion*> *codigo);
 void generar_case_rec(ast* nodo, std::list<Instruccion*> *codigo, RVariable* var);
 void generar_string(ast* nodo, std::list<Instruccion*> *codigo);
+void generar_commando(ast* nodo, std::list<Instruccion*> *codigo);
 void generar_entero(ast* nodo, std::list<Instruccion*> *codigo);
 void generar_decimal(ast* nodo, std::list<Instruccion*> *codigo);
 void generar_bool(ast* nodo, std::list<Instruccion*> *codigo);

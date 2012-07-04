@@ -727,10 +727,8 @@ void generar_new(ast* nodo, std::list<Instruccion*> *codigo){
   set_global_variable(var->getValue(), new RObject(true));
   codigo->push_back(instr(NEW, var, new RString(nodo->str), nodo->linea));
   if (nodo->h1 != NULL && nodo->h1->stmt_list != NULL && nodo->h1->stmt_list->size() > 0){
-    string *tmp1 = get_tmp_var();
-    RVariable* var1 = new RVariable(tmp1);
-    push_args(nodo->h2, codigo, nodo->linea);
-    codigo->push_back(instr(CLASS_INST_CALL, var1, var, new RString("initialize"), nodo->linea));
+    push_args(nodo->h1, codigo, nodo->linea);
+    codigo->push_back(instr(CLASS_INST_CALL, var, var, new RString("initialize"), nodo->linea));
   }
 }
 

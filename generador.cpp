@@ -560,24 +560,15 @@ void generar_inter(ast* nodo, std::list<Instruccion*> *codigo){
    * str  - primer string
    * str2 - string final
    * */
-
-  decidir_nodo(nodo->h1, codigo);
-  RString * s1 = new RString(nodo->str, true);
-  RString * s2 = new RString(nodo->str2, true); 
-  cout << s1->getValue()->data() << endl;
-  cout << s2->getValue()->data() << endl;
-
-  RObject* cond = codigo->back()->arg1;
-
-RObject* arg2, *arg3;
-  arg2 = get_abstract_node(nodo->h1);
-  arg3 = get_abstract_node(nodo->h2);
-  codigo->push_back(instr(ADD, new RString(), s1, s2, nodo->linea));
-
-  //codigo->push_back(instr(CASE, cond, 0));
-  cout << nodo->str << endl;
-  cout << nodo->str2 << endl;
-  cout << nodo->h1 << endl;
+   decidir_nodo(nodo->h1, codigo);
+   RObject* arg2 = codigo->back()->arg1;
+   RString* tmp = new RString();
+   codigo->push_back(instr(TO_S, tmp, arg2, nodo->linea));
+   RString* tmp1 = new RString();
+   RString * s1 = new RString(nodo->str, true);
+   RString * s2 = new RString(nodo->str2, true); 
+   codigo->push_back(instr(ADD, tmp1, s1, tmp, nodo->linea));
+   codigo->push_back(instr(ADD, new RString(), tmp1, s2, nodo->linea));
 }
 
 

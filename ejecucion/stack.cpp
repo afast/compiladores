@@ -348,6 +348,10 @@ void ejecutar(list<Instruccion*> *codigo) {
         (*((RArray*)arg1)).setValue(((RInteger*)arg3)->getValue(), arg2);
         }
         break;
+      case TO_S: {
+        ((RString*)arg1)->setValue(arg2->to_s());
+	}
+        break;
       default: cout << "hay una operacion no reconocida" <<  endl;
         break;
     }

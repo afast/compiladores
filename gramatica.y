@@ -108,8 +108,8 @@ stmt : output
   | T_IDENTIF { $$ = new_method_call($<text>1, NULL, yylineno); }
   | T_IDENTIF list_values_par { $$ = new_method_call($<text>1, $2, yylineno); }
 	| bloque;
-bloque: T_LLAVE_IZQ compstmt T_LLAVE_DER { $$ = $2;}
-	| T_DO compstmt T_END {$$ = $2;};
+bloque: T_LLAVE_IZQ T_FIN_INSTRUCCION compstmt T_LLAVE_DER { $$ = $3;}
+	| T_DO T_FIN_INSTRUCCION compstmt T_END {$$ = $3;};
 value : T_GETS { $$ = new_gets(yylineno); }
 	| T_INSTANCE_CLASS { $$ = new_class_method_call($<text>1, NULL, yylineno); }
 	| T_NEW T_PAR_IZQ list_values T_PAR_DER { $$ = new_class_new($<text>1, $3, yylineno); }

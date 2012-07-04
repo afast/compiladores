@@ -9,6 +9,24 @@ ast* new_numeric_op(enum ast_node_t op, ast* left, ast* right, int linea){
   return res;
 }
 
+ast* copiar_nodo(ast* orig, int linea){
+  if (orig == NULL)
+	return NULL;
+  ast* res = new ast;
+  res->linea = linea;
+  res->tipo= orig->tipo;
+  res->entero = orig->entero;
+  res->decimal = orig->decimal;
+  res->booleano = orig->booleano; 
+  res->h1= copiar_nodo(orig->h1, linea);
+  res->h2= copiar_nodo(orig->h2, linea);
+  res->h3= copiar_nodo(orig->h3, linea);
+  res->h4= copiar_nodo(orig->h4, linea); 
+  res->str = orig->str;
+  res->str2 = orig->str2;
+  return res;
+}
+
 ast* new_number(long int number, int linea){
   ast* res = new ast;
   res->tipo = f_entero;
@@ -106,6 +124,18 @@ ast* new_string(char* texto, int linea){
   res->str = texto;
   return res;
 }
+
+ast* new_inter(char* texto, ast* expr, char* texto2, int linea){
+  ast* res = new ast;
+  res->tipo = t_inter;
+  res->linea = linea;
+  res->str = texto;
+  res->str2 = texto2;
+  res->h1 = expr;
+  return res;
+
+}
+
 
 ast* new_command(char* texto, int linea){
   ast* res = new ast;

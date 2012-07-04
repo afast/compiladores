@@ -57,5 +57,6 @@ void generar_writers(ast* nodo);
 void generar_accesores(ast* nodo);
 void generar_readers(ast* nodo);
 void generar_array(ast* nodo, std::list<Instruccion*> *codigo);
+void generar_inter(ast* nodo, std::list<Instruccion*> *codigo);
 
 #endif

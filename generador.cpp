@@ -235,6 +235,9 @@ void decidir_nodo(ast* nodo, list<Instruccion*> *codigo){
     case t_array :
       generar_array(nodo, codigo);
       break;
+    case t_inter :
+      generar_inter(nodo, codigo);	
+      break;
   }
 }
 
@@ -544,6 +547,25 @@ void generar_case(ast* nodo, std::list<Instruccion*> *codigo){
   generar_case_rec(nodo->h3, codigo, var);
   codigo->push_back(instr(END, var, 0));
 }
+
+void generar_inter(ast* nodo, std::list<Instruccion*> *codigo){
+  /*
+   * h1 - expr
+   * str  - primer string
+   * str2 - string final
+   * */
+   decidir_nodo(nodo->h1, codigo);
+   RObject* arg2 = codigo->back()->arg1;
+   RString* tmp = new RString();
+   codigo->push_back(instr(TO_S, tmp, arg2, nodo->linea));
+   RString* tmp1 = new RString();
+   RString * s1 = new RString(nodo->str, true);
+   RString * s2 = new RString(nodo->str2, true); 
+   codigo->push_back(instr(ADD, tmp1, s1, tmp, nodo->linea));
+   codigo->push_back(instr(ADD, new RString(), tmp1, s2, nodo->linea));
+}
+
+
 
 void generar_case_rec(ast* nodo, std::list<Instruccion*> *codigo, RVariable* var){
   /*

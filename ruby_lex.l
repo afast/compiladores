@@ -117,7 +117,7 @@ not|!  {return(T_NOT);};
 (([1-9][0-9]*)\.[0-9]+)|(((\+|\-)?0)\.[0-9]+) {yylval.real = atof(yytext); return(T_FLOAT_ABS);};
 \'{STRING_SIMPLE_CON_SALTO}\'|\'{STRING_SIMPLE_SIN_SALTO}\' {yylval.text = replaceContinuacionLinea(yytext); return(T_STRING_1);};
 \"{STRING_DOBLE_CON_SALTO}\"|\"{STRING_DOBLE_SIN_SALTO}\"   {yylval.text = replaceContinuacionLinea(yytext); return(T_STRING_2);};
-\"{STRING_DOBLE_CON_SALTO}#\{|\"{STRING_DOBLE_SIN_SALTO}#\{ {yylval.text = replaceContinuacionLinea(yytext); return(T_STRING_IZQ);};
+\"{STRING_DOBLE_CON_SALTO}#\{|\"{STRING_DOBLE_SIN_SALTO}#\{ {yylval.text = replaceContinuacionLinea(strtok (yytext,"{")); return(T_STRING_IZQ);};
 \}{STRING_DOBLE_CON_SALTO}#\{|\}{STRING_DOBLE_SIN_SALTO}#\{ {yylval.text = replaceContinuacionLinea(yytext); return(T_STRING_CENTER);};
 \}{STRING_DOBLE_CON_SALTO}\"|\}{STRING_DOBLE_SIN_SALTO}\"   {yylval.text = replaceContinuacionLinea(yytext); return(T_STRING_DER);};
 `{COMMAND_CON_SALTO}`|`{COMMAND_SIN_SALTO}` {yylval.text = replaceContinuacionLinea(yytext); return(T_COMMAND);};

@@ -26,8 +26,9 @@ class Hola
   attr_accessor :hi
   attr_reader :some
   attr_writer :thing
-  def say a
+  def say a , b
     puts a
+    puts b
   end
   def set b
     @some = b
@@ -38,12 +39,12 @@ class Hola
 end
 
 al = Hola.new
-al.say 'hola andreas'
+al.say 'hola andreas', "final"
 al.set 'seteando un attr'
-al.say 'hi'
+al.say 'hi', 'chau'
 al.hi = 'yummy'
 puts al.hi
-al.say '----'
+al.say '----' , 'chau'
 al.thing = 333
 al.thingy
 al.thing = 334

@@ -360,7 +360,7 @@ ast* add_elem(ast* elems, ast* elem, int linea){
 
 
 ast* add_param(ast* args, ast* arg, int linea){
-  args->stmt_list->push_back(arg);
+  args->stmt_list->push_front(arg);
   return args;
 }
 

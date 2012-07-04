@@ -27,17 +27,18 @@ bool generando_clase;
 string nombre_clase;
 RClass *current_class;
 
-string get_tmp_var(){
+string *get_tmp_var(){
   stringstream s;
-  string tmp;
+  string *tmp = new string();
   if (tmp_var_count == ULONG_MAX){
     s << ULONG_MAX;
-    s >> tmp;
-    tmp_var_prefix += tmp;
+    s >> *tmp;
+    tmp_var_prefix += *tmp;
   }
   s << tmp_var_prefix;
   s << tmp_var_count++;
-  s >> tmp;
+  s >> *tmp;
+  new_pointer(tmp);
   return tmp;
 }
 
@@ -251,9 +252,9 @@ void generar_compstmt(list<ast*> *stmt_list, list<Instruccion*> *codigo){
 void generar_arr_pos(ast* nodo, std::list<Instruccion*> *codigo){
   decidir_nodo(nodo->h1, codigo);
   RObject* arg;
-  string tmp = get_tmp_var();
-  RVariable* var = new RVariable(&tmp);
-  set_global_variable(var->getValue(), new RObject());
+  string *tmp = get_tmp_var();
+  RVariable* var = new RVariable(tmp);
+  set_global_variable(var->getValue(), new RObject(true));
   codigo->push_back(instr(GETV_ARR, var, new RVariable(nodo->str), new RInteger(nodo->h1->entero), nodo->linea));
 
 }
@@ -261,8 +262,8 @@ void generar_arr_pos(ast* nodo, std::list<Instruccion*> *codigo){
 void generar_array(ast* n, std::list<Instruccion*> *codigo){
   RObject* arg;
   int pos = 0;
-  string tmp = get_tmp_var();
-  RVariable* var = new RVariable(&tmp);
+  string *tmp = get_tmp_var();
+  RVariable* var = new RVariable(tmp);
   set_global_variable(var->getValue(), new RArray());
   if (n!=NULL){
     if (n->stmt_list!=NULL){
@@ -313,7 +314,7 @@ void generar_suma_string(ast* nodo, std::list<Instruccion*>* codigo){
   RObject* arg2, *arg3;
   arg2 = get_abstract_node(nodo->h1);
   arg3 = get_abstract_node(nodo->h2);
-  codigo->push_back(instr(ADD, new RString(), arg2, arg3, nodo->linea));
+  codigo->push_back(instr(ADD, new RString(""), arg2, arg3, nodo->linea));
 }
 
 void generar_mul_string(ast* nodo, std::list<Instruccion*>* codigo){
@@ -330,7 +331,7 @@ void generar_mul_string(ast* nodo, std::list<Instruccion*>* codigo){
     decidir_nodo(nodo->h2, codigo); //ultima operacion debe ser numerica y guardar el resultado en arg1
     arg3 = codigo->back()->arg1;
   }
-  codigo->push_back(instr(MULT, new RString(), arg2, arg3, nodo->linea));
+  codigo->push_back(instr(MULT, new RString(""), arg2, arg3, nodo->linea));
 }
 
 void generar_op_numerica(enum code_ops op, ast* nodo, std::list<Instruccion*>* codigo){
@@ -357,10 +358,10 @@ void generar_op_numerica(enum code_ops op, ast* nodo, std::list<Instruccion*>* c
       arg1 = i;
     }
   } else {
-    string tmp = get_tmp_var();
-    RVariable* var = new RVariable(&tmp);
+    string *tmp = get_tmp_var();
+    RVariable* var = new RVariable(tmp);
     arg1 = var;
-    set_global_variable(var->getValue(), new RObject());
+    set_global_variable(var->getValue(), new RObject(true));
   }
   codigo->push_back(instr(op, arg1, arg2, arg3, nodo->linea));
 }
@@ -498,10 +499,10 @@ void generar_each(ast* nodo, std::list<Instruccion*> *codigo){
    * */
   RVariable * arreglo = new RVariable(nodo->str);
   RVariable * var_temp = new RVariable(nodo->str2);
-  string tmp = get_tmp_var();
-  RVariable * tamanio = new RVariable(&tmp);
-  string indice_tmp = get_tmp_var();
-  RVariable * indice = new RVariable(&indice_tmp);
+  string *tmp = get_tmp_var();
+  RVariable * tamanio = new RVariable(tmp);
+  string *indice_tmp = get_tmp_var();
+  RVariable * indice = new RVariable(indice_tmp);
   RObject* arg;
   RObject * arg1;
   RInteger* step = new RInteger(1);
@@ -531,9 +532,9 @@ void generar_case(ast* nodo, std::list<Instruccion*> *codigo){
   /* generar case_rec */
   /* endif */
   RObject* arg;
-  string tmp = get_tmp_var();
-  RVariable* var = new RVariable(&tmp);
-  set_global_variable(var->getValue(), new RObject());
+  string *tmp = get_tmp_var();
+  RVariable* var = new RVariable(tmp);
+  set_global_variable(var->getValue(), new RObject(true));
   decidir_nodo(nodo->h1, codigo);
   RObject* cond = codigo->back()->arg1;
   codigo->push_back(instr(CASE, cond, 0));
@@ -556,13 +557,13 @@ void generar_inter(ast* nodo, std::list<Instruccion*> *codigo){
    * */
    decidir_nodo(nodo->h1, codigo);
    RObject* arg2 = codigo->back()->arg1;
-   RString* tmp = new RString();
+   RString* tmp = new RString("");
    codigo->push_back(instr(TO_S, tmp, arg2, nodo->linea));
-   RString* tmp1 = new RString();
+   RString* tmp1 = new RString("");
    RString * s1 = new RString(nodo->str, true);
    RString * s2 = new RString(nodo->str2, true); 
    codigo->push_back(instr(ADD, tmp1, s1, tmp, nodo->linea));
-   codigo->push_back(instr(ADD, new RString(), tmp1, s2, nodo->linea));
+   codigo->push_back(instr(ADD, new RString(""), tmp1, s2, nodo->linea));
 }
 
 
@@ -631,13 +632,12 @@ void generar_puts(ast* nodo, std::list<Instruccion*> *codigo){
     decidir_nodo(nodo->h1, codigo);
     arg1 = codigo->back()->arg1;
   }
-  Instruccion* i = new Instruccion;
+  enum code_ops oper;
   if(nodo->h1->tipo == t_command)
-    i->op = PUTS_COMMAND;
+    oper = PUTS_COMMAND;
   else
-    i->op = PUTS;
-  i->arg1 = arg1;
-  codigo->push_back(i);
+    oper = PUTS;
+  codigo->push_back(instr(oper, arg1, nodo->linea));
 }
 
 void generar_op_booleana(enum code_ops op, ast* nodo, list<Instruccion*>* codigo){
@@ -709,28 +709,28 @@ void pop_args(ast* args, std::list<Instruccion*>* codigo){
 
 void generar_method_call(ast* nodo, std::list<Instruccion*>* codigo){
   push_args(nodo->h1, codigo, nodo->linea);
-  string tmp = get_tmp_var();
-  RVariable* var = new RVariable(&tmp);
-  set_global_variable(var->getValue(), new RObject());
+  string *tmp = get_tmp_var();
+  RVariable* var = new RVariable(tmp);
+  set_global_variable(var->getValue(), new RObject(true));
   codigo->push_back(instr(CALL, var, new RString(nodo->str), nodo->linea));
 }
 
 void generar_instance_method_call(ast* nodo, std::list<Instruccion*> *codigo){
   push_args(nodo->h2, codigo, nodo->linea);
-  string tmp = get_tmp_var();
-  RVariable* var = new RVariable(&tmp);
-  set_global_variable(var->getValue(), new RObject());
+  string *tmp = get_tmp_var();
+  RVariable* var = new RVariable(tmp);
+  set_global_variable(var->getValue(), new RObject(true));
   codigo->push_back(instr(CLASS_INST_CALL, var, new RVariable(nodo->str), new RString(nodo->h1->str), nodo->linea));
 }
 
 void generar_new(ast* nodo, std::list<Instruccion*> *codigo){
-  string tmp = get_tmp_var();
-  RVariable* var = new RVariable(&tmp);
-  set_global_variable(var->getValue(), new RObject());
+  string *tmp = get_tmp_var();
+  RVariable* var = new RVariable(tmp);
+  set_global_variable(var->getValue(), new RObject(true));
   codigo->push_back(instr(NEW, var, new RString(nodo->str), nodo->linea));
   if (nodo->h1 != NULL && nodo->h1->stmt_list != NULL && nodo->h1->stmt_list->size() > 0){
-    string tmp1 = get_tmp_var();
-    RVariable* var1 = new RVariable(&tmp1);
+    string *tmp1 = get_tmp_var();
+    RVariable* var1 = new RVariable(tmp1);
     push_args(nodo->h2, codigo, nodo->linea);
     codigo->push_back(instr(CLASS_INST_CALL, var1, var, new RString("initialize"), nodo->linea));
   }
@@ -796,6 +796,9 @@ Instruccion* instr(enum code_ops op, int linea){
   Instruccion* inst = new Instruccion;
   inst->op = op;
   inst->linea = linea-1;
+  inst->arg1=NULL;
+  inst->arg2=NULL;
+  inst->arg3=NULL;
   return inst;
 }
 
@@ -818,10 +821,12 @@ Instruccion* instr(enum code_ops op, RObject* arg1, RObject* arg2, RObject* arg3
 }
 
 void generar_gets(list<Instruccion*>* codigo, int linea){
-  codigo->push_back(instr(GETS, new RString(), linea));
+  codigo->push_back(instr(GETS, new RString(""), linea));
 }
 
 void freeList(list<ast*> *stmt_list){
+  if (stmt_list == NULL)
+    return;
   list<ast*>::iterator it;
   for (it=stmt_list->begin(); it != stmt_list->end(); it++)
     freeTree(*it);
@@ -832,11 +837,50 @@ void freeTree(ast* tree){
   if (tree == NULL)
     return;
   switch(tree->tipo){
+    case c_each:
+      free(tree->str);
+      free(tree->str2);
+      freeTree(tree->h1);
+      break;
+    case t_attr_assign:
+      if (tree->str != NULL)
+        delete[] tree->str;
+      tree->str = NULL;
+      freeTree(tree->h1);
+      freeTree(tree->h2);
+      break;
+    case t_arr_place:
+      if (tree->str != NULL)
+        free(tree->str);
+      tree->str = NULL;
+      freeTree(tree->h1);
+      break;
+    case t_accesores:
+      freeList(tree->stmt_list);
+      break;
+    case t_readers:
+      freeTree(tree->h1);
+      break;
+    case t_writers:
+      freeTree(tree->h1);
+      break;
+    case t_wr:
+      freeTree(tree->h1);
+      break;
+    case t_accesor:
+      if (tree->str != NULL)
+        free(tree->str);
+      tree->str = NULL;
+      freeList(tree->stmt_list);
+      break;
+    case t_array:
+      freeList(tree->stmt_list);
+      break;
     case c_if :
-      free(tree->h1);
-      free(tree->h2);
-      free(tree->h3);
-      free(tree->h4);
+      freeTree(tree->h1);
+      freeTree(tree->h2);
+      freeTree(tree->h3);
+      freeTree(tree->h4);
       break;
     case op_mul :
       freeTree(tree->h1);
@@ -864,6 +908,7 @@ void freeTree(ast* tree){
       break;
     case op_asgn :
       freeTree(tree->h1);
+      tree->h1=NULL;
       freeTree(tree->h2);
       break;
     case c_elsif :
@@ -876,16 +921,22 @@ void freeTree(ast* tree){
       freeTree(tree->h2);
       break;
     case f_string :
-      free(tree->str);
+      if (tree->str != NULL)
+        delete[] tree->str;
+      tree->str = NULL;
       break;
     case t_puts :
       freeTree(tree->h1);
       break;
     case t_method_call:
-      free(tree->str);
+      if (tree->str != NULL)
+        delete[] tree->str;
+      tree->str = NULL;
       break;
     case t_command:
-      free(tree->str);
+      if (tree->str != NULL)
+        delete tree->str;
+      tree->str = NULL;
       break;
     case t_mul_string :
       freeTree(tree->h1);
@@ -896,10 +947,14 @@ void freeTree(ast* tree){
       freeTree(tree->h2);
       break;
     case t_identif :
-      free(tree->str);
+      if (tree->str != NULL)
+        free(tree->str);
+      tree->str = NULL;
       break;
     case t_atributo:
-      free(tree->str);
+      if (tree->str != NULL)
+        free(tree->str);
+      tree->str = NULL;
       break;
     case b_and:
       freeTree(tree->h1);
@@ -941,6 +996,7 @@ void freeTree(ast* tree){
       break;
     case t_compstmt :
       freeList(tree->stmt_list);
+      tree->stmt_list=NULL;
       break;
     case c_case:
       freeTree(tree->h1);
@@ -955,35 +1011,54 @@ void freeTree(ast* tree){
     case a_method:
       freeTree(tree->h1);
       freeTree(tree->h2);
-      free(tree->str);
+      if (tree->str != NULL)
+        free(tree->str);
+      tree->str = NULL;
       break;
     case a_method_with_args:
       break;
     case call_method:
       freeTree(tree->h1);
-      free(tree->str);
+      if (tree->str != NULL)
+        free(tree->str);
+      tree->str = NULL;
       break;
     case t_params:
       freeList(tree->stmt_list);
+      tree->stmt_list=NULL;
       break;
     case t_class:
       freeTree(tree->h1);
-      free(tree->str);
+      if (tree->str != NULL)
+        free(tree->str);
+      tree->str = NULL;
       break;
     case instance_method_call:
-      free(tree->str);
+      if (tree->str != NULL)
+        delete[] tree->str;
+      tree->str = NULL;
       freeTree(tree->h1);
       freeTree(tree->h2);
       break;
     case method_call_new:
-      free(tree->str);
+      if (tree->str != NULL)
+        delete[] tree->str;
+      tree->str = NULL;
       freeTree(tree->h1);
       break;
     case t_args:
       freeList(tree->stmt_list);
+      tree->stmt_list=NULL;
       break;
   }
+  tree->h1=NULL;
+  tree->h2=NULL;
+  tree->h3=NULL;
+  tree->h4=NULL;
+  tree->stmt_list = NULL;
+  tree->str = NULL;
   delete tree;
+  tree=NULL;
 }
 
 void printList(list<ast*> *stmt_list){ list<ast*>::iterator it;

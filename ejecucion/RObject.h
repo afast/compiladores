@@ -12,6 +12,7 @@ class RObject {
     long int object_id;
   public:
     enum obj_type type;
+    RObject(bool nil);
     RObject();
     RInteger *objectId();
     bool is_numeric();

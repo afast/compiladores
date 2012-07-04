@@ -69,7 +69,7 @@ void printCodigo();
 %token T_ATRIBUTO T_VAR_PESOS_CERO T_VAR_PESOS T_VAR_ARGV T_VAR_PESOS_PESOS T_INTEGER_ABS T_ATRIBUTO_ACCESOR
 %token T_FLOAT_ABS T_STRING_1 T_STRING_2 T_STRING_IZQ T_STRING_DER T_COMMAND T_ESPACIOS T_ERROR
 
-%type <a> expr_numeric compstmt stmt texpr value output integer float variable string expr_string expr_bool if recursive_elsif opt_else while rec_when_then case argdecl def arglist list_values class args_accesores array list_values_arr each expr_string_interpolado list_values_par
+%type <a> expr_numeric compstmt stmt texpr value output integer float variable string expr_string expr_bool if recursive_elsif opt_else while rec_when_then case argdecl def arglist list_values class args_accesores array list_values_arr each expr_string_interpolado list_values_par bloque
 /*=========================================================================
                           OPERATOR PRECEDENCE
 =========================================================================*/
@@ -95,8 +95,8 @@ stmt : output
 	| while
 	| each
 	| variable T_IGUAL value { $$ = new_asgn($1, $3, yylineno); }
-	| variable T_MAS_IGUAL value { $$ = new_asgn($1, new_numeric_op(op_plus, $1, $3, yylineno), yylineno); }
-	| variable T_MENOS_IGUAL value { $$ = new_asgn($1, new_numeric_op(op_sub, $1, $3, yylineno), yylineno); }
+	| variable T_MAS_IGUAL value { $$ = new_asgn($1, new_numeric_op(op_plus, copiar_nodo($1), $3, yylineno), yylineno); }
+	| variable T_MENOS_IGUAL value { $$ = new_asgn($1, new_numeric_op(op_sub, copiar_nodo($1), $3, yylineno), yylineno); }
 	| def
 	| class {std::cout << "nueva clase\n";}
 	| T_ATTR_READER args_accesores { $$ = new_accesor_list(t_readers, $2, yylineno);}
@@ -108,10 +108,10 @@ stmt : output
   | T_IDENTIF { $$ = new_method_call($<text>1, NULL, yylineno); }
   | T_IDENTIF list_values_par { $$ = new_method_call($<text>1, $2, yylineno); }
 	| bloque;
-bloque: T_LLAVE_IZQ compstmt T_LLAVE_DER
-	| T_DO compstmt T_END;
+bloque: T_LLAVE_IZQ compstmt T_LLAVE_DER { $$ = $2;}
+	| T_DO compstmt T_END {$$ = $2;};
 value : T_GETS { $$ = new_gets(yylineno); }
-	| T_INSTANCE_CLASS
+	| T_INSTANCE_CLASS { $$ = new_class_method_call($<text>1, NULL, yylineno); }
 	| T_NEW T_PAR_IZQ list_values T_PAR_DER { $$ = new_class_new($<text>1, $3, yylineno); }
 	| T_NEW { $$ = new_class_new($<text>1, NULL, yylineno);}
 	| expr_numeric { $$ = $1; }
@@ -242,9 +242,15 @@ main( int argc, char *argv[] )
 		--argc;
 		yyin = fopen( argv[0], "r" );
 		
-		set_global_variable(new std::string("$0"), new RString(argv[0]));
+    std::string* vars = new std::string("$0");
+		set_global_variable(vars, new RString(argv[0]));
+    delete vars;
+    vars = new std::string("$$");
 		set_global_variable(new std::string("$$"), new RInteger(getpid()));
+    delete vars;
+    vars = new std::string("$:");
 		set_global_variable(new std::string("$:"), new RString("."));
+    delete vars;
 
 		int i = 1;
 		RArray *myArgv = new RArray();

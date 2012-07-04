@@ -30,4 +30,8 @@ RVariable::RVariable(RString *arg){
   type = RVARIABLE;
 }
 
-RVariable::~RVariable(){}
+RVariable::~RVariable(){
+  if (this->str != NULL)
+    delete this->str;
+  this->str = NULL;
+}

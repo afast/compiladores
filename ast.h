@@ -74,5 +74,5 @@ ast* new_array(ast * elem , ast * elems,  int linea);
 ast* add_elem(ast* elems, ast* elem, int linea);
 ast* new_each(char* arr, char* var_temp, ast* compstmt, int linea);
 ast* new_inter(char* texto, ast* expr, char* texto2, int linea);
-ast* copiar_nodo(ast* orig, int linea);
+ast* copiar_nodo(ast* orig);
 #endif

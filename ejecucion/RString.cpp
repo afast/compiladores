@@ -80,6 +80,7 @@ RString::RString(RDecimal *arg){
 RString::~RString(){
   if (str != NULL)
     delete this->str;
+  this->str=NULL;
 }
 
 RString * RString::get_class(){

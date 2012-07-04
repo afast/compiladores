@@ -62,7 +62,7 @@ std::cout << "entre aca, pos: " << pos << " val: "<< ((RInteger *)val)->getValue
     for (int i=0; i< arrayLength; i++)
       nuevo[i] = value[i];
     for (int i=arrayLength; i<pos; i++)
-      nuevo[i] = new RObject();
+      nuevo[i] = new RObject(true);
     nuevo[pos] = val;
     arrayLength=pos+1;
   }
@@ -76,14 +76,14 @@ RObject* RArray::operator[] (int n){
   if (n < arrayLength)
   	return value[n];
   else
-	return new RObject();
+	return new RObject(true);
 }
 
 RObject* RArray::operator[] (RInteger param){
   if (param.getValue() < arrayLength)
 	return value[param.getValue()];
   else
-	return new RObject();
+	return new RObject(true);
 }
 
 RObject* RArray::operator[] (RInteger *param){

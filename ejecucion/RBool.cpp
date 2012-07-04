@@ -17,6 +17,7 @@ void RBool::setValue(RBool* val){
 RBool::RBool(){
   new_pointer(this);
   type = RBOOL;
+  value=false;
 }
 
 RBool::RBool(bool arg){

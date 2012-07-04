@@ -61,7 +61,9 @@ void ejecutar(list<Instruccion*> *codigo) {
   cout << "Ejecucion comenzada!" << endl;
   do {
     ri = *it++;
-    arg1 = ri->arg1; arg2 = ri->arg2; arg3 = ri->arg3;
+    arg1 = ri->arg1;
+    arg2 = ri->arg2;
+    arg3 = ri->arg3;
     if (arg1 != NULL && arg1->type == RVARIABLE)
       arg1 = get_variable(((RVariable*)arg1)->getValue()->data());
     if (arg2 != NULL && arg2->type == RVARIABLE)
@@ -90,7 +92,7 @@ void ejecutar(list<Instruccion*> *codigo) {
         }else{
           if (arg2->is_string() && arg3->is_string()){
             if (set_tmp)
-              arg1 = new RString();
+              arg1 = new RString("");
             ((RString*)arg1)->setValue(*((RString*)arg2)->getValue() + *((RString*)arg3)->getValue());
           }else{
             cout << "Error de tipos en linea " << ri->linea << " , no se puede sumar " << *arg2->get_class()->getValue() << " con " << *arg3->get_class()->getValue() << endl;
@@ -113,7 +115,7 @@ void ejecutar(list<Instruccion*> *codigo) {
         }else{
           if (arg2->is_string() && arg3->is_int()) {
             if (set_tmp)
-              arg1 = new RString();
+              arg1 = new RString("");
             string* multiplicado = new string("");
             string* sumando = ((RString*)arg2)->getValue();
             for (int i=0; i<((RInteger*)arg3)->getValue(); i++)
@@ -425,8 +427,7 @@ RObject *get_variable(const char *name){ //aca hay q considerar el tema del scop
   if (object == NULL && global_variables->find(name) != global_variables->end())
     object = (*global_variables)[name];
   if (object == NULL){
-    cout << "Warning, variable is null!" << endl;
-    object = new RObject();
+    object = new RObject(true);
   }
   return object;
 }
@@ -443,7 +444,7 @@ void set_variable(const char *name, RObject* var){ //aca hay q considerar el tem
 }
 
 void set_global_variable(string *name, RObject* var){ //aca hay q considerar el tema del scope?
-  (*global_variables)[name->data()] = var;
+  (*global_variables)[*name] = var;
 }
 
 void set_variable(RString* str, RObject* var){ //aca hay q considerar el tema del scope?
@@ -464,8 +465,10 @@ void new_scope(){
 }
 
 void drop_scope(){
+  unordered_map<string, RObject*> *to_delete = scope_stack.back();
   scope_stack.pop_back();
   current_stack = scope_stack.back();
+  delete to_delete;
 }
 
 list<Instruccion*>::iterator descartar_if(list<Instruccion*>::iterator it) { // caso if false

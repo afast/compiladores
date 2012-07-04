@@ -16,11 +16,14 @@ RClass::RClass(RString* param){
   init(param);
 }
 
-RClass::~RClass(){}
+RClass::~RClass(){
+
+}
 
 void RClass::init(RString* param){
   this->name = param;
   this->type = RCLASS;
+  new_pointer(this);
 }
 
 RString* RClass::get_class(){
@@ -65,11 +68,11 @@ RClass* RClass::get_instance(){
 }
 
 void RClass::add_instance_variable(RString* variable){
-  instance_variables[*variable->getValue()] = new RObject();
+  instance_variables[*variable->getValue()] = new RObject(true);
 }
 
 void RClass::add_instance_variable(std::string* variable){
-  instance_variables[*variable] = new RObject();
+  instance_variables[*variable] = new RObject(true);
 }
 
 function_info* RClass::get_function_info(RString* method){
@@ -89,7 +92,7 @@ RObject* RClass::get_instance_variable(const char* variable){
   if (instance_variables.find(variable) != instance_variables.end())
     res = instance_variables[variable];
   else {
-    res = new RObject();
+    res = new RObject(true);
     instance_variables[variable] = res;
   }
   return res;
@@ -100,7 +103,7 @@ RObject* RClass::get_instance_variable(RString* variable){
   if (instance_variables.find(*variable->getValue()) != instance_variables.end())
     res = instance_variables[*variable->getValue()];
   else {
-    res = new RObject();
+    res = new RObject(true);
     instance_variables[*variable->getValue()] = res;
   }
   return res;
@@ -118,6 +121,7 @@ void RClass::add_writer(RString* writer){
 void RClass::add_reader(RString* reader){
   std::list<Instruccion*>* codigo = new std::list<Instruccion*>;
   function_info* nueva = new function_info;
+  new_pointer(nueva);
   nueva->param_count = 0;
   Instruccion* inst = new Instruccion;
   inst->op = RETURN;
@@ -127,6 +131,8 @@ void RClass::add_reader(RString* reader){
   reader->getValue()->insert(0,1,'@');
   std::cout << *reader->getValue() << std::endl;
   inst->arg1 = new RVariable(reader);
+  inst->arg2 = NULL;
+  inst->arg3 = NULL;
   codigo->push_back(inst);
   nueva->codigo = codigo;
   this->add_method(nueva->name, nueva);

@@ -169,7 +169,7 @@ char* replaceContinuacionLinea(char* textIn){
     		n = tmp->find("\\\n");
   	}
 	char * result = new char[tmp->size() + 1];
-	std::copy(tmp->begin(), tmp->end(), result);
+	tmp->copy(result, tmp->size(), 0);
 	result[tmp->size()] = '\0';
 	delete tmp;
 	return result;

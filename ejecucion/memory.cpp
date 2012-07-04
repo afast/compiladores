@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 #include <list>
 
 #include "stack.h"
@@ -13,15 +14,21 @@
 #include "RObject.h"
 
 std::list<RString*> mstrings;
+std::list<std::string*> cstrings;
 std::list<RVariable*> mvariables;
 std::list<RInteger*> mintegers;
 std::list<RDecimal*> mdecimals;
 std::list<RClass*> mclasses;
 std::list<RBool*> mbooleans;
 std::list<RArray*> marrays;
+std::list<RObject*> mobjetos;
 std::list<function_info*> mfunctions;
 void new_pointer(RVariable* obj){
   mvariables.push_back(obj);
+}
+
+void new_pointer(std::string* obj){
+  cstrings.push_back(obj);
 }
 
 void new_pointer(RString* obj){
@@ -48,6 +55,10 @@ void new_pointer(RArray* obj){
   marrays.push_back(obj);
 }
 
+void new_object_pointer(RObject* obj){
+  mobjetos.push_back(obj);
+}
+
 void new_pointer(function_info_t* funcion){
   mfunctions.push_back(funcion);
 }
@@ -59,6 +70,9 @@ void free_memory(){
   std::list<RString*>::iterator its;
   for (its=mstrings.begin(); its != mstrings.end(); its++)
     delete (*its);
+  std::list<std::string*>::iterator itcs;
+  for (itcs=cstrings.begin(); itcs != cstrings.end(); itcs++)
+    delete (*itcs);
   std::list<RInteger*>::iterator iti;
   for (iti=mintegers.begin(); iti != mintegers.end(); iti++)
     delete (*iti);
@@ -68,6 +82,9 @@ void free_memory(){
   std::list<RClass*>::iterator itc;
   for (itc=mclasses.begin(); itc != mclasses.end(); itc++)
     delete (*itc);
+  std::list<RObject*>::iterator ito;
+  for (ito=mobjetos.begin(); ito != mobjetos.end(); ito++)
+    delete (*ito);
   std::list<RBool*>::iterator itb;
   for (itb=mbooleans.begin(); itb != mbooleans.end(); itb++)
     delete (*itb);

@@ -1,7 +1,21 @@
 #include "ast.h"
+#include <cstring>
+#include <cstdlib>
+
+ast* init_ast(){
+  ast* res = new ast;
+  res->h1 = NULL;
+  res->h2 = NULL;
+  res->h3 = NULL;
+  res->h4 = NULL;
+  res->str = NULL;
+  res->str2 = NULL;
+  res->stmt_list = NULL;
+  return res;
+}
 
 ast* new_numeric_op(enum ast_node_t op, ast* left, ast* right, int linea){
-  ast* res = new ast;
+  ast* res = init_ast();
   res->linea = linea;
   res->tipo= op;
   res->h1= left;
@@ -9,26 +23,31 @@ ast* new_numeric_op(enum ast_node_t op, ast* left, ast* right, int linea){
   return res;
 }
 
-ast* copiar_nodo(ast* orig, int linea){
+ast* copiar_nodo(ast* orig){
   if (orig == NULL)
-	return NULL;
-  ast* res = new ast;
-  res->linea = linea;
+    return NULL;
+  ast* res = init_ast();
+  res->linea = orig->linea;
   res->tipo= orig->tipo;
   res->entero = orig->entero;
   res->decimal = orig->decimal;
   res->booleano = orig->booleano; 
-  res->h1= copiar_nodo(orig->h1, linea);
-  res->h2= copiar_nodo(orig->h2, linea);
-  res->h3= copiar_nodo(orig->h3, linea);
-  res->h4= copiar_nodo(orig->h4, linea); 
-  res->str = orig->str;
+  res->h1= copiar_nodo(orig->h1);
+  res->h2= copiar_nodo(orig->h2);
+  res->h3= copiar_nodo(orig->h3);
+  res->h4= copiar_nodo(orig->h4); 
+  if (orig->str != NULL){
+    res->str = (char*)malloc((strlen(orig->str)+1)*sizeof(char));
+    for (int i=0; i < strlen(orig->str); i++)
+      res->str[i] = orig->str[i];
+    res->str[strlen(orig->str)] = '\0';
+  }
   res->str2 = orig->str2;
   return res;
 }
 
 ast* new_number(long int number, int linea){
-  ast* res = new ast;
+  ast* res = init_ast();
   res->tipo = f_entero;
   res->linea = linea;
   res->entero = number;
@@ -36,7 +55,7 @@ ast* new_number(long int number, int linea){
 }
 
 ast* new_number(double number, int linea){
-  ast* res = new ast;
+  ast* res = init_ast();
   res->tipo = f_decimal;
   res->linea = linea;
   res->decimal = number;
@@ -44,7 +63,7 @@ ast* new_number(double number, int linea){
 }
 
 ast* new_puts(ast* t, int linea){
-  ast* res = new ast;
+  ast* res = init_ast();
   res->tipo = t_puts;
   res->linea = linea;
   res->h1 = t;
@@ -54,7 +73,7 @@ ast* new_puts(ast* t, int linea){
 ast* new_compstmt(ast* t){
   if (t == NULL)
     return NULL;
-  ast* res = new ast;
+  ast* res = init_ast();
   res->tipo = t_compstmt;
   res->stmt_list = new std::list<ast*>;
   res->stmt_list->push_back(t);
@@ -76,7 +95,7 @@ ast* add_front_stmt_compstmt(ast* stmt, ast* compstmt){
 }
 
 ast* new_identificador(char* name, int linea){
-  ast* res = new ast;
+  ast* res = init_ast();
   res->tipo = t_identif;
   res->linea = linea;
   res->str = name;
@@ -84,7 +103,7 @@ ast* new_identificador(char* name, int linea){
 }
 
 ast* new_identificador_global(char* name, int linea){
-  ast* res = new ast;
+  ast* res = init_ast();
   res->tipo = t_identif;
   res->linea = linea;
   res->str = name;
@@ -92,7 +111,7 @@ ast* new_identificador_global(char* name, int linea){
 }
 
 ast* new_atributo(char* name, int linea){
-  ast* res = new ast;
+  ast* res = init_ast();
   res->tipo = t_atributo;
   res->linea = linea;
   res->str = name;
@@ -100,25 +119,23 @@ ast* new_atributo(char* name, int linea){
 }
 
 ast* new_array_pos(char* name, ast* place, int linea){
-  ast* res = new ast;
+  ast* res = init_ast();
   res->tipo = t_arr_place;
   res->linea = linea;
   res->str = name;
-std::cout << "nombre: " << name << std::endl;
   res->h1 = place;
-std::cout << "place: " << place << std::endl;
   return res;
 }
 
 ast* new_gets(int linea){
-  ast* res = new ast;
+  ast* res = init_ast();
   res->tipo = t_gets;
   res->linea = linea;
   return res;
 }
 
 ast* new_string(char* texto, int linea){
-  ast* res = new ast;
+  ast* res = init_ast();
   res->tipo = f_string;
   res->linea = linea;
   res->str = texto;
@@ -126,7 +143,7 @@ ast* new_string(char* texto, int linea){
 }
 
 ast* new_inter(char* texto, ast* expr, char* texto2, int linea){
-  ast* res = new ast;
+  ast* res = init_ast();
   res->tipo = t_inter;
   res->linea = linea;
   res->str = texto;
@@ -138,7 +155,7 @@ ast* new_inter(char* texto, ast* expr, char* texto2, int linea){
 
 
 ast* new_command(char* texto, int linea){
-  ast* res = new ast;
+  ast* res = init_ast();
   res->tipo = t_command;
   res->linea = linea;
   res->str = texto;
@@ -146,8 +163,7 @@ ast* new_command(char* texto, int linea){
 }
 
 ast* new_object_call(char* llamada, int linea){
- std::cout << "===============           " << llamada << std::endl;
-  ast* res = new ast;
+  ast* res = init_ast();
   res->tipo = t_method_call;
   res->linea = linea;
   res->str = llamada;
@@ -155,14 +171,14 @@ ast* new_object_call(char* llamada, int linea){
 }
 
 ast* new_nil(int linea){
-  ast* res = new ast;
+  ast* res = init_ast();
   res->tipo = t_nil;
   res->linea = linea;
   return res;
 }
 
 ast* new_mul_string(ast* texto, ast* numero, int linea){
-  ast* res = new ast;
+  ast* res = init_ast();
   res->tipo = t_mul_string;
   res->linea = linea;
   res->h1 = texto;
@@ -171,7 +187,7 @@ ast* new_mul_string(ast* texto, ast* numero, int linea){
 }
 
 ast* new_add_string(ast* string1, ast* string2, int linea){
-  ast* res = new ast;
+  ast* res = init_ast();
   res->tipo = t_add_string;
   res->linea = linea;
   res->h1 = string1;
@@ -180,7 +196,7 @@ ast* new_add_string(ast* string1, ast* string2, int linea){
 }
 
 ast* new_object_call(char* funcion, ast* args, int linea){
-  ast* res = new ast;
+  ast* res = init_ast();
   res->tipo = t_method_with_args;
   res->linea = linea;
   res->str = funcion;
@@ -189,7 +205,7 @@ ast* new_object_call(char* funcion, ast* args, int linea){
 }
 
 ast* new_arguments(ast* arg, int linea){
-  ast* res = new ast;
+  ast* res = init_ast();
   res->tipo = t_args;
   res->linea = linea;
   res->stmt_list = new std::list<ast*>;
@@ -203,7 +219,7 @@ ast* add_argument(ast* arg, ast* args, int linea){
 }
 
 ast* new_boolean_op(enum ast_node_t op, ast* left, ast* right, int linea){
-  ast* res = new ast;
+  ast* res = init_ast();
   res->tipo = op;
   res->linea = linea;
   res->h1 = left;
@@ -212,7 +228,7 @@ ast* new_boolean_op(enum ast_node_t op, ast* left, ast* right, int linea){
 }
 
 ast* new_bool(int b, int linea){
-  ast* res = new ast;
+  ast* res = init_ast();
   res->tipo = f_bool;
   res->linea = linea;
   res->booleano = (b != 0);
@@ -220,7 +236,7 @@ ast* new_bool(int b, int linea){
 }
 
 ast* new_if(ast* cond, ast* compstmt, ast* opt_rec_elsif, ast* opt_else, int linea){
-  ast* res = new ast;
+  ast* res = init_ast();
   res->tipo = c_if;
   res->linea = linea;
   res->h1 = cond;
@@ -231,7 +247,7 @@ ast* new_if(ast* cond, ast* compstmt, ast* opt_rec_elsif, ast* opt_else, int lin
 }
 
 ast* new_elsif(ast* cond, ast* compstmt, ast* opt_rec_elsif, int linea) {
-  ast* res = new ast;
+  ast* res = init_ast();
   res->tipo = c_elsif;
   res->linea = linea;
   res->h1 = cond;
@@ -241,7 +257,7 @@ ast* new_elsif(ast* cond, ast* compstmt, ast* opt_rec_elsif, int linea) {
 }
 
 ast* new_asgn(ast* variable, ast* valor, int linea){
-  ast* res = new ast;
+  ast* res = init_ast();
   res->tipo = op_asgn;
   res->linea = linea;
   res->h1 = variable;
@@ -250,7 +266,7 @@ ast* new_asgn(ast* variable, ast* valor, int linea){
 }
 
 ast* new_while(ast* cond, ast* compstmt, int linea){
-  ast* res = new ast;
+  ast* res = init_ast();
   res->tipo = c_while;
   res->linea = linea;
   res->h1 = cond;
@@ -259,7 +275,7 @@ ast* new_while(ast* cond, ast* compstmt, int linea){
 }
 
 ast* new_each(char* arr, char* var_temp, ast* compstmt, int linea){
-  ast* res = new ast;
+  ast* res = init_ast();
   res->tipo = c_each;
   res->linea = linea;
   res->str = arr;
@@ -269,7 +285,7 @@ ast* new_each(char* arr, char* var_temp, ast* compstmt, int linea){
 }
 
 ast* new_case(ast* cond, ast* value, ast* when_rec) {
-  ast* res = new ast;
+  ast* res = init_ast();
   res->tipo = c_case;
   res->h1 = cond;
   res->h2 = value;
@@ -278,7 +294,7 @@ ast* new_case(ast* cond, ast* value, ast* when_rec) {
 }
 
 ast* new_when_rec(ast* cond, ast* value, ast* when_rec) {
-  ast* res = new ast;
+  ast* res = init_ast();
   res->tipo = c_case_rec;
   res->h1 = cond;
   res->h2 = value;
@@ -287,7 +303,7 @@ ast* new_when_rec(ast* cond, ast* value, ast* when_rec) {
 }
 
 ast* new_method(char* name, ast* args, ast* comp_stmt, int linea){
-  ast* res = new ast;
+  ast* res = init_ast();
   res->tipo = a_method; //method defined
   res->linea = linea;
   res->h1 = args; //puede ser NULL
@@ -297,7 +313,7 @@ ast* new_method(char* name, ast* args, ast* comp_stmt, int linea){
 }
 
 ast* new_method_call(char* variable, ast* args, int linea){
-  ast* res = new ast;
+  ast* res = init_ast();
   res->tipo = call_method;
   res->linea = linea;
   res->str = variable;
@@ -306,7 +322,7 @@ ast* new_method_call(char* variable, ast* args, int linea){
 }
 
 ast* new_params(ast* param, int linea){
-  ast* res = new ast;
+  ast* res = init_ast();
   res->tipo = t_params;
   res->linea = linea;
   res->stmt_list = new std::list<ast*>;
@@ -315,7 +331,7 @@ ast* new_params(ast* param, int linea){
 }
 
 ast* new_array( int linea){
-  ast* res = new ast;
+  ast* res = init_ast();
   res->tipo = t_array;
   res->linea = linea;
   res->stmt_list = NULL;
@@ -323,7 +339,7 @@ ast* new_array( int linea){
 }
 
 ast* new_array(ast * elem , int linea){
-  ast* res = new ast;
+  ast* res = init_ast();
   res->tipo = t_array;
   res->linea = linea;
   res->stmt_list = new std::list<ast*>;
@@ -349,7 +365,7 @@ ast* add_param(ast* args, ast* arg, int linea){
 }
 
 ast* new_class(char* name, ast* compstmt, int linea){
-  ast* res = new ast;
+  ast* res = init_ast();
   res->tipo = t_class;
   res->linea = linea;
   res->str = name;
@@ -358,15 +374,17 @@ ast* new_class(char* name, ast* compstmt, int linea){
 }
 
 ast* new_class_method_call(char* name, ast* params, int linea){
-  ast* res = new ast;
+  ast* res = init_ast();
   std::string* aux = new std::string(name);
   int pos = aux->find('.');
   res->tipo = instance_method_call;
   res->linea = linea;
-  char* method = new char[aux->size()-pos-1];
-  res->str = new char[pos];
+  char* method = new char[aux->size()-pos];
+  res->str = new char[pos+1];
   aux->copy(method, aux->size(), pos+1);
+  method[aux->size()-pos-1] = '\0';
   aux->copy(res->str, pos, 0);
+  res->str[pos]='\0';
   std::cout << res->str << std::endl;
   std::cout << method << std::endl;
   res->h1 = new_object_call(method, linea);
@@ -376,13 +394,14 @@ ast* new_class_method_call(char* name, ast* params, int linea){
 }
 
 ast* new_class_new(char* class_name, ast* params, int linea){
-  ast* res = new ast;
+  ast* res = init_ast();
   std::string* aux = new std::string(class_name);
   int pos = aux->find('.');
   res->tipo = method_call_new;
   res->linea = linea;
-  res->str = new char[pos];
+  res->str = new char[pos+1];
   aux->copy(res->str, pos, 0);
+  res->str[pos]='\0';
   std::cout << "callging " << res->str << ".new" << std::endl;
   res->h1 = params;
   delete aux;
@@ -390,11 +409,11 @@ ast* new_class_new(char* class_name, ast* params, int linea){
 }
 
 ast* new_accesores(char* atributo, int linea){
-  ast* res = new ast;
+  ast* res = init_ast();
   res->tipo = t_accesor;
   res->linea = linea;
   res->str = atributo;
-  ast* lista = new ast;
+  ast* lista = init_ast();
   lista->tipo = t_accesores;
   lista->stmt_list = new std::list<ast*>;
   lista->stmt_list->push_back(res);
@@ -402,7 +421,7 @@ ast* new_accesores(char* atributo, int linea){
 }
 
 ast* new_accesores(char* atributo, ast* accesores, int linea){
-  ast* res = new ast;
+  ast* res = init_ast();
   res->tipo = t_accesor;
   res->linea = linea;
   res->str = atributo;
@@ -411,7 +430,7 @@ ast* new_accesores(char* atributo, ast* accesores, int linea){
 }
 
 ast* new_accesor_list(enum ast_node_t tipo, ast* lista, int linea){
-  ast* res = new ast;
+  ast* res = init_ast();
   res->tipo = tipo;
   res->linea = linea;
   res->h1 = lista;
@@ -419,18 +438,22 @@ ast* new_accesor_list(enum ast_node_t tipo, ast* lista, int linea){
 }
 
 ast* new_class_attr_assign(char* var_attr, ast* value, int linea){
-  ast* res = new ast;
+  ast* res = init_ast();
   std::string* aux = new std::string(var_attr);
   int pos = aux->find('.');
-  char* method = new char[aux->size()-pos-1];
-  res->str = new char[pos];
+  char* method = new char[aux->size()-pos];
+  res->str = new char[pos+1];
   aux->copy(method, aux->size(), pos+1);
+  method[aux->size()-pos-1] = '\0';
   aux->copy(res->str, pos, 0);
+  res->str[pos]='\0';
   std::cout << res->str << std::endl;
   std::cout << method << std::endl;
   res->h1 = new_object_call(method, linea);
   res->h2 = value;
   res->tipo = t_attr_assign;
   res->linea = linea;
+  free(var_attr);
+  delete aux;
   return res;
 }

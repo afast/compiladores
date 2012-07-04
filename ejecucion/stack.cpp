@@ -58,7 +58,7 @@ void ejecutar(list<Instruccion*> *codigo) {
   Instruccion *ri;
   RObject *arg1, *arg2, *arg3;
   bool set_tmp, fin_error=false;
-  cout << "Ejecucion comenzada!" << endl;
+  /*cout << "Ejecucion comenzada!" << endl;*/
   do {
     ri = *it++;
     arg1 = ri->arg1;
@@ -74,7 +74,7 @@ void ejecutar(list<Instruccion*> *codigo) {
     if (set_tmp && operacion_es_booleana(ri->op))
       arg1 = new RBool();
     switch (ri->op) {
-      case FIN   : cout << "Fin ejecución" << endl; break;
+      case FIN   : /*cout << "Fin ejecución" << endl;*/ break;
       case PUTS  : puts(arg1->to_s());break;
       case PUTS_COMMAND  : system(((RString*)arg1)->getValue()->data());break;
       case GETS  : gets((RString *)ri->arg1); break;
@@ -311,16 +311,16 @@ void ejecutar(list<Instruccion*> *codigo) {
         argument_stack.pop();
         break;
       case CMP_ARR_SIZE:
-        cout << "CMP_ARR_SIZE...";
+        /*cout << "CMP_ARR_SIZE...";*/
         ((RBool*)arg1)->setValue(((RArray*)arg2)->int_size() > ((RInteger*)arg3)->getValue());
-        cout << "[OK]" << endl;
+        /*cout << "[OK]" << endl;*/
         break;
       case DROP_SCOPE:
-        cout << "DROP SCOPE" << flush  << endl;
+        /*cout << "DROP SCOPE" << flush  << endl;*/
         drop_scope();
         break;
       case NEW_SCOPE:
-        cout << "NEW SCOPE" << flush << endl;
+        /*cout << "NEW SCOPE" << flush << endl;*/
         new_scope();
         break;
       case CALL:
@@ -394,7 +394,7 @@ void ejecutar(list<Instruccion*> *codigo) {
         ((RString*)arg1)->setValue(arg2->to_s());
 	}
         break;
-      default: cout << "hay una operacion no reconocida" <<  endl;
+      default: /*cout << "hay una operacion no reconocida" <<  endl;*/
         break;
     }
     if (set_tmp)

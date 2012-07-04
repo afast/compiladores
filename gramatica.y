@@ -98,7 +98,7 @@ stmt : output
 	| variable T_MAS_IGUAL value { $$ = new_asgn($1, new_numeric_op(op_plus, copiar_nodo($1), $3, yylineno), yylineno); }
 	| variable T_MENOS_IGUAL value { $$ = new_asgn($1, new_numeric_op(op_sub, copiar_nodo($1), $3, yylineno), yylineno); }
 	| def
-	| class {std::cout << "nueva clase\n";}
+	| class
 	| T_ATTR_READER args_accesores { $$ = new_accesor_list(t_readers, $2, yylineno);}
 	| T_ATTR_WRITER args_accesores { $$ = new_accesor_list(t_writers, $2, yylineno);}
 	| T_ACCESSOR args_accesores { $$ = new_accesor_list(t_wr, $2, yylineno);}
@@ -269,7 +269,7 @@ main( int argc, char *argv[] )
       fin->arg3 = NULL;
       fin->arg2 = NULL;
       codigoGlobal->push_back(fin);
-      printCodigo();
+      //printCodigo();
       ejecutar(codigoGlobal);
     }
 	} else {

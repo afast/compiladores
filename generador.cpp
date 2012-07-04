@@ -43,12 +43,12 @@ string *get_tmp_var(){
 }
 
 void generar(ast* arbol, std::list<Instruccion*> *codigo){
-  cout << "Comenzando Generacion..." << endl;
+  //cout << "Comenzando Generacion..." << endl;
   if (arbol->tipo != t_compstmt)
     cout << "Error detectando programa, arbol deberia ser compstmt!" << endl;
   else
     generar_compstmt(arbol->stmt_list, codigo);
-  cout << "Generacion finalizada!" << endl;
+  //cout << "Generacion finalizada!" << endl;
 }
 
 RObject* generar_objeto(ast* nodo){
@@ -149,9 +149,7 @@ void decidir_nodo(ast* nodo, list<Instruccion*> *codigo){
     case t_method_call:
       break;
     case t_command :
-      cout << "intenta generar commando" <<endl;
       generar_commando(nodo, codigo);
-      cout << "genero commando" << endl;
       break;
     case t_nil :
       break;
@@ -669,7 +667,7 @@ function_info* generar_metodo(ast* nodo){
   std::list<Instruccion*>* res = new std::list<Instruccion*>;
   function_info* nueva = new function_info;
   nueva->name = new RString(nodo->str);
-  std::cout << "Generando metodo: "<< nodo->str << " args - " << nodo->h1 << "stmtlist: " << nodo->h2 << " ...";
+  //std::cout << "Generando metodo: "<< nodo->str << " args - " << nodo->h1 << "stmtlist: " << nodo->h2 << " ...";
   if (nodo->h1 != NULL){
     nueva->param_count = nodo->h1->stmt_list->size();
     pop_args(nodo->h1, res);
@@ -677,7 +675,7 @@ function_info* generar_metodo(ast* nodo){
     nueva->param_count = 0;
   generar_compstmt(nodo->h2->stmt_list, res);
   res->push_back(instr(ENDFUNC, nodo->linea));
-  std::cout << "[OK]" <<std::endl;
+  //std::cout << "[OK]" <<std::endl;
   nueva->codigo = res;
   return nueva;
 }

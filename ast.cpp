@@ -385,8 +385,8 @@ ast* new_class_method_call(char* name, ast* params, int linea){
   method[aux->size()-pos-1] = '\0';
   aux->copy(res->str, pos, 0);
   res->str[pos]='\0';
-  std::cout << res->str << std::endl;
-  std::cout << method << std::endl;
+  //std::cout << res->str << std::endl;
+  //std::cout << method << std::endl;
   res->h1 = new_object_call(method, linea);
   res->h2 = params;
   delete aux;
@@ -402,7 +402,7 @@ ast* new_class_new(char* class_name, ast* params, int linea){
   res->str = new char[pos+1];
   aux->copy(res->str, pos, 0);
   res->str[pos]='\0';
-  std::cout << "callging " << res->str << ".new" << std::endl;
+  //std::cout << "callging " << res->str << ".new" << std::endl;
   res->h1 = params;
   delete aux;
   return res;
@@ -447,8 +447,8 @@ ast* new_class_attr_assign(char* var_attr, ast* value, int linea){
   method[aux->size()-pos-1] = '\0';
   aux->copy(res->str, pos, 0);
   res->str[pos]='\0';
-  std::cout << res->str << std::endl;
-  std::cout << method << std::endl;
+  //std::cout << res->str << std::endl;
+  //std::cout << method << std::endl;
   res->h1 = new_object_call(method, linea);
   res->h2 = value;
   res->tipo = t_attr_assign;

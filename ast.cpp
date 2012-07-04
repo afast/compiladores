@@ -107,6 +107,18 @@ ast* new_string(char* texto, int linea){
   return res;
 }
 
+ast* new_inter(char* texto, ast* expr, char* texto2, int linea){
+  ast* res = new ast;
+  res->tipo = t_inter;
+  res->linea = linea;
+  res->str = texto;
+  res->str2 = texto2;
+  res->h1 = expr;
+  return res;
+
+}
+
+
 ast* new_command(char* texto, int linea){
   ast* res = new ast;
   res->tipo = t_command;

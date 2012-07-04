@@ -69,7 +69,7 @@ void printCodigo();
 %token T_ATRIBUTO T_VAR_PESOS_CERO T_VAR_PESOS T_VAR_ARGV T_VAR_PESOS_PESOS T_INTEGER_ABS T_ATRIBUTO_ACCESOR
 %token T_FLOAT_ABS T_STRING_1 T_STRING_2 T_STRING_IZQ T_STRING_DER T_COMMAND T_ESPACIOS T_ERROR
 
-%type <a> expr_numeric compstmt stmt texpr value output integer float variable string expr_string expr_bool if recursive_elsif opt_else while rec_when_then case argdecl def arglist list_values class args_accesores array list_values_arr each
+%type <a> expr_numeric compstmt stmt texpr value output integer float variable string expr_string expr_bool if recursive_elsif opt_else while rec_when_then case argdecl def arglist list_values class args_accesores array list_values_arr each expr_string_interpolado
 /*=========================================================================
                           OPERATOR PRECEDENCE
 =========================================================================*/
@@ -224,10 +224,11 @@ class :	T_CLASS T_NOM_CONST T_FIN_INSTRUCCION compstmt T_END { $$ = new_class($<
 args_accesores : T_ATRIBUTO_ACCESOR { $$ = new_accesores($<text>1, yylineno);}
                | args_accesores T_COMA T_ATRIBUTO_ACCESOR { $$ = new_accesores($<text>2, $1, yylineno);};
 each : T_EACH T_DO T_PIPE T_IDENTIF T_PIPE T_FIN_INSTRUCCION compstmt T_END {$$ = new_each($<text>1,$<text>4, $7, yylineno);};
-expr_string_interpolado : T_STRING_IZQ expr_string_interpolado_recur T_STRING_DER;
-expr_string_interpolado_recur : /*vacio*/
-	| value
-	| expr_string_interpolado_recur T_STRING_CENTER value;
+expr_string_interpolado : T_STRING_IZQ value T_STRING_DER {$$ = new_inter($<text>1, $2, $<text>3,  yylineno);};
+//expr_string_interpolado : T_STRING_IZQ expr_string_interpolado_recur T_STRING_DER;
+//expr_string_interpolado_recur : /*vacio*/
+//	| value
+//	| expr_string_interpolado_recur T_STRING_CENTER value;
 
 
 %%

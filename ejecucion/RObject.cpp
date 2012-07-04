@@ -69,12 +69,6 @@ RString* RObject::to_s(){
 }
 
 bool RObject::respond_to(RString *method){
-  bool res = *method == "object_id" || *method == "class" || *method == "respond_to?";
+  bool res = *method->getValue() == "object_id" || *method->getValue() == "class" || *method->getValue() == "respond_to?";
   return res;
 }
-
-bool RObject::operator== (RObject param) {
-  return this->objectId() == param.objectId();
-}
-
-

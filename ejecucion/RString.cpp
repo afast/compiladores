@@ -78,7 +78,8 @@ RString::RString(RDecimal *arg){
 }
 
 RString::~RString(){
-  delete this->str;
+  if (str != NULL)
+    delete this->str;
 }
 
 RString * RString::get_class(){
@@ -94,18 +95,6 @@ std::string *RString::getValue(){
   return str;
 }
 
-bool RString::operator== (RString param) {
-  return this->str->compare(*param.getValue()) == 0;
-}
-
-bool RString::operator== (std::string *param) {
-  return this->str->compare(*param) == 0;
-}
-
-bool RString::operator== (const char *param) {
-  return this->str->compare(param) == 0;
-}
-
 void RString::setValue(const char * param){
   if (this->str != NULL)
     delete str;
@@ -115,7 +104,7 @@ void RString::setValue(const char * param){
 void RString::setValue(std::string *param){
   if (this->str != NULL)
     delete str;
-  str = param;
+  str = new std::string(param->data());
 }
 
 void RString::setValue(std::string param){
@@ -125,6 +114,8 @@ void RString::setValue(std::string param){
 }
 
 RString* RString::to_s(){
+  if (str == NULL)
+    str = new std::string();
   return this;
 }
 

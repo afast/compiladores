@@ -68,27 +68,6 @@ std::cout << "entre aca, pos: " << pos << " val: "<< ((RInteger *)val)->getValue
   value[pos] = val;
 }
 
-
-bool RArray::operator== (RArray param){
-  bool res;
-  if (param.size() != this->size())
-    res = false;
-  else if (param.size() == 0)
-    res = true;
-  else {
-    int i=0;
-    res = false;
-    while (i < param.size()->getValue() && !res) {
-      RObject object1, object2;
-      object1 = *(param[i]);
-      object2 = *(value[i]);
-      if (object1.get_class() == object2.get_class() && object1 == object2)
-        res = true;
-    }
-  }
-  return res;
-}
-
 RObject* RArray::operator[] (int n){
   if (n < arrayLength)
   	return value[n];

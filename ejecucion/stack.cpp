@@ -186,7 +186,32 @@ void ejecutar(list<Instruccion*> *codigo) {
           }
         }else{
           cout << "Error de tipos en linea " << ri->linea << " , no se puede multiplicar " << *arg2->get_class()->getValue() << " con " << *arg3->get_class()->getValue() << endl;
+          fin_error = true;
+        }
+        break;
+      case SIZE:
+        if (arg2->type == RARRAY){
+          arg1= ((RArray*)arg2)->size();
+        } else if (arg2->type == RCLASS){
+          if (((RClass*)arg2)->respond_to(new RString("size"))){
+            call_stack.push(it);
+            new_scope();
+            excecuting_current_class = (RClass*)arg2;
+            function_info* funcion = excecuting_current_class->get_function_info((RString*)arg3);
+            if (funcion->param_count == argument_stack.size()){
+              it = funcion->codigo->begin();
+              return_stack.push(ri->arg1);
+            }else{
+              cout << "Error en linea " << ri->linea << ": cantidad erronea de argumentos, se esperaban " << funcion->param_count << " pero se encontraron " << argument_stack.size() << endl;
+              fin_error = true;
+            }
+          } else {
+            cout << "Error en linea " << ri->linea << ": el metodo " << *arg3->to_s()->getValue() << " no esta definido para " << *arg2->to_s()->getValue() << endl;
             fin_error = true;
+          }
+        } else {
+          cout << "Error en linea " << ri->linea << ": no se puede ejecutar size de " << *arg2->get_class()->getValue() << endl;
+          fin_error = true;
         }
         break;
       case IF : 
@@ -253,6 +278,8 @@ void ejecutar(list<Instruccion*> *codigo) {
       case GETV_ARR : // Evaluar variable o metodo?
           if (arg3->is_int()){
             arg1 = (*((RArray *)arg2))[((RInteger *)arg3)->getValue()];
+            if (ri->arg1->type == RVARIABLE)
+              set_variable((RVariable*)ri->arg1, arg1);
 	  }
           else{
             cout << "Error de tipos en linea " << ri->linea << " , no se puede sumar " << *arg2->get_class()->getValue() << " con " << *arg3->get_class()->getValue() << endl;
@@ -280,6 +307,19 @@ void ejecutar(list<Instruccion*> *codigo) {
       case POP_ARG:
         set_variable((RString*)arg1, argument_stack.top());
         argument_stack.pop();
+        break;
+      case CMP_ARR_SIZE:
+        cout << "CMP_ARR_SIZE...";
+        ((RBool*)arg1)->setValue(((RArray*)arg2)->int_size() > ((RInteger*)arg3)->getValue());
+        cout << "[OK]" << endl;
+        break;
+      case DROP_SCOPE:
+        cout << "DROP SCOPE" << flush  << endl;
+        drop_scope();
+        break;
+      case NEW_SCOPE:
+        cout << "NEW SCOPE" << flush << endl;
+        new_scope();
         break;
       case CALL:
         if (global_methods.find(*((RString*)arg2)->getValue()) != global_methods.end()){

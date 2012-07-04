@@ -31,6 +31,10 @@ RObject **RArray::getValue(){
   return value;
 }
 
+int RArray::int_size(){
+  return arrayLength;
+}
+
 RInteger *RArray::size(){
   return new RInteger(arrayLength);
 }

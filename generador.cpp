@@ -493,33 +493,27 @@ void generar_each(ast* nodo, std::list<Instruccion*> *codigo){
    * str2 - nombre variable temporal a utilizar
    * h1 - el codigo a ejecutar dentro del each
    * */
-  /* evaluar condicion */
-  /* while cond */
-  /* cuerpo while */
-  /* endwhile */
-  
-  //generar la condicion temporal < size
-  //decidir_nodo(nodo->h1, codigo);
-  //RObject* cond = codigo->back()->arg1;
-  //codigo->push_back(instr(WHILE, cond, nodo->linea));
-  //generar_compstmt(nodo->h2->stmt_list, codigo);
-  //decidir_nodo(nodo->h1, codigo);
-  //RObject* cond2 = codigo->back()->arg1;
-  //codigo->push_back(instr(WHILEEND, cond2, nodo->linea)); //END o WHILEEND
+  RVariable * arreglo = new RVariable(nodo->str);
   RVariable * var_temp = new RVariable(nodo->str2);
+  string tmp = get_tmp_var();
+  RVariable * tamanio = new RVariable(&tmp);
+  string indice_tmp = get_tmp_var();
+  RVariable * indice = new RVariable(&indice_tmp);
   RObject* arg;
   RObject * arg1;
-  string tmp = get_tmp_var();
-  RVariable* var = new RVariable(&tmp);
-  set_global_variable(var->getValue(), new RObject());
-  set_global_variable(var_temp->getValue(), new RObject());
-  //codigo->push_back(instr(ASGN, new RString(nodo->h1->str), arg, nodo->linea));
-  codigo->push_back(instr(GETV_ARR, var_temp, new RVariable(nodo->str), new RInteger(1), nodo->linea));
-  Instruccion* i = new Instruccion;
-  i->op = PUTS;
-  i->arg1 = var_temp;
-  codigo->push_back(i);
+  RInteger* step = new RInteger(1);
+  set_global_variable(indice->getValue(), new RInteger(0));
+  RBool * continuar = new RBool();
+  codigo->push_back(instr(SIZE, tamanio, arreglo, nodo->linea));
+  codigo->push_back(instr(G, continuar, tamanio, indice, nodo->linea));
+  codigo->push_back(instr(NEW_SCOPE, nodo->linea));
+  codigo->push_back(instr(WHILE, continuar, nodo->linea));
+  codigo->push_back(instr(GETV_ARR, var_temp, arreglo, indice, nodo->linea));
   generar_compstmt(nodo->h1->stmt_list, codigo);
+  codigo->push_back(instr(ADD, indice, indice, step, nodo->linea));
+  codigo->push_back(instr(G, continuar, tamanio, indice, nodo->linea));
+  codigo->push_back(instr(WHILEEND, continuar, nodo->linea)); //END o WHILEEND
+  codigo->push_back(instr(DROP_SCOPE, nodo->linea));
 }
 
 void generar_case(ast* nodo, std::list<Instruccion*> *codigo){

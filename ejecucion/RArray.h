@@ -15,6 +15,7 @@ class RArray: public RObject {
   public:
     RObject **getValue();
     RInteger *size();
+    int int_size();
     RInteger *length();
     RArray();
     ~RArray();

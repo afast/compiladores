@@ -69,7 +69,7 @@ void printCodigo();
 %token T_ATRIBUTO T_VAR_PESOS_CERO T_VAR_PESOS T_VAR_ARGV T_VAR_PESOS_PESOS T_INTEGER_ABS T_ATRIBUTO_ACCESOR
 %token T_FLOAT_ABS T_STRING_1 T_STRING_2 T_STRING_IZQ T_STRING_DER T_COMMAND T_ESPACIOS T_ERROR
 
-%type <a> expr_numeric compstmt stmt texpr value output integer float variable string expr_string expr_bool if recursive_elsif opt_else while rec_when_then case argdecl def arglist list_values class args_accesores array list_values_arr each
+%type <a> expr_numeric compstmt stmt texpr value output integer float variable string expr_string expr_bool if recursive_elsif opt_else while rec_when_then case argdecl def arglist list_values class args_accesores array list_values_arr each list_values_par
 /*=========================================================================
                           OPERATOR PRECEDENCE
 =========================================================================*/
@@ -104,9 +104,9 @@ stmt : output
 	| T_ACCESSOR args_accesores { $$ = new_accesor_list(t_wr, $2, yylineno);}
 	| T_INVOCACION_METODO { $$ = new_class_method_call($<text>1, NULL, yylineno); }
 	| T_INVOCACION_METODO T_IGUAL value { $$ = new_class_attr_assign($<text>1, $3, yylineno); }
-	| T_INVOCACION_METODO list_values { $$ = new_class_method_call($<text>1, $2, yylineno); }
+	| T_INVOCACION_METODO list_values_par { $$ = new_class_method_call($<text>1, $2, yylineno); }
   | T_IDENTIF { $$ = new_method_call($<text>1, NULL, yylineno); }
-  | T_IDENTIF list_values { $$ = new_method_call($<text>1, $2, yylineno); }
+  | T_IDENTIF list_values_par { $$ = new_method_call($<text>1, $2, yylineno); }
 	| bloque;
 bloque: T_LLAVE_IZQ compstmt T_LLAVE_DER
 	| T_DO compstmt T_END;
@@ -120,7 +120,8 @@ value : T_GETS { $$ = new_gets(yylineno); }
 	| variable { $$ = $1; }
 	| case
 	| expr_string_interpolado
-	| array;
+	| array
+  | T_PAR_IZQ value T_PAR_DER {$$= $2;};
 output : T_PUTS value { $$ = new_puts($2, yylineno);  }
        | T_PUTS T_INVOCACION_METODO { $$ = new_puts(new_class_method_call($<text>2, NULL, yylineno), yylineno); }
        ;
@@ -158,23 +159,20 @@ expr_numeric : integer
 	| variable T_MENOS variable { $$ = new_numeric_op(op_sub, $1, $3, yylineno);}
 	| variable T_BAR variable   { $$ = new_numeric_op(op_div, $1, $3, yylineno);}	
 	| variable T_EXPO variable  { $$ = new_numeric_op(op_pow, $1, $3, yylineno);}
-	| variable T_PORCENTAJE variable { $$ = new_numeric_op(op_mod, $1, $3, yylineno);}
-	| T_PAR_IZQ expr_numeric T_PAR_DER{ $$ = $2; }; 
+	| variable T_PORCENTAJE variable { $$ = new_numeric_op(op_mod, $1, $3, yylineno);}; 
 expr_string : string { $$ = $1; }
 	| T_NIL { $$ = new_nil(yylineno); }
 	| expr_string T_ASTER expr_numeric { $$ = new_mul_string($1, $3, yylineno);}
 	| expr_string T_ASTER variable { $$ = new_mul_string($1, $3, yylineno);}
 	| expr_string T_MAS expr_string { $$ = new_add_string($1, $3, yylineno); }
 	| variable T_MAS expr_string { $$ = new_add_string($1, $3, yylineno); }
-	| expr_string T_MAS variable { $$ = new_add_string($1, $3, yylineno); }
-	| T_PAR_IZQ expr_string T_PAR_DER { $$ = $2; };
+	| expr_string T_MAS variable { $$ = new_add_string($1, $3, yylineno); };
 string : T_STRING_1 { $$ = new_string($<text>1, yylineno); }
 	| T_STRING_2 { $$ = new_string($<text>1, yylineno); }
 	| T_COMMAND { $$ = new_command($<text>1, yylineno); };
 expr_bool : T_BOOL {$$ = new_boolean_op(b_is_bool, new_bool($<entero>1, yylineno), NULL, yylineno); }
   | T_RESPOND_TO T_PAR_IZQ expr_string T_PAR_DER { $$ = new_object_call($<text>1, new_arguments($3, yylineno), yylineno); }
 	| T_INSTANCE_OF expr_string { $$ = new_object_call($<text>1, new_arguments($2, yylineno), yylineno); }
-	/*| T_PAR_IZQ value T_PAR_DER{ $$ = new_boolean_op(b_is_bool, $2, NULL, yylineno);}*/
 	| T_NOT value { $$ = new_boolean_op(b_not, $2, NULL, yylineno);}
 	| value  T_MAYOR value { $$ = new_boolean_op(b_mayor, $1, $3, yylineno);}
 	| value  T_MAYOR_IGUAL value { $$ = new_boolean_op(b_mayor_igual, $1, $3, yylineno);}
@@ -184,7 +182,7 @@ expr_bool : T_BOOL {$$ = new_boolean_op(b_is_bool, new_bool($<entero>1, yylineno
 	| value  T_NOT_IGUAL value { $$ = new_boolean_op(b_not_igual, $1, $3, yylineno);}
 	| value T_AND value { $$ = new_boolean_op(b_and, $1, $3, yylineno);}
 	| value T_OR value { $$ = new_boolean_op(b_or, $1, $3, yylineno);}
-  | T_PAR_IZQ expr_bool T_PAR_DER {$$ = $2;};
+  ;
 variable : T_IDENTIF { $$ = new_identificador($<text>1, yylineno);}
 	| T_ATRIBUTO { $$ = new_atributo($<text>1, yylineno);}
 	| T_VAR_PESOS_CERO { $$ = new_identificador_global($<text>1, yylineno);}
@@ -208,8 +206,8 @@ rec_when_then : /* Vacio */ { $$ = NULL; }
 while : T_WHILE expr_bool T_FIN_INSTRUCCION compstmt T_END { $$ = new_while($2, $4, yylineno); };
 def :	T_DEF T_IDENTIF argdecl T_FIN_INSTRUCCION compstmt T_END { $$ = new_method($<text>2, $3, $5,yylineno);}
 	| T_DEF T_IDENTIF T_FIN_INSTRUCCION compstmt T_END { $$ = new_method($<text>2, NULL, $4, yylineno);};
-argdecl : T_PAR_IZQ arglist T_PAR_DER
-	| T_PAR_IZQ T_PAR_DER /*para representar pej: funcion()*/
+argdecl : T_PAR_IZQ arglist T_PAR_DER { $$ = $2;}
+	| T_PAR_IZQ T_PAR_DER {$$=NULL;}/*para representar pej: funcion()*/
 	| arglist;
 arglist :	T_IDENTIF { $$ = new_arguments(new_identificador($<text>1, yylineno), yylineno);}
 	| arglist T_COMA T_IDENTIF { $$ = add_argument(new_identificador($<text>3, yylineno), $1, yylineno);};
@@ -218,8 +216,11 @@ array :	T_CORCHETE_IZQ value T_COMA list_values_arr T_CORCHETE_DER { $$ = new_ar
 	| T_CORCHETE_IZQ T_CORCHETE_DER { $$ = new_array(yylineno);};
 list_values_arr: value { $$ = new_array($1, yylineno);} 
 	| list_values_arr T_COMA value { $$ = add_elem($1, $3, yylineno);};
-list_values: value { $$ = new_params($1, yylineno);}
+list_values: T_COMA value { $$ = new_params($2, yylineno);}
 	| list_values T_COMA value { $$ = add_param($1, $3, yylineno);};
+list_values_par: T_PAR_IZQ value list_values T_PAR_DER { $$ = add_param($3, $2, yylineno);}
+               | value list_values { $$ = add_param($2, $1, yylineno);}
+               | value {$$ = new_params($1, yylineno);};
 class :	T_CLASS T_NOM_CONST T_FIN_INSTRUCCION compstmt T_END { $$ = new_class($<text>2, $4, yylineno);};
 args_accesores : T_ATRIBUTO_ACCESOR { $$ = new_accesores($<text>1, yylineno);}
                | args_accesores T_COMA T_ATRIBUTO_ACCESOR { $$ = new_accesores($<text>2, $1, yylineno);};
@@ -305,12 +306,16 @@ void printCodigo() {
       case AND : std::cout << "AND " << *ri->arg2->to_s()->getValue() << *ri->arg3->to_s()->getValue()  << std::endl; break;
       case OR : std::cout << "OR " << *ri->arg2->to_s()->getValue() << *ri->arg3->to_s()->getValue()  << std::endl; break;
       case PUT_INST_V : std::cout << "PUT_INST_V" << std::endl; break;
-      case GET_INST_V : std::cout << "GET_INST_V" << std::endl; break;
+      case GET_INST_V : std::cout << "GET_INST_V - " << std::endl; break;
       case PUTV : std::cout << "PUTV" << std::endl; break;
       case PUSH_ARG: std::cout << "PUSH_ARG" << std::endl; break;
       case POP_ARG: std::cout << "POP_ARG" << std::endl; break;
       case CALL: std::cout << "CALL" << std::endl; break;
       case CLASS_INST_CALL: std::cout << "CLASS_INST_CALL" << std::endl; break;
+      case CMP_ARR_SIZE: std::cout << "CMP_ARR_SIZE" << std::endl; break;
+      case NEW_SCOPE: std::cout << "NEW_SCOPE" << std::endl; break;
+      case GETV_ARR: std::cout << "GET V ARRAY"<< *ri->arg1->to_s()->getValue() << *ri->arg2->to_s()->getValue() << *ri->arg3->to_s()->getValue() << std::endl; break;
+      case DROP_SCOPE: std::cout << "DROP_SCOPE" << std::endl; break;
       case NEW: std::cout << "NEW" << std::endl; break;
       case ENDFUNC: std::cout << "ENDFUNC" << std::endl; break;
       case RETURN: std::cout << "RETURN" << std::endl; break;

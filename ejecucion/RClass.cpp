@@ -127,9 +127,7 @@ void RClass::add_reader(RString* reader){
   inst->op = RETURN;
   inst->linea = 0;
   nueva->name = new RString(reader);
-  std::cout << *reader->getValue() << std::endl;
   reader->getValue()->insert(0,1,'@');
-  std::cout << *reader->getValue() << std::endl;
   inst->arg1 = new RVariable(reader);
   inst->arg2 = NULL;
   inst->arg3 = NULL;

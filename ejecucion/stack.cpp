@@ -282,10 +282,15 @@ void ejecutar(list<Instruccion*> *codigo) {
         argument_stack.pop();
         break;
       case CALL:
-        call_stack.push(it);
-        new_scope();
-        it = get_function_iterator((RString*)arg2);
-        return_stack.push(ri->arg1);
+        if (global_methods.find(*((RString*)arg2)->getValue()) != global_methods.end()){
+          call_stack.push(it);
+          new_scope();
+          it = get_function_iterator((RString*)arg2);
+          return_stack.push(ri->arg1);
+        } else {
+          cout << "Error en linea " << ri->linea << ": el metodo " << *arg2->to_s()->getValue() << " no esta definido!" << endl;
+          fin_error = true;
+        }
         break;
       case CLASS_INST_CALL:
         {
@@ -298,11 +303,11 @@ void ejecutar(list<Instruccion*> *codigo) {
             it = funcion->codigo->begin();
             return_stack.push(ri->arg1);
           }else{
-            cout << "Error: cantidad erronea de argumentos, se esperaban " << funcion->param_count << " pero se encontraron " << argument_stack.size() << endl;
+            cout << "Error en linea " << ri->linea << ": cantidad erronea de argumentos, se esperaban " << funcion->param_count << " pero se encontraron " << argument_stack.size() << endl;
             fin_error = true;
           }
         } else {
-          cout << "Error: el metodo " << *arg3->to_s()->getValue() << " no esta definido para " << *arg2->to_s()->getValue() << endl;
+          cout << "Error en linea " << ri->linea << ": el metodo " << *arg3->to_s()->getValue() << " no esta definido para " << *arg2->to_s()->getValue() << endl;
           fin_error = true;
         }
         break;
@@ -313,7 +318,7 @@ void ejecutar(list<Instruccion*> *codigo) {
         if (clase != NULL){
           arg1 = clases[*((RString*)arg2)->getValue()]->get_instance();
         }else{
-          cout << "Error: Clase no definida" << endl;
+          cout << "Error en linea " << ri->linea << ": Clase no definida" << endl;
           fin_error=true;
         }
         break;
@@ -343,7 +348,7 @@ void ejecutar(list<Instruccion*> *codigo) {
         (*((RArray*)arg1)).setValue(((RInteger*)arg3)->getValue(), arg2);
         }
         break;
-      default: cout << "hay una op no reconocida" <<  endl;
+      default: cout << "hay una operacion no reconocida" <<  endl;
         break;
     }
     if (set_tmp)

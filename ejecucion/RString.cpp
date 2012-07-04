@@ -94,18 +94,6 @@ std::string *RString::getValue(){
   return str;
 }
 
-bool RString::operator== (RString param) {
-  return this->str->compare(*param.getValue()) == 0;
-}
-
-bool RString::operator== (std::string *param) {
-  return this->str->compare(*param) == 0;
-}
-
-bool RString::operator== (const char *param) {
-  return this->str->compare(param) == 0;
-}
-
 void RString::setValue(const char * param){
   if (this->str != NULL)
     delete str;

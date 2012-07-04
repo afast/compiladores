@@ -35,9 +35,8 @@ bool RClass::respond_to(RString *method){
   bool res = RObject::respond_to(method);
   if (!res) {
     std::list<RString*>::iterator it = method_names.begin();
-    do {
-      res = **it == *method;
-    } while(it++ != method_names.end() && !res);
+    for (it = method_names.begin(); it!= method_names.end() && !res; it++)
+      res = (*(*it)->getValue() == *method->getValue());
   }
   return res;
 }

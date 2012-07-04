@@ -24,6 +24,5 @@ class RObject {
     virtual RString *get_class();
     virtual bool respond_to(RString *method);
     virtual RString* to_s();
-    virtual bool operator== (RObject param);
 };
 #endif

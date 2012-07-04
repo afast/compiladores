@@ -31,8 +31,5 @@ class RString: public RObject {
     void setValue(std::string *param);
     void setValue(RString * param);
     bool respond_to(RString *method);
-    bool operator== (RString param);
-    bool operator== (std::string *param);
-    bool operator== (const char *param);
 };
 #endif

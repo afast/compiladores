@@ -289,15 +289,20 @@ void ejecutar(list<Instruccion*> *codigo) {
         break;
       case CLASS_INST_CALL:
         {
-        call_stack.push(it);
-        new_scope();
-        excecuting_current_class = (RClass*)arg2;
-        function_info* funcion = excecuting_current_class->get_function_info((RString*)arg3);
-        if (funcion->param_count == argument_stack.size()){
-          it = funcion->codigo->begin();
-          return_stack.push(ri->arg1);
-        }else{
-          cout << "Error: cantidad erronea de argumentos, se esperaban " << funcion->param_count << " pero se encontraron " << argument_stack.size() << endl;
+        if (((RClass*)arg2)->respond_to((RString*)arg3)){
+          call_stack.push(it);
+          new_scope();
+          excecuting_current_class = (RClass*)arg2;
+          function_info* funcion = excecuting_current_class->get_function_info((RString*)arg3);
+          if (funcion->param_count == argument_stack.size()){
+            it = funcion->codigo->begin();
+            return_stack.push(ri->arg1);
+          }else{
+            cout << "Error: cantidad erronea de argumentos, se esperaban " << funcion->param_count << " pero se encontraron " << argument_stack.size() << endl;
+            fin_error = true;
+          }
+        } else {
+          cout << "Error: el metodo " << *arg3->to_s()->getValue() << " no esta definido para " << *arg2->to_s()->getValue() << endl;
           fin_error = true;
         }
         break;

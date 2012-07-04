@@ -1,0 +1,47 @@
+echo ""
+echo "hacemos make"
+make
+echo ""
+echo "EJECUCION"
+echo "---------"
+echo ""
+echo ""
+echo "TEST1"
+echo "---------"
+./myruby test1.rb
+echo ""
+echo ""
+echo "TEST2"
+echo "---------"
+./myruby test2.rb
+echo ""
+echo ""
+echo "TEST3"
+echo "---------"
+./myruby test3.rb argumento0 argumento1 argumento2
+echo ""
+echo ""
+echo "TEST4"
+echo "---------"
+./myruby test4.rb
+echo ""
+echo ""
+echo "TEST5"
+echo "---------"
+./myruby test5.rb
+echo ""
+echo ""
+echo "TEST6"
+echo "---------"
+./myruby test6.rb
+echo ""
+echo ""
+echo "TEST7"
+echo "---------"
+./myruby test7.rb
+echo ""
+echo ""
+echo "TEST8"
+echo "---------"
+./myruby test8.rb
+echo ""

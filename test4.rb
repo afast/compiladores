@@ -31,7 +31,9 @@ b[1]= "modificado"
 puts b[0]
 puts b[1]
 puts b[2]
-
+#largos de arreglos
+puts "length del arreglo: #{b.length}"
+puts "size del arreglo: #{b.size}"
 #pruebas del each
 arreglo = [ 1 , 2.35 , 3 , true , "nuevo_string" ]
 puts a[2]

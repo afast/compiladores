@@ -1,0 +1,32 @@
+3
+-1
+6
+1
+1.5
+1.5
+0.75
+256
+4
+31.5
+17.5
+Hola mundo
+Que bueno que esta interpretar Ruby, este texto es laaaaarggooooo
+Hola mundo
+Me gusta Ruby
+HolaHolaHola
+100 * 5 = 500  hola
+diez veces i : iiiiiiiiii 
+ast.cpp			      gramatica.y	test4.rb      testErr2.rb~
+ast.h			      lex.yy.c		test4.rb~     testErr3.rb
+ast.o			      Makefile		test5.rb      testErr3.rb~
+cargar.rb		      myruby		test5.rb~     testErr4.rb
+cargar.rb~		      prueba9.rb	test6.rb      testErr4.rb~
+ejecucion		      ruby_lex.l	test6.rb~     testErr5.rb
+ejecutar_pruebas_errores.sh   salidas_nuestras	test7.rb      testErr5.rb~
+ejecutar_pruebas_errores.sh~  salidas_ruby	test7.rb~     testErr6.rb
+ejecutar_pruebas.sh	      test1.rb		test8.rb      test.rb
+ejecutar_pruebas.sh~	      test2.rb		test8.rb~     test.rb~
+generador.cpp		      test2.rb~		testErr1.rb   y.tab.c
+generador.h		      test3.rb		testErr1.rb~  y.tab.h
+generador.o		      test3.rb~		testErr2.rb
+/home/martin/comp/compiladores

@@ -1,4 +1,4 @@
 puts "se hace load del archivo cargar, se carga"
-load 'cargar'
+load 'cargar.rb'
 puts "se hace load del archivo cargar, se carga de nuevo"
-load 'cargar'
+load 'cargar.rb'

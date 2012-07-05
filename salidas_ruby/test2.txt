@@ -1,0 +1,29 @@
+3
+-1
+6
+1
+1.5
+1.5
+0.75
+256
+4
+31.5
+17.5
+Hola mundo
+Que bueno que esta interpretar Ruby, este texto es laaaaarggooooo
+Hola mundo
+Me gusta Ruby
+HolaHolaHola
+100 * 5 = 500  hola
+1
+12
+12
+diez veces i : iiiiiiiiii 
+ast.cpp			     generador.cpp  ruby_lex.l
+ast.h			     generador.h    salidas_nuestras
+ast.o			     generador.o    salidas_ruby
+ejecucion		     gramatica.y    tests
+ejecutar_pruebas_errores.sh  lex.yy.c	    y.tab.c
+ejecutar_pruebas.sh	     Makefile	    y.tab.h
+ejecutar_pruebas.sh~	     myruby
+/home/andreas/fing/compiladores/code

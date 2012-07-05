@@ -1,0 +1,3 @@
+se hace require del archivo cargar, como el la primera vez se carga
+archivo cargado
+se hace require del archivo cargar, como ya esta cargado no ejecuta nada

@@ -1,0 +1,27 @@
+jellou
+12
+hola martin
+hola
+martin
+hola martin
+nil
+nil
+10
+20
+1
+2
+3
+1
+modificado
+3
+length del arreglo: 3
+size del arreglo: 3
+20
+Esto es lo que tiene: modificado
+Esto es lo que tiene: 2.35
+Esto es lo que tiene: 3
+Esto es lo que tiene: true
+Esto es lo que tiene: nuevo_string
+scope
+la modifique dentro
+valor bloque de afuera

@@ -31,7 +31,9 @@ b[1]= "modificado"
 puts b[0]
 puts b[1]
 puts b[2]
-
+#largos de arreglos
+puts "length del arreglo: #{b.length}"
+puts "size del arreglo: #{b.size}"
 #pruebas del each
 arreglo = [ 1 , 2.35 , 3 , true , "nuevo_string" ]
 puts a[2]
@@ -39,21 +41,11 @@ arreglo[0]= "modificado"
 arreglo.each do |tmp|
   puts "Esto es lo que tiene: #{tmp}"
 end
-
 #Bloques
-puts "bloques"
-{ 
-  var = 6
-  puts var
-  }
-do
-  puts "dentro del bloque" 
-  puts "---"
-end
+puts "scope"
 # modifico una variable dentro de un metodo, pero fuera del metodo mantiene su valor. 
 nueva_var = "valor bloque de afuera"
 def prueba
-  puts nueva_var
   nueva_var = "la modifique dentro"
   puts nueva_var
 end

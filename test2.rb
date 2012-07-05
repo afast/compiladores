@@ -6,7 +6,7 @@ puts 3 / 2
 # División flotante (al menos un argumento debe ser flotante)
 puts 3.0 / 2
 puts 3 / 2.0
-puts 1.5 / 2.6
+puts 1.5 / 2.0
 puts 2**8
 puts 13 % 9
 c = 1.5

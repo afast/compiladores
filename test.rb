@@ -1,4 +1,12 @@
-
+c=4
+puts c.instance_of? FixNum
+b= a.instance_of?(Astif)
+puts a.respond_to?('classs')
+puts b
+puts a.object_id
+b = [1,2,3,4, 3]
+puts b.size
+puts b.length
 puts 10
 puts ARGV[0]
 puts 11.0

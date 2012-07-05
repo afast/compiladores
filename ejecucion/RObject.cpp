@@ -70,7 +70,7 @@ RString *RObject::get_class(){
 }
 
 RString* RObject::to_s(){
-  return this->get_class();
+  return new RString("");
 }
 
 bool RObject::respond_to(RString *method){

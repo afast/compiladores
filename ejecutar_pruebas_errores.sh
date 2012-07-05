@@ -23,3 +23,7 @@ echo "TEST4"
 echo "---------"
 ./myruby tests/testErr4.rb
 echo ""
+echo "TEST5"
+echo "---------"
+./myruby tests/testErr5.rb
+echo ""

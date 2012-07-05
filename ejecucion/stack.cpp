@@ -313,8 +313,14 @@ void ejecutar(list<Instruccion*> *codigo) {
         if (global_methods.find(*((RString*)arg2)->getValue()) != global_methods.end()){
           call_stack.push(it);
           new_scope();
-          it = get_function_iterator((RString*)arg2);
-          return_stack.push(ri->arg1);
+          function_info* funcion = global_methods[(*((RString*)arg2)->getValue())];
+	  if (funcion->param_count == argument_stack.size()){
+             it = get_function_iterator((RString*)arg2);
+             return_stack.push(ri->arg1);
+	  }else{
+		cout << "Error en linea " << ri->linea << ": cantidad erronea de argumentos, se esperaban " << funcion->param_count << " pero se encontraron " << argument_stack.size() << endl;
+		fin_error = true;
+	  }
         } else {
           cout << "Error en linea " << ri->linea << ": el metodo " << *arg2->to_s()->getValue() << " no esta definido!" << endl;
           fin_error = true;

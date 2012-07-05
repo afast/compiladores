@@ -92,7 +92,6 @@ void ejecutar(list<Instruccion*> *codigo) {
           }
         }
         break;
-      case OBJID : if (arg1 != NULL) *((RInteger*)arg1) = getDir(arg2); break;
       case MULT : 
         if (arg2->is_numeric() && arg3->is_numeric()){
           if (!set_tmp && arg1->is_int() || arg2->is_int() && arg3->is_int()){

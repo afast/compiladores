@@ -18,6 +18,7 @@ void cargarArchivo(char* textIn, int largo, bool isLoad);
 %option yylineno
 %x load
 %x require
+%x COMMENT
 STRING_DOBLE_CON_SALTO ([^(\"(#{)\n)]*(\\\n)*)*|(([^(\"(#{)\n)]*(\\\")*)*(\\\n)*)*
 STRING_DOBLE_SIN_SALTO [^(\"(#{)\n)]*|([^(\"(#{)\n)]*(\\\")*)*
 STRING_SIMPLE_CON_SALTO ([^(\'\n)]*(\\\n)*)*
@@ -30,7 +31,8 @@ VARIABLE [_a-z][_a-zA-Z0-9]*|[_a-z][_a-zA-Z0-9]*\[([1-9][0-9]*|0)\]
 require(\t|" ")*\' {BEGIN(require);};
 load(\t|" ")*\' {BEGIN(load);};
 #.*\n? {};
-^=begin(.*\n)*=end(" ")*\n* {;};
+^=begin.*\n {BEGIN(COMMENT);};
+<COMMENT>^=end.*\n {BEGIN(INITIAL);;};
 then      {return(T_THEN);};
 nil      {return(T_NIL);};
 puts   {return(T_PUTS);};

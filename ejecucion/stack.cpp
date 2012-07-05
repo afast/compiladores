@@ -185,7 +185,9 @@ void ejecutar(list<Instruccion*> *codigo) {
       case SIZE:
         if (arg2->type == RARRAY){
           arg1= ((RArray*)arg2)->size();
-        } else if (arg2->type == RCLASS){
+        } else if (arg2->type == RSTRING) {
+          arg1 = new RInteger(((RString*)arg2)->size());
+        } else if (arg2->type == RCLASS) {
           if (((RClass*)arg2)->respond_to(new RString("size"))){
             call_stack.push(it);
             new_scope();
@@ -300,9 +302,6 @@ void ejecutar(list<Instruccion*> *codigo) {
       case POP_ARG:
         set_variable((RString*)arg1, argument_stack.top());
         argument_stack.pop();
-        break;
-      case CMP_ARR_SIZE:
-        ((RBool*)arg1)->setValue(((RArray*)arg2)->int_size() > ((RInteger*)arg3)->getValue());
         break;
       case DROP_SCOPE:
         drop_scope();

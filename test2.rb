@@ -34,6 +34,7 @@ puts "100 * 5 = #{100 * 5}  hola"
 #interpolacion2
 a = 10
 b = "i"
+puts b.length
 puts "diez veces i : #{b * a} "
 #puts de comandos al sistema operativo
 puts `dir`

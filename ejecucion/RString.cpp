@@ -125,3 +125,9 @@ void RString::setValue(RString * param){
     delete str;
   str = new std::string(*(param->getValue()));
 }
+
+int RString::size(){
+  int res = 0;
+  if (this->str != NULL)
+    res = str->size();
+}

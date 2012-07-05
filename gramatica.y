@@ -322,7 +322,6 @@ void printCodigo() {
       case POP_ARG: std::cout << "POP_ARG" << std::endl; break;
       case CALL: std::cout << "CALL" << std::endl; break;
       case CLASS_INST_CALL: std::cout << "CLASS_INST_CALL" << std::endl; break;
-      case CMP_ARR_SIZE: std::cout << "CMP_ARR_SIZE" << std::endl; break;
       case NEW_SCOPE: std::cout << "NEW_SCOPE" << std::endl; break;
       case GETV_ARR: std::cout << "GET V ARRAY"<< *ri->arg1->to_s()->getValue() << *ri->arg2->to_s()->getValue() << *ri->arg3->to_s()->getValue() << std::endl; break;
       case DROP_SCOPE: std::cout << "DROP_SCOPE" << std::endl; break;

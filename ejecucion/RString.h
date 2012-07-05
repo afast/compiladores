@@ -26,6 +26,7 @@ class RString: public RObject {
     RString(RDecimal *arg);
     RString *get_class();
     RString *to_s();
+    int size();
     void setValue(const char * param);
     void setValue(std::string param);
     void setValue(std::string *param);

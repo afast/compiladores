@@ -114,10 +114,10 @@ bloque: T_LLAVE_IZQ T_FIN_INSTRUCCION compstmt T_LLAVE_DER { $$ = $3;}
 	| T_DO T_FIN_INSTRUCCION compstmt T_END {$$ = $3;};
 value : T_GETS { $$ = new_gets(yylineno); }
 	| T_INSTANCE_CLASS { $$ = new_class_method_call($<text>1, NULL, yylineno); }
-	| expr_numeric { $$ = $1; }
-	| expr_string { $$ = $1; }
-	| expr_bool { $$ = $1; }
-	| variable { $$ = $1; }
+	| expr_numeric
+	| expr_string
+	| expr_bool
+	| variable
 	| case
 	| expr_string_interpolado
 	| array
@@ -132,7 +132,7 @@ float: T_FLOAT_ABS { $$ = new_number($<real>1, yylineno); }
 	| T_MENOS T_FLOAT_ABS { $$ = new_number((-1)*$<real>2, yylineno); }
 	| T_MAS T_FLOAT_ABS { $$ = new_number($<real>2, yylineno); };
 expr_numeric : integer
-  	| float
+  | float
 	| T_OBJECT_ID { $$ = new_object_id($<text>1, yylineno); }
 	| T_SIZE { $$ = new_object_size($<text>1, yylineno); }
 	| expr_numeric T_MAS expr_numeric { $$ = new_numeric_op(op_plus, $1, $3, yylineno);}
@@ -159,7 +159,7 @@ expr_numeric : integer
 	| variable T_BAR variable   { $$ = new_numeric_op(op_div, $1, $3, yylineno);}	
 	| variable T_EXPO variable  { $$ = new_numeric_op(op_pow, $1, $3, yylineno);}
 	| variable T_PORCENTAJE variable { $$ = new_numeric_op(op_mod, $1, $3, yylineno);}; 
-expr_string : string { $$ = $1; }
+expr_string : string
 	| T_NIL { $$ = new_nil(yylineno); }
 	| expr_string T_ASTER expr_numeric { $$ = new_mul_string($1, $3, yylineno);}
 	| expr_string T_ASTER variable { $$ = new_mul_string($1, $3, yylineno);}
@@ -170,8 +170,12 @@ string : T_STRING_1 { $$ = new_string($<text>1, yylineno); }
 	| T_STRING_2 { $$ = new_string($<text>1, yylineno); }
 	| T_COMMAND { $$ = new_command($<text>1, yylineno); };
 expr_bool : T_BOOL {$$ = new_boolean_op(b_is_bool, new_bool($<entero>1, yylineno), NULL, yylineno); }
-  | T_RESPOND_TO T_PAR_IZQ expr_string T_PAR_DER { $$ = new_object_call($<text>1, new_arguments($3, yylineno), yylineno); }
-	| T_INSTANCE_OF expr_string { $$ = new_object_call($<text>1, new_arguments($2, yylineno), yylineno); }
+  | T_RESPOND_TO T_PAR_IZQ expr_string T_PAR_DER { $$ = new_respondto_call($<text>1, $3, yylineno); }
+  | T_RESPOND_TO expr_string { $$ = new_respondto_call($<text>1, $2, yylineno); }
+	| T_INSTANCE_OF T_NOM_CONST { $$ = new_instance_of_call($<text>1, $<text>2, yylineno); }
+	| T_INSTANCE_OF T_NIL { $$ = new_instance_of_call($<text>1, NULL, yylineno); }
+	| T_INSTANCE_OF T_PAR_IZQ T_NOM_CONST T_PAR_DER { $$ = new_instance_of_call($<text>1, $<text>3, yylineno); }
+	| T_INSTANCE_OF T_PAR_IZQ T_NIL T_PAR_DER { $$ = new_instance_of_call($<text>1, NULL, yylineno); }
 	| T_NOT value { $$ = new_boolean_op(b_not, $2, NULL, yylineno);}
 	| value  T_MAYOR value { $$ = new_boolean_op(b_mayor, $1, $3, yylineno);}
 	| value  T_MAYOR_IGUAL value { $$ = new_boolean_op(b_mayor_igual, $1, $3, yylineno);}

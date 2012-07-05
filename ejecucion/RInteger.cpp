@@ -52,5 +52,5 @@ RString* RInteger::to_s(){
 }
 
 RString* RInteger::get_class(){
-  return new RString("Integer");;
+  return new RString("FixNum");;
 }

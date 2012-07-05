@@ -471,3 +471,21 @@ ast* new_class_attr_assign(char* var_attr, ast* value, int linea){
   delete aux;
   return res;
 }
+
+ast* new_instance_of_call(char* object, char* str, int linea){
+  ast* res = init_ast();
+  res->tipo = t_instance_of_call;
+  res->linea = linea;
+  res->str = object;
+  res->str2 = str;
+  return res;
+}
+
+ast* new_respondto_call(char* object, ast* param, int linea){
+  ast* res = init_ast();
+  res->tipo = t_respondto_call;
+  res->linea = linea;
+  res->str = object;
+  res->h1 = param;
+  return res;
+}

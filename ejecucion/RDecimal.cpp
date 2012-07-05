@@ -32,7 +32,7 @@ void RDecimal::setValue(double dec){
 }
 //RDecimal *object_id(); use parent method
 RString* RDecimal::get_class(){
-  return new RString("Decimal");
+  return new RString("Float");
 }
 
 

@@ -44,6 +44,8 @@ string *get_tmp_var(){
 
 void generar(ast* arbol, std::list<Instruccion*> *codigo){
   //cout << "Comenzando Generacion..." << endl;
+  if (arbol == NULL)
+    return;
   if (arbol->tipo != t_compstmt)
     cout << "Error detectando programa, arbol deberia ser compstmt!" << endl;
   else
@@ -91,6 +93,12 @@ void decidir_nodo(ast* nodo, list<Instruccion*> *codigo){
       break;
     case object_id_method:
       generar_object_id(nodo, codigo);
+      break;
+    case t_instance_of_call:
+      generar_instance_of(nodo, codigo);
+      break;
+    case t_respondto_call:
+      generar_respondto_call(nodo, codigo);
       break;
     case op_mul :
       generar_op_numerica(MULT, nodo, codigo);
@@ -712,6 +720,26 @@ void pop_args(ast* args, std::list<Instruccion*>* codigo){
     for (it=args->stmt_list->rbegin(); it != args->stmt_list->rend(); it++)
       codigo->push_back(instr(POP_ARG, new RString((*it)->str), args->linea));
   }
+}
+
+void generar_respondto_call(ast* nodo, std::list<Instruccion*>* codigo){
+  RObject* arg;
+  if (nodo_hoja(nodo->h1)){ // no preciso variable temporal
+    arg = get_abstract_node(nodo->h1);
+  } else {
+    decidir_nodo(nodo->h1, codigo);
+    arg = codigo->back()->arg1;
+  }
+  codigo->push_back(instr(RESPOND_TO, new RBool(), new RVariable(nodo->str), arg, nodo->linea));
+}
+
+void generar_instance_of(ast* nodo, std::list<Instruccion*>* codigo){
+  RObject* arg;
+  if (nodo->str2 == NULL)
+    arg=new RString("nil");
+  else
+    arg = new RString(nodo->str2);
+  codigo->push_back(instr(INSTANCE_OF, new RBool(), new RVariable(nodo->str), arg, nodo->linea));
 }
 
 void generar_object_id(ast* nodo, std::list<Instruccion*>* codigo){

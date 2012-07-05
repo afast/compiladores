@@ -378,12 +378,18 @@ void ejecutar(list<Instruccion*> *codigo) {
         (*((RArray*)arg1)).setValue(((RInteger*)arg3)->getValue(), arg2);
         }
         break;
-      case TO_S: {
+      case TO_S:
         ((RString*)arg1)->setValue(arg2->to_s());
-	}
+        break;
+      case RESPOND_TO:
+        ((RBool*)arg1)->setValue(arg2->respond_to(arg3->to_s()));
         break;
       case OBJECT_ID:
         ((RInteger*)arg1)->setValue(arg2->objectId()->getValue());
+        break;
+      case INSTANCE_OF:
+        ((RBool*)arg1)->setValue(*arg2->get_class()->getValue() == *((RString*)arg3)->getValue());
+        break;
       default:
         break;
     }

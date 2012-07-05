@@ -60,4 +60,6 @@ void generar_array(ast* nodo, std::list<Instruccion*> *codigo);
 void generar_inter(ast* nodo, std::list<Instruccion*> *codigo);
 void generar_size(ast* nodo, std::list<Instruccion*>* codigo);
 void generar_object_id(ast* nodo, std::list<Instruccion*>* codigo);
+void generar_instance_of(ast* nodo, std::list<Instruccion*>* codigo);
+void generar_respondto_call(ast* nodo, std::list<Instruccion*>* codigo);
 #endif

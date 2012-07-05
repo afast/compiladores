@@ -2,11 +2,19 @@
 
 echo ""
 echo "hacemos make"
-make
+make >/dev/null
+rm salidas_ruby/*
+ruby test1.rb > salidas_ruby/test1.txt
+ruby test2.rb > salidas_ruby/test2.txt
+ruby test3.rb > salidas_ruby/test3.txt
+ruby test4.rb > salidas_ruby/test4.txt
+ruby test5.rb > salidas_ruby/test5.txt
+ruby test6.rb > salidas_ruby/test6.txt
+ruby test7.rb > salidas_ruby/test7.txt
+ruby test8.rb > salidas_ruby/test8.txt
 echo ""
 echo "EJECUCION"
 echo "---------"
-echo ""
 echo ""
 echo "TEST1"
 echo "---------"
@@ -17,7 +25,6 @@ else
   echo Hay diferencias en los archivos
 fi
 echo ""
-echo ""
 echo "TEST2"
 echo "---------"
 ./myruby test2.rb > salidas_nuestras/test2.txt
@@ -26,7 +33,6 @@ if diff salidas_nuestras/test2.txt salidas_ruby/test2.txt >/dev/null ; then
 else
   echo Hay diferencias en los archivos
 fi
-echo ""
 echo ""
 echo "TEST3"
 echo "---------"
@@ -37,7 +43,6 @@ else
   echo Hay diferencias en los archivos
 fi
 echo ""
-echo ""
 echo "TEST4"
 echo "---------"
 ./myruby test4.rb > salidas_nuestras/test4.txt
@@ -46,7 +51,6 @@ if diff salidas_nuestras/test4.txt salidas_ruby/test4.txt >/dev/null ; then
 else
   echo Hay diferencias en los archivos
 fi
-echo ""
 echo ""
 echo "TEST5"
 echo "---------"
@@ -57,7 +61,6 @@ else
   echo Hay diferencias en los archivos
 fi
 echo ""
-echo ""
 echo "TEST6"
 echo "---------"
 ./myruby test6.rb > salidas_nuestras/test6.txt
@@ -67,7 +70,6 @@ else
   echo Hay diferencias en los archivos
 fi
 echo ""
-echo ""
 echo "TEST7"
 echo "---------"
 ./myruby test7.rb > salidas_nuestras/test7.txt
@@ -76,7 +78,6 @@ if diff salidas_nuestras/test7.txt salidas_ruby/test7.txt >/dev/null ; then
 else
   echo Hay diferencias en los archivos
 fi
-echo ""
 echo ""
 echo "TEST8"
 echo "---------"

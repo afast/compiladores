@@ -1,7 +1,0 @@
-7
-house
-7.5
-test3.rb
-nil
-nil
-ingrese un string:

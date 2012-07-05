@@ -27,7 +27,11 @@ al.thingy
 al.thing = 334
 al.thingy
 puts al.some
-
+puts al.object_id
+puts (al.instance_of? Hola)
+puts (al.instance_of? Fixnum)
+puts al.respond_to?("say")
+puts al.respond_to?("noexiste")
 puts "----------------------------------"
 # define la clase Perro
 class Perro  

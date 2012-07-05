@@ -35,6 +35,9 @@ puts "100 * 5 = #{100 * 5}  hola"
 a = 10
 b = "i"
 puts b.length
+string12 = "123456789012"
+puts string12.length
+puts string12.size
 puts "diez veces i : #{b * a} "
 #puts de comandos al sistema operativo
 puts `dir`

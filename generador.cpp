@@ -837,7 +837,7 @@ RClass* generar_clase(ast* nodo, std::list<Instruccion*> *codigo){
 Instruccion* instr(enum code_ops op, int linea){
   Instruccion* inst = new Instruccion;
   inst->op = op;
-  inst->linea = linea-1;
+  inst->linea = linea;
   inst->arg1=NULL;
   inst->arg2=NULL;
   inst->arg3=NULL;

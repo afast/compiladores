@@ -385,11 +385,25 @@ ast* new_class_method_call(char* name, ast* params, int linea){
   method[aux->size()-pos-1] = '\0';
   aux->copy(res->str, pos, 0);
   res->str[pos]='\0';
-  //std::cout << res->str << std::endl;
-  //std::cout << method << std::endl;
   res->h1 = new_object_call(method, linea);
   res->h2 = params;
   delete aux;
+  return res;
+}
+
+ast* new_object_size(char* object, int linea){
+  ast* res = init_ast();
+  res->tipo = size_method;
+  res->linea = linea;
+  res->str = object;
+  return res;
+}
+
+ast* new_object_id(char* object, int linea){
+  ast* res = init_ast();
+  res->tipo = object_id_method;
+  res->linea = linea;
+  res->str = object;
   return res;
 }
 

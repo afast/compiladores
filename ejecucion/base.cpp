@@ -150,6 +150,9 @@ RBool* igual(RObject* arg1, RObject* arg2){
       case RSTRING:
         resultado = *((RString*)arg1)->getValue() == *((RString*)arg2)->getValue();
         break;
+      case RNIL:
+        resultado = (arg1->type == arg2->type);
+        break;
     }
     res = new RBool(resultado);
   }

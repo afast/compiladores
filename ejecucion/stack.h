@@ -15,7 +15,7 @@ class RClass;
 enum code_ops { FIN, PUTS, GETS, CALL, OBJID, ADD, ASSIGN_TMP, MULT, SUB, DIV, POW, MOD, IF, ELSIF, ELSIFCOND,
   WHILEEND, WHILE, CASE, CASEREC, CASERECCOND, ELSE, END, AND, OR, NOT, G, GE, L, LE, EQ, NEQ, TOBOOL, DO,
   GETV, PUTV, ASGN, GETV_ARR, PUSH_ARG, ENDFUNC, RETURN, POP_ARG, CLASS_INST_CALL, PUT_INST_V, GET_INST_V, NEW,
-  WRITE_ATTR, SET_ARR_POS, PUTS_COMMAND, CMP_ARR_SIZE, SIZE, NEW_SCOPE, DROP_SCOPE, TO_S
+  WRITE_ATTR, SET_ARR_POS, PUTS_COMMAND, CMP_ARR_SIZE, SIZE, NEW_SCOPE, DROP_SCOPE, TO_S, OBJECT_ID
 };
 /*
  * G  - mayor
@@ -67,7 +67,6 @@ void set_variable(RString* str, RObject* var);
 void set_global_variable(std::string *name, RObject* var);
 RObject *get_variable(const char *name);
 RObject* get_variable(RString* str);
-void add_symbol(char *name);
 void decimal_add(RDecimal* arg1, RNumeric* arg2, RNumeric* arg3);
 bool operacion_es_booleana(enum code_ops op);
 std::list<Instruccion*>::iterator get_function_iterator(RString* name);

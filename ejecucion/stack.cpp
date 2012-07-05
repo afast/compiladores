@@ -19,9 +19,7 @@
 
 using namespace std;
 
-set<string> tsimbolos;
 unordered_map<string, list<Instruccion*> *> functions;
-//unordered_map<string, RObject*> vTemporales;
 
 unordered_map<string, RObject*> *global_variables = new unordered_map<string, RObject*>; // las variables deben agregarse a este hash variables["nombre"] = RObject*
 unordered_map<string, RClass*> clases; // clases
@@ -34,11 +32,6 @@ stack<list<Instruccion *>::iterator> call_stack;
 stack<RObject*> argument_stack;
 stack<RObject*> return_stack;
 RClass *excecuting_current_class=NULL;
-
-
-//RObject *getValue(string* key){
-//	return vTemporales[*key];
-//}
 
 void initializer(){
   // Stack inicial
@@ -58,7 +51,6 @@ void ejecutar(list<Instruccion*> *codigo) {
   Instruccion *ri;
   RObject *arg1, *arg2, *arg3;
   bool set_tmp, fin_error=false;
-  /*cout << "Ejecucion comenzada!" << endl;*/
   do {
     ri = *it++;
     arg1 = ri->arg1;
@@ -74,7 +66,7 @@ void ejecutar(list<Instruccion*> *codigo) {
     if (set_tmp && operacion_es_booleana(ri->op))
       arg1 = new RBool();
     switch (ri->op) {
-      case FIN   : /*cout << "Fin ejecución" << endl;*/ break;
+      case FIN   : break;
       case PUTS  : puts(arg1->to_s());break;
       case PUTS_COMMAND  : system(((RString*)arg1)->getValue()->data());break;
       case GETS  : gets((RString *)ri->arg1); break;
@@ -311,16 +303,12 @@ void ejecutar(list<Instruccion*> *codigo) {
         argument_stack.pop();
         break;
       case CMP_ARR_SIZE:
-        /*cout << "CMP_ARR_SIZE...";*/
         ((RBool*)arg1)->setValue(((RArray*)arg2)->int_size() > ((RInteger*)arg3)->getValue());
-        /*cout << "[OK]" << endl;*/
         break;
       case DROP_SCOPE:
-        /*cout << "DROP SCOPE" << flush  << endl;*/
         drop_scope();
         break;
       case NEW_SCOPE:
-        /*cout << "NEW SCOPE" << flush << endl;*/
         new_scope();
         break;
       case CALL:
@@ -394,7 +382,9 @@ void ejecutar(list<Instruccion*> *codigo) {
         ((RString*)arg1)->setValue(arg2->to_s());
 	}
         break;
-      default: /*cout << "hay una operacion no reconocida" <<  endl;*/
+      case OBJECT_ID:
+        ((RInteger*)arg1)->setValue(arg2->objectId()->getValue());
+      default:
         break;
     }
     if (set_tmp)
@@ -408,11 +398,7 @@ void ejecutar(list<Instruccion*> *codigo) {
     exit(1);
 }
 
-void add_symbol(char *name) {
-  tsimbolos.insert(name);
-}
-
-RObject *get_variable(const char *name){ //aca hay q considerar el tema del scope?
+RObject *get_variable(const char *name){
   list<unordered_map<string, RObject*>*>::reverse_iterator rit;
   //unordered_map<string, Instruccion*>* stack;
   rit = scope_stack.rbegin();
@@ -436,18 +422,18 @@ RObject* get_variable(RString* str){
   return get_variable(str->getValue()->data());
 }
 
-void set_variable(const char *name, RObject* var){ //aca hay q considerar el tema del scope?
+void set_variable(const char *name, RObject* var){
   if (name[0] == '@' && excecuting_current_class != NULL){
     excecuting_current_class->set_instance_variable(name, var);
   }else
     (*current_stack)[name] = var;
 }
 
-void set_global_variable(string *name, RObject* var){ //aca hay q considerar el tema del scope?
+void set_global_variable(string *name, RObject* var){
   (*global_variables)[*name] = var;
 }
 
-void set_variable(RString* str, RObject* var){ //aca hay q considerar el tema del scope?
+void set_variable(RString* str, RObject* var){
   set_variable(str->getValue()->data(), var);
 }
 

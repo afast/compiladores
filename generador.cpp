@@ -86,6 +86,12 @@ void decidir_nodo(ast* nodo, list<Instruccion*> *codigo){
     case c_if :
       generar_if(nodo, codigo);
       break;
+    case size_method:
+      generar_size(nodo, codigo);
+      break;
+    case object_id_method:
+      generar_object_id(nodo, codigo);
+      break;
     case op_mul :
       generar_op_numerica(MULT, nodo, codigo);
       break;
@@ -437,6 +443,9 @@ RObject* get_abstract_node(ast* hoja){
     case f_bool :
                    arg = new RBool(hoja->booleano);
                    break;
+    case t_nil :
+      arg = new RObject(true);
+      break;
     case t_identif :
                    arg = new RVariable(hoja->str);
                    break;
@@ -660,7 +669,7 @@ void generar_op_booleana(enum code_ops op, ast* nodo, list<Instruccion*>* codigo
 }
 
 bool nodo_hoja(ast* nodo){
-  return (nodo->tipo == f_string || nodo->tipo == f_entero || nodo->tipo == f_decimal || nodo->tipo == f_bool || nodo->tipo == t_identif || nodo->tipo == t_atributo || nodo->tipo == t_command);
+  return (nodo->tipo == f_string || nodo->tipo == f_entero || nodo->tipo == f_decimal || nodo->tipo == f_bool || nodo->tipo == t_identif || nodo->tipo == t_atributo || nodo->tipo == t_command || nodo->tipo == t_nil);
 }
 
 function_info* generar_metodo(ast* nodo){
@@ -703,6 +712,15 @@ void pop_args(ast* args, std::list<Instruccion*>* codigo){
     for (it=args->stmt_list->rbegin(); it != args->stmt_list->rend(); it++)
       codigo->push_back(instr(POP_ARG, new RString((*it)->str), args->linea));
   }
+}
+
+void generar_object_id(ast* nodo, std::list<Instruccion*>* codigo){
+  codigo->push_back(instr(OBJECT_ID, new RInteger(), new RVariable(nodo->str), nodo->linea));
+}
+
+void generar_size(ast* nodo, std::list<Instruccion*>* codigo){
+  std::string *tmp = get_tmp_var();
+  codigo->push_back(instr(SIZE, new RVariable(tmp), new RVariable(nodo->str), nodo->linea));
 }
 
 void generar_method_call(ast* nodo, std::list<Instruccion*>* codigo){

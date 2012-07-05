@@ -10,8 +10,10 @@
 RObject::RObject(){}
 
 RObject::RObject(bool nil){
-  this->object_id=0;
-  this->type = RNIL;
+  if (nil){
+    this->object_id=4;
+    this->type = RNIL;
+  }
   new_object_pointer(this);
 }
 

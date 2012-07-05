@@ -63,7 +63,7 @@ void printCodigo();
 %token T_DOBLE_IGUAL T_TRIPLE_IGUAL T_NOT_IGUAL T_IGUAL_NIOQUI T_NOT_NIOQUI T_NIOQUI
 %token T_ELSE T_ELSIF T_CLASS T_DEF T_COMA T_PTO T_DOS_PTOS T_THEN T_INSTANCE_CLASS
 %token T_CORCHETE_IZQ T_CORCHETE_DER T_NIL T_CASE STRING STRING2 SYMBOL VARNAME T_WHEN T_IDENTIF
-%token T_IGUAL T_FIN_INTERROGACION T_PUTS T_LENGTH T_GETS T_NEW T_SIZE T_EACH T_OBJECT_ID T_RESPOND_TO
+%token T_IGUAL T_FIN_INTERROGACION T_PUTS T_GETS T_NEW T_SIZE T_EACH T_OBJECT_ID T_RESPOND_TO
 %token T_INSTANCE_OF T_ATTR_READER T_ATTR_WRITER T_ACCESSOR T_LOAD T_REQUIRE T_INVOCACION_METODO
 %token T_BOOL T_ANTI_BAR T_NUMERAL T_MAYOR_IGUAL T_MENOR_IGUAL T_IDENTIF_GLOBAL
 %token T_ATRIBUTO T_VAR_PESOS_CERO T_VAR_PESOS T_VAR_ARGV T_VAR_PESOS_PESOS T_INTEGER_ABS T_ATRIBUTO_ACCESOR
@@ -107,13 +107,13 @@ stmt : output
 	| T_INVOCACION_METODO list_values_par { $$ = new_class_method_call($<text>1, $2, yylineno); }
   | T_IDENTIF { $$ = new_method_call($<text>1, NULL, yylineno); }
   | T_IDENTIF list_values_par { $$ = new_method_call($<text>1, $2, yylineno); }
+	| variable T_IGUAL T_NEW list_values_par { $$ = new_asgn($1, new_class_new($<text>3, $4, yylineno), yylineno); }
+	| variable T_IGUAL T_NEW { $$ = new_asgn($1, new_class_new($<text>3, NULL, yylineno), yylineno);}
 	| bloque;
 bloque: T_LLAVE_IZQ T_FIN_INSTRUCCION compstmt T_LLAVE_DER { $$ = $3;}
 	| T_DO T_FIN_INSTRUCCION compstmt T_END {$$ = $3;};
 value : T_GETS { $$ = new_gets(yylineno); }
 	| T_INSTANCE_CLASS { $$ = new_class_method_call($<text>1, NULL, yylineno); }
-	| T_NEW list_values_par { $$ = new_class_new($<text>1, $2, yylineno); }
-	| T_NEW { $$ = new_class_new($<text>1, NULL, yylineno);}
 	| expr_numeric { $$ = $1; }
 	| expr_string { $$ = $1; }
 	| expr_bool { $$ = $1; }
@@ -133,9 +133,8 @@ float: T_FLOAT_ABS { $$ = new_number($<real>1, yylineno); }
 	| T_MAS T_FLOAT_ABS { $$ = new_number($<real>2, yylineno); };
 expr_numeric : integer
   	| float
-	| T_OBJECT_ID { $$ = new_object_call($<text>1, yylineno); }
-	| T_SIZE { $$ = new_object_call($<text>1, yylineno); }
-	| T_LENGTH { $$ = new_object_call($<text>1, yylineno); }
+	| T_OBJECT_ID { $$ = new_object_id($<text>1, yylineno); }
+	| T_SIZE { $$ = new_object_size($<text>1, yylineno); }
 	| expr_numeric T_MAS expr_numeric { $$ = new_numeric_op(op_plus, $1, $3, yylineno);}
 	| expr_numeric T_ASTER expr_numeric { $$ = new_numeric_op(op_mul, $1, $3, yylineno);}
 	| expr_numeric T_MENOS expr_numeric { $$ = new_numeric_op(op_sub, $1, $3, yylineno);}

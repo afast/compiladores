@@ -14,6 +14,7 @@ ruby -I. test5.rb > salidas_ruby/test5.txt
 ruby -I. test6.rb > salidas_ruby/test6.txt
 ruby -I. test7.rb > salidas_ruby/test7.txt
 ruby -I. test8.rb > salidas_ruby/test8.txt
+ruby -I. testvacio.rb > salidas_ruby/testvacio.txt
 echo
 echo "EJECUCION"
 echo "---------"
@@ -84,6 +85,15 @@ echo ""
 echo "TEST8"
 ./myruby test8.rb > salidas_nuestras/test8.txt
 if diff salidas_nuestras/test8.txt salidas_ruby/test8.txt >/dev/null ; then
+  echo OK
+else
+  echo Hay diferencias en los archivos
+fi
+echo "---------"
+echo ""
+echo "TEST VACIO"
+./myruby testvacio.rb > salidas_nuestras/testvacio.txt
+if diff salidas_nuestras/testvacio.txt salidas_ruby/testvacio.txt >/dev/null ; then
   echo OK
 else
   echo Hay diferencias en los archivos

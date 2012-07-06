@@ -16,6 +16,7 @@ if [ ! -d salidas_ruby ]; then mkdir salidas_ruby
   ruby -I. tests/test2.rb > salidas_ruby/test2.txt
   echo "OK"
 fi
+ruby -I. tests/test2.rb > salidas_ruby/test2.txt
 if [ ! -d salidas_nuestras ]; then mkdir salidas_nuestras; else rm salidas_nuestras/*; fi
 
 echo

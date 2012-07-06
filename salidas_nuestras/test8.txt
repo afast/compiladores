@@ -1,0 +1,4 @@
+se hace load del archivo cargar, se carga
+archivo cargado
+se hace load del archivo cargar, se carga de nuevo
+archivo cargado

@@ -3,7 +3,19 @@
 echo
 echo "Compilando el interprete"
 make >/dev/null
-if [ ! -d salidas_ruby ]; then mkdir salidas_ruby; fi
+if [ ! -d salidas_ruby ]; then mkdir salidas_ruby
+  echo -n "La carpeta con los archivos de comparacion no fue encontrada, intentando generarlos nuevamente con ruby... "
+  ruby -I. tests/test1.rb > salidas_ruby/test1.txt
+  ruby -I. tests/test3.rb arg1 arg2 > salidas_ruby/test3.txt
+  ruby -I. tests/test4.rb > salidas_ruby/test4.txt
+  ruby -I. tests/test5.rb > salidas_ruby/test5.txt
+  ruby -I. tests/test6.rb > salidas_ruby/test6.txt
+  ruby -I. tests/test7.rb > salidas_ruby/test7.txt
+  ruby -I. tests/test8.rb > salidas_ruby/test8.txt
+  ruby -I. tests/testvacio.rb > salidas_ruby/testvacio.txt
+  ruby -I. tests/test2.rb > salidas_ruby/test2.txt
+  echo "OK"
+fi
 if [ ! -d salidas_nuestras ]; then mkdir salidas_nuestras; else rm salidas_nuestras/*; fi
 
 echo

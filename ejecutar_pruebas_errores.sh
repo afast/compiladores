@@ -1,29 +1,21 @@
 #!/bin/sh
 
-echo ""
-echo "hacemos make"
+echo
+echo "Compilando el interprete"
 make >/dev/null
 echo ""
-echo "EJECUCION"
-echo "---------"
-echo ""
-echo "TEST1"
-echo "---------"
+echo "tests/testErr1.rb"
 ./myruby tests/testErr1.rb 
 echo ""
-echo "TEST2"
-echo "---------"
+echo "tests/testErr2.rb"
 ./myruby tests/testErr2.rb
 echo ""
-echo "TEST3"
-echo "---------"
+echo "tests/testErr3.rb"
 ./myruby tests/testErr3.rb
 echo ""
-echo "TEST4"
-echo "---------"
+echo "tests/testErr4.rb"
 ./myruby tests/testErr4.rb
 echo ""
-echo "TEST5"
-echo "---------"
+echo "tests/testErr5.rb"
 ./myruby tests/testErr5.rb
-echo ""
+
